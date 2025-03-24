@@ -56,7 +56,7 @@
 # 전체 데이터 구조
 
 ### 1. User(사용자)
-```json
+```
 {
   _id: ObjectId,
   email: String,
@@ -70,7 +70,7 @@
 ```
 
 ### 2. Couple(커플)
-```json
+```
 {
   _id: ObjectId,
   users: [ObjectId],              // 두 사람의 userId
@@ -83,7 +83,7 @@
 ```
 
 ### 3. Schedule(일정)
-```json
+```
 {
   _id: ObjectId,
   coupleId: ObjectId,
@@ -101,7 +101,7 @@
 ```
 
 ### 4. ExchangeJournal(교환 일기)
-```json
+```
 {
   _id: ObjectId,
   coupleId: ObjectId,
@@ -116,7 +116,7 @@
 ```
 
 ### 5. UserQuest(개인 퀘스트)
-```json
+```
 {
   _id: ObjectId,
   userId: ObjectId,              // 퀘스트를 수행하는 사람
@@ -137,7 +137,7 @@
 ```
 
 ### 6. CoupleQuest(커플 퀘스트)
-```json
+```
 {
   _id: ObjectId,
   coupleId: ObjectId,
@@ -160,7 +160,7 @@
 ```
 
 ### 7. Character(캐릭터)
-```json
+```
 {
   _id: ObjectId,
   userId: ObjectId,
@@ -175,7 +175,7 @@
 ```
 
 ### 8. CharacterCustmization(캐릭터 외형)
-```json
+```
 // 추가 될 가능성 있음
 {
   _id: ObjectId,
@@ -187,7 +187,7 @@
 ```
 
 ### 9. Notification(알림)
-```json
+```
 {
   _id: ObjectId,
   userId: ObjectId,              // 알림 대상자
