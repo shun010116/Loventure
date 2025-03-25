@@ -54,6 +54,7 @@
   content: String,
   images: [String],               // optional
   mood: String,                   // optional
+  weather: String,                // optional: 'sunny', 'cloudy', 'rainy', etc
   turnNumber: Number,             // 1부터 증가
   isRead: Boolean,                // 상대가 읽었는지
   createdAt: Date
