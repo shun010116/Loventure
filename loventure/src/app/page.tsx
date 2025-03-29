@@ -4,16 +4,6 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <main className="min-h-screen bg-cream text-gray-800 p-4">
-      {/* Header */}
-      <header className="flex justify-between items-center border-b pb-2 mb-4">
-        <h1 className="text-2xl font-bold">Loventure</h1>
-        <div className="relative">
-          <Link href="/login"> Login </Link>
-          <button className="text-xl">🔔</button>
-          <span className="absolute -top-1 -right-1 text-xs text-red-500 font-bold">0</span>
-        </div>
-      </header>
-
       {/* Characters Section */}
       <section className="grid grid-cols-3 gap-4 mb-6">
         <div className="flex flex-col gap-2 items-start">
