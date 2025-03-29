@@ -5,6 +5,7 @@ const coupleSchema = new mongoose.Schema({
     startedDating: { type: Date },
     sharedGoals: [{ type: String }],
     activeQuestIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "CoupleQuest" }],
+    sharedCode: String,
 }, { timestamps: true });
 
 export default mongoose.models.Couple || mongoose.model("Couple", coupleSchema);
