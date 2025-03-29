@@ -1,5 +1,34 @@
 @import "tailwindcss";
 
+.table-register {
+  width: 280px;
+  height: 550px;
+  margin: auto auto;      
+}
+
+.text-register {
+  width: 250px;
+  height: 32px;
+  font-size: 15px;
+  border: 0;
+  border-radius: 15px;
+  outline: none;
+  padding-left: 10px;
+  background-color: rgb(233,233,233);
+}
+
+.btn-register {
+  width: 200px;
+  height: 32px;
+  font-size: 15px;
+  border: 0;
+  border-radius: 15px;
+  outline: none;
+  padding-left: 10px;
+  background-color: rgb(164, 199, 255);
+}
+
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
