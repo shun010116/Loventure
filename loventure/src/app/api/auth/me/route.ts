@@ -1,5 +1,3 @@
-// GET /api/auth/me 현재 로그인한 유저 정보 가져오기
-
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -7,6 +5,7 @@ if (!JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined");
 }
 
+// GET /api/auth/me : 현재 로그인한 유저 정보 가져오기
 export async function GET(req: Request) {
     // 1. Get token from cookie
     const cookie = req.headers.get("cookie") || "";
