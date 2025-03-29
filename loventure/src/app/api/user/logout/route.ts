@@ -1,3 +1,5 @@
+// POST /api/user/logout 로그아웃
+
 export async function POST(req: Request) {
     try {
         // Clear the cookie by setting its expiration date to the past

@@ -1,3 +1,5 @@
+// POST /api/user/register 회원가입
+
 import { dbConnect } from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcrypt";
