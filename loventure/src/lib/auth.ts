@@ -9,8 +9,8 @@ if (!JWT_SECRET) {
 
 /**
  * 로그인 된 유저를 가져오는 함수
- * @params req - Next.js API 요청 객체
- * @params requireCouple - 커플 연결 여부 검사 (default: false)
+ * @param req - Next.js API 요청 객체
+ * @param requireCouple - 커플 연결 여부 검사 (default: false)
  * @returns user 또는 error 객체
  */
 export async function getAuthenticatedUser(req: Request, requireCouple = false) {
