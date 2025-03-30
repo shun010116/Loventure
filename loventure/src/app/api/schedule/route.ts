@@ -10,7 +10,7 @@ export async function POST(req: Request) {
         return error(authError.message, authError.status);
     }
 
-    // 1. Create schedule
+    // Create schedule
     const { title, description, startDate, endDate, repeat, participants } = await req.json();
 
     if (!title || !startDate || !endDate || !participants || !Array.isArray(participants)) {
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         participants,
     });
 
-    // 2. Return schedule info
+    // Return schedule info
     return success("일정이 생성되었습니다.", {
         schedule: newSchedule,
     });
@@ -43,11 +43,11 @@ export async function GET(req: Request) {
         return error(authError.message, authError.status);
     }
 
-    // 1. Get schedules
+    // Get schedules
     const schedules = await Schedule.find({ coupleId: user.coupleId })
         .sort({ startDate: 1 });
 
-    // 2. Return schedules info
+    // Return schedules info
     return success("일정 목록을 불러왔습니다.", {
         schedules,
     });

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
         return error(authError.message, authError.status);
     }
 
-    // 1. Create ExchangeJournal
+    // Create ExchangeJournal
     const { content, images, mood, weather } = await req.json();
 
     if (!content || typeof content !== "string") {
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
         createdAt: new Date(),
     });
 
-    // 2. Return ExchangeJournal info
+    // Return ExchangeJournal info
     return success("일기가 작성되었습니다.", {
         journal: newEntry,
     });
@@ -47,12 +47,12 @@ export async function GET(req: Request) {
         return error(authError.message, authError.status);
     }
 
-    // 1. Get ExchangeJournals
+    // Get ExchangeJournals
     const journals = await ExchangeJournal.find({ coupleId: user.coupleId })
         .sort({ turnNumber: 1})
         .populate("senderId", "nickname profileImage");
 
-    // 2. Return ExchangeJournals info
+    // Return ExchangeJournals info
     return success("교환일기 목록을 불러왔습니다.", {
         journals,
         lastTurn: journals.at(-1)?.turnNumber || 0

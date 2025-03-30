@@ -7,24 +7,24 @@ if (!JWT_SECRET) {
 
 // GET /api/auth/me : 현재 로그인한 유저 정보 가져오기
 export async function GET(req: Request) {
-    // 1. Get token from cookie
+    // Get token from cookie
     const cookie = req.headers.get("cookie") || "";
     
-    // 2. Parse the cookie to get the token
+    // Parse the cookie to get the token
     const token = cookie
         .split(";")
         .find((c) => c.trim().startsWith("token="))
         ?.split("=")[1];
 
-    // 3. Check if token exists
+    // Check if token exists
     if (!token) {
         return Response.json({ message: "로그인이 필요합니다." }, { status: 401 });
     }
 
-    // 4. Verify the token
+    // Verify the token
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        // 5. Return user info
+        // Return user info
         return Response.json({ user: decoded });
     } catch (error) {
         //console.error("Token verification failed:", error);

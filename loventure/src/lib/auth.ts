@@ -16,21 +16,21 @@ if (!JWT_SECRET) {
 export async function getAuthenticatedUser(req: Request, requireCouple = false) {
     await dbConnect();
         
-    // 1. Get token from cookie
+    // Get token from cookie
     const cookie = req.headers.get("cookie") || "";
     
-    // 2. Parse the cookie to get the token
+    // Parse the cookie to get the token
     const token = cookie
         .split(";")
         .find((c) => c.trim().startsWith("token="))
         ?.split("=")[1];
 
-    // 3. Check if token exists
+    // Check if token exists
     if (!token) {
         return { erorr: { message: "로그인이 필요합니다.", status: 401 } };
     }
 
-    // 4. Verify the token
+    // Verify the token
     let decoded: any;
     try {   
         decoded = jwt.verify(token, JWT_SECRET);
@@ -39,13 +39,13 @@ export async function getAuthenticatedUser(req: Request, requireCouple = false) 
         return { error: { message: "유효하지 않은 토큰입니다.", status: 401 } };
     }
 
-    // 5. Check if user exists
+    // Check if user exists
     const user = await User.findById(decoded.userId);
     if (!user) {
         return { error: { message: "유효하지 않은 유저입니다.", status: 404 } };
     }
 
-    // 6. Check if user has coupleId
+    // Check if user has coupleId
     if (requireCouple && !user.coupleId) {   
         return { error: { message: "커플이 아닙니다.", status: 400 } };
     }

@@ -15,7 +15,7 @@ export async function POST(req: Request) {
         return error("이미 커플로 연결된 유저입니다.", 400);
     }
 
-    // 1. Create couple
+    // Create couple
     const sharedCode = await generateUniqueCoupleCode();
 
     const newCouple = await Couple.create({
@@ -23,11 +23,11 @@ export async function POST(req: Request) {
         sharedCode,
     });
 
-    // 2. Update user with coupleId
+    // Update user with coupleId
     user.coupleId = newCouple._id;
     await user.save();
 
-    // 3. Return couple info
+    // Return couple info
     return success("커플이 생성되었습니다.", {
         coupleId: newCouple._id,
         sharedCode: newCouple.sharedCode,

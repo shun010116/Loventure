@@ -11,13 +11,18 @@ export async function GET(req: Request) {
         return error(authError.message, authError.status);
     }
 
+    // Check if couple exists
     const couple = await Couple.findById(user.coupleId);
     if(!couple) {
         return error("커플 정보를 찾을 수 없습니다.", 404);
     }
 
-    const users = await User.find({ _id: { $in: couple.users } }).select("_id nickname email profileImage");
+    // GET partner's info
+    const users = await User
+        .find({ _id: { $in: couple.users } })
+        .select("_id nickname email profileImage");
 
+    // Return partner's info
     return success("커플 정보를 불러왔습니다.", {
         couple: {
             _id: couple._id,

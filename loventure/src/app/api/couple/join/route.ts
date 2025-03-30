@@ -10,18 +10,18 @@ export async function POST(req: Request) {
         return error(authError.message, authError.status);
     }
 
-    // 1. Check if Couple already exists
+    // Check if Couple already exists
     if (user.coupleId) {
         return error("이미 커플입니다.", 400);
     }
 
-    // 2. Get shared code from request body
+    // Get shared code from request body
     const { sharedCode } = await req.json();
     if (!sharedCode) {
         return error("커플 코드를 입력해야합니다.", 400);
     }
 
-    // 3. Check if couple valid
+    // Check if couple valid
     const couple = await Couple.findOne({ sharedCode });
     if (!couple) {
         return error("유효하지 않은 커플 코드입니다.", 404);
@@ -30,15 +30,15 @@ export async function POST(req: Request) {
         return error("이미 커플이 연결되어 있습니다.", 400);
     }
 
-    // 4. Add user to couple
+    // Add user to couple
     couple.users.push(user._id);
     await couple.save();
 
-    // 5. Update user with coupleId
+    // Update user with coupleId
     user.coupleId = couple._id;
     await user.save();
 
-    // 6. Return couple info
+    // Return couple info
     return success("커플이 성공적으로 등록되었습니다.", {
         coupleId: couple._id,
     });
