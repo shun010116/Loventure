@@ -1,17 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function RegisterPage() {
     const [form, setForm] = useState({
-        username: '',
+        nickname: '',
         email: '',
         password: '',
         confirmPassword: '',
     });
-
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({
@@ -28,13 +30,16 @@ export default function RegisterPage() {
             return;
         }
 
+        setLoading(true);
+        setMessage('');
+
         const res = await fetch('/api/user/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: form.email,
                 password: form.password,
-                nickname: form.username,
+                nickname: form.nickname,
             }),
         });
 
@@ -42,9 +47,12 @@ export default function RegisterPage() {
 
         if (res.ok) {
             setMessage('회원가입이 완료되었습니다.');
+            setTimeout(() => router.push('/login'), 1500) // 1.5s 후 로그인 페이지 이동
         } else {
             setMessage(data.message || '회원가입에 실패했습니다.');
         }
+
+        setLoading(false);
     };
 
     return (
@@ -63,8 +71,8 @@ export default function RegisterPage() {
                     <input 
                         type="text"
                         className="text-register"
-                        name="username"
-                        value={form.username}
+                        name="nickname"
+                        value={form.nickname}
                         onChange={handleChange}
                     />
                 </td></tr>
@@ -103,11 +111,21 @@ export default function RegisterPage() {
                 </td></tr>
     
                 <tr><td>
-                    <button type="submit" className="btn-register">가입하기</button>
+                    <button
+                        type="submit"
+                        className="btn-register"
+                        disabled={loading}
+                    >
+                        {loading ? '가입 중...' : '가입하기'}
+                    </button>
                 </td></tr>
 
               </tbody>
             </table>
+
+            <div className="text-center mt-2">
+                <Link href="/login">로그인</Link>
+            </div>
           </form>
 
           {message && <p className="mt-4 text-center">{message}</p>}

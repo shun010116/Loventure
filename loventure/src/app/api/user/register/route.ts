@@ -15,15 +15,15 @@ export async function POST(req: Request) {
             return error("모든 항목을 입력해주세요.", 400);
         }
 
-        // check password condition
-        if (password.length < 6) {
-            return error("비밀번호는 최소 6자 이상이어야 합니다.", 400);
-        }
-
         // check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return error("이미 가입된 이메일입니다.", 409);
+        }
+        
+        // check password condition
+        if (password.length < 6) {
+            return error("비밀번호는 최소 6자 이상이어야 합니다.", 400);
         }
 
         // hash password

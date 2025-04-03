@@ -1,11 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
     const [form, setForm] = useState({ email: '', password: '' });
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({
@@ -14,8 +17,10 @@ export default function LoginPage() {
         });
     };
 
-    const handleSubmint = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
+        setMessage('');
 
         const res = await fetch('/api/user/login', {
             method: 'POST',
@@ -29,15 +34,22 @@ export default function LoginPage() {
             setMessage(`환영합니다!, ${data.user.nickname}님! 🎉`);
             // Redirect to home page or dashboard
             //window.location.href = '/';
+            router.push('/');
         } else {
-            setMessage(data.message || '로그인에 실패했습니다.');
+            const fallbackMessage =
+                res.status === 401
+                ? '이메일 또는 비밀번호가 일치하지 않습니다.'
+                : '로그인 중 오류가 발생했습니다.';
+            setMessage(data?.message || fallbackMessage);
         }
+
+        setLoading(false);
     };
 
   return (
     <div>
 
-        <form onSubmit={handleSubmint} className="register">
+        <form onSubmit={handleSubmit} className="register">
             
             <table className="table-register">
             <tbody>
@@ -69,7 +81,13 @@ export default function LoginPage() {
                 </td></tr>
 
                 <tr><th>
-                    <button type="submit" className="btn-register">로그인</button>
+                    <button
+                        type="submit"
+                        className="btn-register"
+                        disabled={loading}
+                    >
+                        {loading ? '로그인 중...' : '로그인'}
+                    </button>
                 </th></tr>
             </tbody>
             </table>
