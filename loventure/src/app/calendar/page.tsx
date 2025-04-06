@@ -111,7 +111,7 @@ export default function Calendar() {
 
   // Get events for the selected date
   const getEventsForDate = (date: string) =>
-    schedule.filter((e) => dayjs(e.startDate).format("YYYY-MM-DD") === date);
+    (schedule ?? []).filter((e) => dayjs(e.startDate).format("YYYY-MM-DD") === date);
 
   // Calculate Calendar days
   const startOfMonth = currentDate.startOf("month").startOf("week");
