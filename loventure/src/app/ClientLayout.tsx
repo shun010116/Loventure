@@ -82,6 +82,7 @@ export default function ClientLayout({
           <Link href="/inventory">인벤토리</Link>
           <Link href="/shop">상점</Link>
           <Link href="/myPage">마이페이지</Link>
+          <Link href="coupleLink">커플 연결</Link>
         </nav>
       )}
 
