@@ -1,16 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import user_image from '../../public/user.png';
 import "../styles/globals.css";
-
-type UserInfo = {
-  _id: string;
-  email: string;
-  nickname: string;
-};
 
 export default function ClientLayout({
   children,
@@ -18,30 +12,6 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<UserInfo | null>(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch('/api/user/me');
-        const data = await res.json();
-        if (res.ok && data.success) {
-          setUser(data.data);
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
-        setUser(null);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  const handleLogout = async () => {
-    await fetch('api/user/logout', { method: 'POST' });
-    location.reload();
-  };
 
   return (
     <>
@@ -56,16 +26,9 @@ export default function ClientLayout({
             <span className="absolute -top-1 -right-2 text-xs text-red-500 font-bold">0</span>
           </button>
 
-          {user ? (
-            <>
-              <span className="text-base font-semibold">{user.nickname}님</span>
-              <button onClick={handleLogout} className="text-sm text-gray-500">Logout</button>
-            </>
-          ) : (
-            <Link href="/login" className="text-base">
-              Login
-            </Link>
-          )}
+          <Link href="/login" className="text-base">
+            Login
+          </Link>
 
           <button
             className="text-3xl"
@@ -83,6 +46,7 @@ export default function ClientLayout({
           <Link href="/inventory">인벤토리</Link>
           <Link href="/shop">상점</Link>
           <Link href="/myPage">마이페이지</Link>
+          <Link href="/coupleLink">커플연결</Link>
         </nav>
       )}
 
