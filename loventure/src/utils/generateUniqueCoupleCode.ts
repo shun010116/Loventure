@@ -1,5 +1,5 @@
 import { generateCoupleCode } from "./generateCode";
-import Couple from "@/models/Couple";
+import User from "@/models/User";
 
 /**
  * DB에 저장된 커플 코드와 중복되지 않는 커플 코드를 생성합니다.
@@ -12,7 +12,7 @@ export async function generateUniqueCoupleCode(length = 6): Promise<string> {
     while (exists) {
         code = generateCoupleCode(length);
         // 커플 코드가 DB에 존재하는지 확인
-        const existing = await Couple.findOne({ sharedCode: code });
+        const existing = await User.findOne({ sharedCode: code });
         exists = !!existing;
     }
 

@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     nickname: { type: String, required: true },
     profileImage: { type: String },
     coupleId: { type: mongoose.Schema.Types.ObjectId, ref: "Couple" },
+    sharedCode: { type: String, required: true, unique: true },
 }, { timestamps: true });
 
 export default mongoose.models.User || mongoose.model("User", userSchema);

@@ -2,6 +2,7 @@ import { dbConnect } from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcrypt";
 import { success, error } from "@/utils/response";
+import { generateUniqueCoupleCode } from "@/utils/generateUniqueCoupleCode";
 
 // POST /api/user/register : 회원가입
 export async function POST(req: Request) {
@@ -28,6 +29,8 @@ export async function POST(req: Request) {
 
         // hash password
         const passwordHash = await bcrypt.hash(password, 10);
+        // generate unique shared code
+        const sharedCode = await generateUniqueCoupleCode();
 
         // create new user
         const newUser = new User({
@@ -35,6 +38,7 @@ export async function POST(req: Request) {
             passwordHash,
             nickname,
             profileImage: "",
+            sharedCode,
         });
 
         await newUser.save();

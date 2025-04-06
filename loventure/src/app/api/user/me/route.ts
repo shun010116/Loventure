@@ -15,5 +15,6 @@ export async function GET(req: Request) {
         nickname: user.nickname,
         coupleId: user.coupleId,
         profileImage: user.profileImage,
+        sharedCode: user.sharedCode,
     });
 }

@@ -1,5 +1,4 @@
 import Couple from "@/models/Couple";
-import { generateUniqueCoupleCode } from "@/utils/generateUniqueCoupleCode";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 
@@ -12,15 +11,12 @@ export async function POST(req: Request) {
     }
 
     if (user.coupleId) {
-        return error("이미 커플로 연결된 유저입니다.", 400);
+        return error("이미 커플로 연결되어 있습니다.", 400);
     }
 
     // Create couple
-    const sharedCode = await generateUniqueCoupleCode();
-
     const newCouple = await Couple.create({
         users: [user._id],
-        sharedCode,
     });
 
     // Update user with coupleId
