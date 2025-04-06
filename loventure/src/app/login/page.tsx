@@ -34,7 +34,7 @@ export default function LoginPage() {
             setMessage(`환영합니다!, ${data.user.nickname}님! 🎉`);
             // Redirect to home page or dashboard
             //window.location.href = '/';
-            router.push('/');
+            window.location.href  = '/';
         } else {
             const fallbackMessage =
                 res.status === 401
