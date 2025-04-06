@@ -21,14 +21,20 @@ export default function ClientLayout({
         </h1>
 
         <div className="flex items-center gap-4 relative">
-          <button className="text-xl relative">
-            🔔
-            <span className="absolute -top-1 -right-2 text-xs text-red-500 font-bold">0</span>
-          </button>
-
-          <Link href="/login" className="text-base">
-            Login
-          </Link>
+          {user ? (
+            <>
+              <span className="text-base font-semibold">{user.nickname}님</span>
+              <button onClick={handleLogout} className="text-sm text-gray-500">Logout</button>
+              <button className="text-xl relative">
+                🔔
+                <span className="absolute -top-1 -right-2 text-xs text-red-500 font-bold">0</span>
+              </button>
+            </>
+          ) : (
+            <Link href="/login" className="text-base">
+              Login
+            </Link>
+          )}
 
           <button
             className="text-3xl"
