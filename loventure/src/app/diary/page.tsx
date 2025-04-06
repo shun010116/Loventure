@@ -8,7 +8,8 @@ import { spec } from "node:test/reporters"
 
 export default function Diary() {
 	const [currentDate, setCurrentDate] = useState(dayjs())
-	const [selectedDate, setSelectedDate] = useState<spectring | null>(null)
+	const [selectedDate, setSelectedDate] = useState<string | null>(null)
+	const [selectedWeather, setSelectedWeather] = useState<string | null>(null)
 
 	const startOfMonth = currentDate.startOf("month").startOf("week")
 	const endOfMonth = currentDate.endOf("month").endOf("week")
@@ -36,6 +37,12 @@ export default function Diary() {
 						transition = {{ duration: 0.3 }}
 						className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-6"
 					>
+
+					<div className="flex justify-center mb-4">
+						<h2 className="text-xl font-bold text-center">
+							일기를 작성할 날짜를 선택해주세요
+						</h2>
+					</div>
 
 					{/* 달력 header */}
 						<div className="flex justify-between items-center mb-4">
@@ -75,7 +82,7 @@ export default function Diary() {
 
 				) : (
 					<motion.div
-						key="diaryFrom"
+						key="diaryForm"
 						initial = {{ opacity: 0, y: 0 }}
 						animate = {{ opacity: 1, y: 0 }}
 						exit = {{ opacity: 0, y: 30 }}
@@ -86,7 +93,7 @@ export default function Diary() {
 					{/* 날짜 다시 선택(뒤로가기) */}
 					<div className="flex items-center justify-between">
 						<button
-							className="text-xl text-gray hover:underline flex items-center gap-2 px-4 py-2 -ml-4"
+							className="text-xl text-gray-700 hover:underline flex items-center gap-2 px-4 py-2 -ml-4"
 							onClick= { () => setSelectedDate(null)}
 						>
 							<span className="text-2xl">📅</span>
@@ -103,13 +110,22 @@ export default function Diary() {
 							className="text-xl font-bold p-3 border rounded-md w-full"
 						/>
 
-						<div>
-							<label className="block mb-2 text-sm font-medium">오늘의 날씨는?</label>
-							<div className="flex gap-3 text-xl"> 
-								<button>☀️</button>
-								<button>⛅</button>
-								<button>🌧️</button>
-								<button>❄️</button>
+						<div className="flex items-center gap-4">
+							<label className="text-sm font-medium whitespace-nowrap">오늘의 날씨는?</label>
+
+							<div className="flex gap-2"> 
+								{ ["☀️", "⛅", "🌧️", "❄️"].map( (weather) => (
+									<button
+										key = { weather }
+										onClick = { () => setSelectedWeather(weather)}
+										className={`text-2xl p-2 rounded-full transition
+											${selectedWeather == weather
+												? "bg-blue-100 ring-1 ring-blue-400"
+												: "hover:bg-gray-100"}`}
+									>
+										{weather}
+									</button>
+								))}
 							</div>
 						</div>
 
