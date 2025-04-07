@@ -13,9 +13,8 @@ export default function coupleLinkPage() {
         const user = await resUser.json();
         //console.log("user", user);
 
-        if (resUser.ok && user.data?.sharedCode) {
-          setMyCode(user.data?.sharedCode);
-          //console.log("coupleData", coupleData);
+        if (resUser.ok && user.data?.user.sharedCode) {
+          setMyCode(user.data?.user.sharedCode);
         }
       } catch (err) {
         console.error('Error fetching user code:', err);
@@ -63,7 +62,6 @@ export default function coupleLinkPage() {
           onClick={handleJoinCouple}
         > 
           제출하기
-          {/*loading ? '코드 확인중...' : '제출하기'*/}
         </button>
       </div>
 
