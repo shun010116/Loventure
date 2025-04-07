@@ -31,7 +31,6 @@ export default function ClientLayout({
           {!loading && (
             isLoggedIn ? (
               <>
-                <Link href="/myPage" className="text-base">My Page</Link>
                 <button onClick={logout} className="text-base">Logout</button>
               </>
             ) : (
