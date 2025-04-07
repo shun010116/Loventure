@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+
 interface Schedule {
   _id: string;
   title: string;
@@ -9,12 +12,21 @@ interface Schedule {
   startDate: string;
   endDate: string;
   repeat: string;
-  isComplete: boolean;
+  isCompleted: boolean;
   createdBy: string;
   participants: string[];
 }
 
+interface UserInfo {
+  _id: string;
+  nickname: string;
+  email?: string;
+}
+
 export default function Calendar() {
+  const router = useRouter();
+  const { isLoggedIn, loading, user } = useAuth();
+
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [schedule, setSchedule] = useState<Schedule[]>([]);
@@ -22,15 +34,26 @@ export default function Calendar() {
   const [description, setDescription] = useState("");
   const [endDate, setEndDate] = useState(selectedDate);
   const [editingId, setEditingId] = useState<String | null>(null);
+  const [isCompleted, setIsComplete] = useState(false);
 
-  // Fetch schedule data from the server
+  const [allMembers, setAllMembers] = useState<UserInfo[]>([]);
+  const [participants, setParticipants] = useState<string[]>([]);
+
   useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      router.push("/login");
+    }
+  }, [loading, isLoggedIn, router]);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
     const fetchSchedule = async () => {
       try {
         const res = await fetch("/api/schedule");
         const data = await res.json();
         if (res.ok) {
-          setSchedule(data.schedules);
+          setSchedule(data.data.schedules);
         } else {
           console.error("Failed to fetch schedules:", data.message);
         }
@@ -38,10 +61,31 @@ export default function Calendar() {
         console.error("Error fetching schedules:", err);
       }
     };
-    fetchSchedule();
-  }, []);
 
-  // Add a new event
+    const fetchMembers = async () => {
+      try {
+        const res = await fetch("/api/couple/me");
+        const data = await res.json();
+        if (res.ok && data.data?.users) {
+          setAllMembers(data.data.users);
+          if (user) setParticipants([user._id]);
+        }
+      } catch (err) {
+        console.error("Error fetching members:", err);
+      }
+    };
+
+    fetchSchedule();
+    fetchMembers();
+  }, [isLoggedIn, user]);
+
+  const toggleParticipant = (id: string) => {
+    if (user && id === user._id) return;
+    setParticipants((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+    );
+  };
+
   const handleAddEvent = async () => {
     if (newEvent.trim() === "") return;
 
@@ -51,8 +95,8 @@ export default function Calendar() {
       startDate: selectedDate,
       endDate,
       repeat: "none",
-      isComplete: false,
-      participants: [],
+      isCompleted,
+      participants,
     };
 
     let res;
@@ -70,29 +114,38 @@ export default function Calendar() {
       });
     }
 
-    const data = await res.json();
+    let data = null;
+    const isJson = res.headers.get("content-type")?.includes("application/json");
+    if (isJson) {
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.warn("Not JSON:", err);
+      }
+    }
+
     if (res.ok) {
-      if (editingId) {
-        setSchedule(schedule.map(s => s._id === editingId ? data.schedule : s));
-      } else {
-        setSchedule([...schedule, data.schedule]);
+      if (editingId && data?.data?.schedule) {
+        setSchedule(schedule.map(s => s._id === editingId ? data.data.schedule : s));
+      } else if (data?.data?.schedule){
+        setSchedule([...schedule, data.data.schedule]);
       }
       resetForm();
     } else {
-      alert(data.message || "Failed to add Event");
+      alert(data?.message || "Failed to add Event");
     }
   };
 
-  // Edit an event
   const handleEdit = (item: Schedule) => {
     setNewEvent(item.title);
     setDescription(item.description);
     setSelectedDate(dayjs(item.startDate).format("YYYY-MM-DD"));
     setEndDate(dayjs(item.endDate).format("YYYY-MM-DD"));
     setEditingId(item._id);
+    setParticipants(item.participants);
+    setIsComplete(item.isCompleted);
   };
 
-  // Delete an event
   const handleDelete = async (id: string) => {
     const res = await fetch(`/api/schedule/${id}`, { method: "DELETE" });
     if (res.ok) {
@@ -107,13 +160,13 @@ export default function Calendar() {
     setDescription("");
     setEndDate(selectedDate);
     setEditingId(null);
+    setIsComplete(false);
+    setParticipants(user ? [user._id] : []);
   }
 
-  // Get events for the selected date
   const getEventsForDate = (date: string) =>
     (schedule ?? []).filter((e) => dayjs(e.startDate).format("YYYY-MM-DD") === date);
 
-  // Calculate Calendar days
   const startOfMonth = currentDate.startOf("month").startOf("week");
   const endOfMonth = currentDate.endOf("month").endOf("week");
   const days = [];
@@ -124,20 +177,16 @@ export default function Calendar() {
     day = day.add(1, "day");
   }
 
+  if (loading || !isLoggedIn || !user) return null;
+
   return (
     <div className="max-w-4xl mx-auto p-4">
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <button onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}>
-          ◀️
-        </button>
+        <button onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}>◀️</button>
         <h2 className="text-xl font-bold">{currentDate.format("MMMM YYYY")}</h2>
-        <button onClick={() => setCurrentDate(currentDate.add(1, "month"))}>
-          ▶️
-        </button>
+        <button onClick={() => setCurrentDate(currentDate.add(1, "month"))}>▶️</button>
       </div>
 
-      {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-2">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
           <div key={d} className="text-center font-semibold">{d}</div>
@@ -146,55 +195,82 @@ export default function Calendar() {
         {days.map((d) => {
           const formatted = d.format("YYYY-MM-DD");
           const isSelected = selectedDate === formatted;
-          const events = getEventsForDate(formatted);  
+          const events = getEventsForDate(formatted);
 
           return (
             <div
               key={formatted}
               className={`border rounded cursor-pointer flex flex-col items-start p-2 h-32 overflow-auto ${
                 isSelected ? "bg-blue-300" : "hover:bg-blue-100"
-              }`}  
+              }`}
               onClick={() => setSelectedDate(formatted)}
             >
               <div className="font-bold">{d.date()}</div>
-              {events.map((e, idx) => (  
+              {events.map((e, idx) => (
                 <div key={idx} className="text-xs text-left mt-1 bg-gray-100 rounded px-1">
                   <span>{e.title}</span>
-                  <div className="flex gap-1">
-                    <button onClick={() => handleEdit(e)} className="text-blue-500">✏️</button>
-                    <button onClick={() => handleDelete(e._id)} className="text-red-500">🗑️</button>
-                  </div>
+                  {e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
                 </div>
-              ))} 
+              ))}
             </div>
           );
         })}
       </div>
 
-      {/* Schedule Panel */}
       <div className="mt-4 border-t pt-4">
-        <h3 className="font-bold mb-2">
-          {dayjs(selectedDate).format("YYYY-MM-DD")} 일정
-        </h3>
+        <h3 className="font-bold mb-2">{dayjs(selectedDate).format("YYYY-MM-DD")} 일정</h3>
         <ul className="mb-2">
           {getEventsForDate(selectedDate).map((e, idx) => (
-            <li key={idx} className="text-sm">• {e.title}</li>
+            <li key={idx} className="text-sm">• {e.title}
+              {e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
+              <div className="float-right">
+                <button onClick={() => handleEdit(e)} className="text-blue-500">✏️</button>
+                <button onClick={() => handleDelete(e._id)} className="text-red-500">🗑️</button>
+              </div>
+            </li>
           ))}
         </ul>
+        <br />
+
+        <div className="mb-2">
+          <span className="text-sm font-semibold">참가자:</span>
+          <div className="flex gap-2 mt-1">
+            {allMembers.map((member) => (
+              <label key={member._id} className="flex items-center gap-1 text-sm">
+                <input
+                  type="checkbox"
+                  checked={participants.includes(member._id)}
+                  onChange={() => toggleParticipant(member._id)}
+                  disabled={member._id === user?._id}
+                />
+                {member.nickname}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-2 items-center mb-2">
+          <input
+            type="checkbox"
+            checked={!!isCompleted}
+            onChange={() => setIsComplete(!isCompleted)}
+          />
+          <span className="text-sm">완료</span>
+        </div>
 
         <div className="flex gap-2">
           <input
             type="text"
             value={newEvent}
             onChange={(e) => setNewEvent(e.target.value)}
-            className="border p-2 rounded w-full"
+            className="border p-2 rounded"
             placeholder="일정을 입력하세요"
           />
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="상세 설명"
-            className="border p-2 rounded"
+            className="border p-2 rounded w-full"
           />
 
           <input
@@ -210,6 +286,12 @@ export default function Calendar() {
           >
             {editingId ? "수정 완료" : "일정 추가"}
           </button>
+
+          {editingId && (
+            <button onClick={resetForm} className="bg-red-500 text-white px-4 py-2 rounded">
+              취소
+            </button>
+          )}
         </div>
       </div>
     </div>

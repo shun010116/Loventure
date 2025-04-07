@@ -2,8 +2,8 @@ import Schedule from "@/models/Schedule";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 
-// PATCH /api/schedule/:id : 일정 수정
-export async function PATCH(req: Request, context: { params: { id: string } }) {
+// PUT /api/schedule/:id : 일정 수정
+export async function PUT(req: Request, context: { params: { id: string } }) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
 
     if (authError) {
@@ -19,9 +19,8 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
     }
 
     // Compare id
-    if (String(schedule.createdBy) !== String(user._id)) {
-        return error("권한이 없습니다.", 403)
-    }
+    const isParticipant = schedule.participants.map(String).includes(String(user._id));
+    if (!isParticipant) return error("수정 권한이 없습니다.", 403);
 
     // Wait input
     const {
@@ -70,9 +69,8 @@ export async function DELETE(req: Request, context: { params: { id: string } }) 
     }
 
     // Compare Id
-    if (String(schedule.createdBy) !== String(user._id)) {
-        return error("권한이 없습니다.", 403);
-    }
+    const isParticipant = schedule.participants.map(String).includes(String(user._id));
+    if (!isParticipant) return error("삭제 권한이 없습니다.", 403);
 
     // Delete schedule
     await Schedule.deleteOne({ _id: schedule._id });
