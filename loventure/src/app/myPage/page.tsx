@@ -1,12 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
-export default function coupleLinkPage() {
+export default function MyPage() {
+  const router = useRouter();
+  const { isLoggedIn, loading, user } = useAuth();
   const [sharedCode, setSharedCode] = useState('');
   const [myCode, setMyCode]= useState('');
 
   useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      router.push('/login');
+    }
+  }, [loading, isLoggedIn, router]);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
     const fetchUserCode = async () => {
       try {
         const resUser = await fetch('/api/user/me');
@@ -38,6 +50,8 @@ export default function coupleLinkPage() {
       alert(data.message);
     }
   };
+
+  if (loading || !isLoggedIn || !user) return null;
 
   return (
     <div className='flex flex-col items-center p-8'>
