@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { Plus } from "lucide-react";
 
-// 유저 퀘스트 타입 정의     ?는 optional을 의미
 export type UserQuest = {
   _id: string;
   userId: string;
@@ -27,43 +26,15 @@ export type UserQuest = {
   updatedAt: string;
 };
 
-// 커플 퀘스트 타입 정의     ?는 optional을 의미
-export type CoupleQuest = {
-  _id: string;
-  coupledId: string;
-  title: string
-  description?: string
-  goalType?: string;
-  targetValue?: number;
-  currentValue?: number;
-  isCompleted: boolean;
-  reward: {
-    exp: number;
-    coins: number;
-  };
-  createdBy: string;
-  agreed: boolean;
-  completedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 const QUEST_CATEGORIES = ["All", "Daily", "Weekly"];
-const COUPLE_CATEGORIES = ["ALL", "Daily", "Bucket"]
 const RESET_OPTIONS = ["Daily", "Weekly", "One-time"];
 
 export default function Home() {
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuest, setEditingQuest] = useState<UserQuest | null>(null);
   const [quests, setQuests] = useState<UserQuest[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null);
-
-  const [coupleQuests, setCoupleQuests] = useState<CoupleQuest[]>([]);
-  const [editingCoupleQuest, setEditingCoupleQuest] = useState<CoupleQuest | null>(null);
-  const [isCoupleDialogOpen, setIsCoupleDialogOpen] = useState(false);
-  const [selectedCoupleCategory, setSelectedCoupleCategory] = useState("All");
-  
 
   const openNewQuestDialog = () => {
     setEditingQuest(null);
@@ -119,62 +90,6 @@ export default function Home() {
       ? quests
       : quests.filter((q) => q.goalType === selectedCategory);
 
-
-  {/* Couple Quest 구간 */}
-  const openNewCoupleQuestDialog = () => {
-    setEditingCoupleQuest(null);
-    setIsCoupleDialogOpen(true);
-  };
-  
-  const openEditCoupleQuestDialog = (quest: CoupleQuest) => {
-    setEditingCoupleQuest(quest);
-    setIsCoupleDialogOpen(true);
-  };
-  
-  const saveCoupleQuest = (quest: Partial<CoupleQuest>) => {
-    if (editingCoupleQuest) {
-      setCoupleQuests((prev) =>
-        prev.map((q) =>
-          q._id === editingCoupleQuest._id ? { ...q, ...quest } as CoupleQuest : q
-        )
-      );
-    } else {
-      const newQuest: CoupleQuest = {
-        _id: Date.now().toString(),
-        coupledId: "",
-        title: quest.title || "",
-        description: quest.description || "",
-        goalType: quest.goalType || "",
-        targetValue: quest.targetValue || 0,
-        currentValue: 0,
-        isCompleted: false,
-        reward: {
-          exp: 0,
-          coins: 0,
-        },
-        createdBy: "",
-        agreed: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        completedAt: undefined,
-      };
-      setCoupleQuests((prev) => [...prev, newQuest]);
-    }
-    setIsCoupleDialogOpen(false);
-  };
-  
-  const deleteCoupleQuest = () => {
-    if (editingCoupleQuest) {
-      setCoupleQuests((prev) => prev.filter((q) => q._id !== editingCoupleQuest._id));
-      setIsCoupleDialogOpen(false);
-    }
-  };
-  
-  const filteredCoupleQuests = 
-    selectedCoupleCategory === "All"
-      ? coupleQuests
-      : coupleQuests.filter((q) => q.goalType === selectedCoupleCategory);
-  
   return (
     <main className="min-h-screen bg-cream text-gray-800 p-4">
       {/* Characters Section */}
@@ -205,20 +120,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ------------------------Quest Sections------------------------ */}
+      {/* Quest Sections */}
       <section className="grid grid-cols-3 gap-4">
-        {/* --------------------User Quests------------------------ */}
+        {/* User Quests */}
         <div className="bg-blue-50 rounded-xl p-4 col-span-1 h-[600px] overflow-y-auto">
           <div className="flex justify-end gap-4 mb-4">
-            {QUEST_CATEGORIES.map((category) => (
+            {QUEST_CATEGORIES.map((cat) => (
               <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
                 className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
-                  selectedCategory === category ? "text-blue-500 border-blue-500" : "text-gray-400 border-transparent"
+                  selectedCategory === cat ? "text-blue-500 border-blue-500" : "text-gray-400 border-transparent"
                 }`}
               >
-                {category}
+                {cat}
               </button>
             ))}
           </div>
@@ -250,66 +165,13 @@ export default function Home() {
           </ul>
         </div>
 
-
-        {/* Couple Quests */}
-        <div className="bg-orange-100 rounded-xl p-4 col-span-2 h-[600px] overflow-y-auto">
-            <div className="flex justify-end gap-4 mb-4">
-              {COUPLE_CATEGORIES.map((category) => (
-                <button
-                  key = {category}
-                  onClick = { () => setSelectedCoupleCategory(category) }
-                  className = {`text-sm font-medium pb-1 border-b-2 transition-colors ${
-                    selectedCoupleCategory === category
-                      ? "text-orange-500 border-orange-500"
-                      : "text-gray-400 border-transparent"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-        
-            {/* Add Couple Quest Button */}
-            <div className="flex justify-center mb-2">
-              <button
-                onClick = {openNewCoupleQuestDialog}
-                  className="w-10 h-10 bg-orange-500 textwhite rounded-full flex items-center justify-center hover:scale-105 transition"
-              >
-               <Plus size={24}/>
-              </button>
-            </div>
-
-            {/* Couple Quest List */}
-            <ul className="space-y-[2px]">
-              {filteredCoupleQuests.map( (quest) => (
-                <li
-                  key={quest._id}
-                  onClick = { () => openEditCoupleQuestDialog(quest)}
-                  className="bg-white hover:bg-orange-200 px-4 py-4 rounded shadow-sm cursor-pointer "
-                >
-                  <div className="text-base font-medium">{quest.title}</div>
-                </li>
-              ))}
-              {filteredCoupleQuests.length === 0 && (
-                <li className="text-center text-gray-400 py-4">
-                  No couple quests yet
-                </li>
-              )}
-            </ul>
-        </div> {/* -------------couple quest end----------- */}
-
-
-
-
-        {/* Partner Quest 자리 비움 */}
+        {/* Couple Quests & Partner Quests 자리 비움 */}
+        <div className="col-span-2 bg-gray-100 rounded-xl p-4 flex items-center justify-center text-gray-400">
+          (Couple & Partner Quests 영역)
+        </div>
       </section>
 
-
-        
-
-
-      {/*-------------------Quest Modal-------------------- */}
-      {/*-------------------Uset Quest Modal-------------------- */}
+      {/* Quest Modal */}
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -394,80 +256,6 @@ export default function Home() {
                   className="mt-4 text-sm text-red-500 hover:underline"
                 >
                   Delete this Quest
-                </button>
-              )}
-            </form>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
-
-
-      {/*-------------------Couple Quest Modal-------------------- */}
-      <Dialog open = { isCoupleDialogOpen } onClose = { () => setIsCoupleDialogOpen(false)} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true"/>
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-md bg-white rounded-lg shadow p-6 max-6-[90vh] h-[600px] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4"> 
-              <h3 className="text-lg font-semibold">Couple Quest</h3>
-              <div className="flex gap-2">
-                <button
-                  onClick = { () => setIsCoupleDialogOpen(false)}
-                  className="text-red-500 hover:underline"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick = { ()  => {
-                    const form = document.forms.namedItem("title") as HTMLFormElement;
-                    const title = (form.elements.namedItem("title") as HTMLInputElement).value;
-                    const description = (form.elements.namedItem("notes") as HTMLTextAreaElement).value;
-                    const goalType = (form.elements.namedItem("reset") as HTMLSelectElement).value;
-
-                    saveCoupleQuest({ title, description, goalType });
-                  }}
-                  className="text-orange-600 font-semibold hover:underline"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-
-            <form name="coupleQuestForm" className="flex flex-col gap-3">
-              <input
-                name="title"
-                placeholder="Title"
-                defaultValue={editingCoupleQuest?.title || ""}
-                className="border rounded px-2 py-1"
-              />
-              <textarea
-                name="notes"
-                placeholder="Notes"
-                defaultValue={editingCoupleQuest?.description || ""}
-                className="border rounded px-2 py-1"
-              />
-
-              <div>
-                <label className="block mb-1">Reset Counter</label>
-                <select
-                  name="reset"
-                  defaultValue={editingCoupleQuest?.goalType || "Daily"}
-                  className="border rounded px-2 py-1 w-full"
-                >
-                  {RESET_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {editingCoupleQuest && (
-                <button
-                  type="button"
-                  onClick={deleteCoupleQuest}
-                  className="mt-4 text-sm text-red-500 hover:underline"
-                >
-                  Delete this Couple Quest
                 </button>
               )}
             </form>
