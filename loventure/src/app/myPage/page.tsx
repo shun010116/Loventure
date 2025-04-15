@@ -1,21 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
-export default function coupleLinkPage() {
+export default function MyPage() {
+  const router = useRouter();
+  const { isLoggedIn, loading, user } = useAuth();
   const [sharedCode, setSharedCode] = useState('');
   const [myCode, setMyCode]= useState('');
 
   useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      router.push('/login');
+    }
+  }, [loading, isLoggedIn, router]);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
     const fetchUserCode = async () => {
       try {
         const resUser = await fetch('/api/user/me');
         const user = await resUser.json();
         //console.log("user", user);
 
-        if (resUser.ok && user.data?.sharedCode) {
-          setMyCode(user.data?.sharedCode);
-          //console.log("coupleData", coupleData);
+        if (resUser.ok && user.data?.user.sharedCode) {
+          setMyCode(user.data?.user.sharedCode);
         }
       } catch (err) {
         console.error('Error fetching user code:', err);
@@ -40,6 +51,8 @@ export default function coupleLinkPage() {
     }
   };
 
+  if (loading || !isLoggedIn || !user) return null;
+
   return (
     <div className='flex flex-col items-center p-8'>
       {myCode && (
@@ -63,7 +76,6 @@ export default function coupleLinkPage() {
           onClick={handleJoinCouple}
         > 
           제출하기
-          {/*loading ? '코드 확인중...' : '제출하기'*/}
         </button>
       </div>
 

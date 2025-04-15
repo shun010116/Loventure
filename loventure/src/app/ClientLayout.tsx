@@ -1,16 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
 import Image from 'next/image';
 import user_image from '../../public/user.png';
 import "../styles/globals.css";
-
-type UserInfo = {
-  _id: string;
-  email: string;
-  nickname: string;
-};
 
 export default function ClientLayout({
   children,
@@ -18,30 +13,7 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<UserInfo | null>(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch('/api/user/me');
-        const data = await res.json();
-        if (res.ok && data.success) {
-          setUser(data.data);
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
-        setUser(null);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  const handleLogout = async () => {
-    await fetch('api/user/logout', { method: 'POST' });
-    location.reload();
-  };
+  const { isLoggedIn, user, loading, logout } = useAuth();
 
   return (
     <>
@@ -51,20 +23,25 @@ export default function ClientLayout({
         </h1>
 
         <div className="flex items-center gap-4 relative">
-          {user ? (
-            <>
-              <span className="text-base font-semibold">{user.nickname}님</span>
-              <button onClick={handleLogout} className="text-sm text-gray-500">Logout</button>
-              <button className="text-xl relative">
-                🔔
-                <span className="absolute -top-1 -right-2 text-xs text-red-500 font-bold">0</span>
-              </button>
-            </>
-          ) : (
-            <Link href="/login" className="text-base">
-              Login
-            </Link>
+        {!loading && isLoggedIn && user && (
+          <span className="text-sm font-semibold">
+            👋 {user.nickname}님
+          </span>
+        )}
+          {!loading && (
+            isLoggedIn ? (
+              <>
+                <button onClick={logout} className="text-base">Logout</button>
+              </>
+            ) : (
+              <Link href="/login" className="text-base">Login</Link>
+            )
           )}
+
+          <button className="text-xl relative">
+            🔔
+            <span className="absolute -top-1 -right-2 text-xs text-red-500 font-bold">0</span>
+          </button>
 
           <button
             className="text-3xl"

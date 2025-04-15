@@ -1,12 +1,17 @@
 // pages/diary.tsx
 "use client"
 
-import React, {useState } from "react"
+import React, { useState, useEffect } from "react"
 import dayjs from "dayjs"
 import {motion, AnimatePresence } from "framer-motion"
 import { spec } from "node:test/reporters"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function Diary() {
+	const router = useRouter();
+	const { isLoggedIn, loading, user } = useAuth();
+
 	const [currentDate, setCurrentDate] = useState(dayjs())
 	const [selectedDate, setSelectedDate] = useState<string | null>(null)
 	const [selectedWeather, setSelectedWeather] = useState<string | null>(null)
@@ -16,12 +21,18 @@ export default function Diary() {
 	const days = []
 	let day = startOfMonth
 
+	useEffect(() => {
+		if (!loading && !isLoggedIn) {
+			router.push("/login");
+		}
+	}, [loading, isLoggedIn, router]);
 
 	while (day.isBefore(endOfMonth)) {
 		days.push(day)
 		day = day.add(1, "day")
 	}
 
+	if (loading || !isLoggedIn || !user) return null;
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">

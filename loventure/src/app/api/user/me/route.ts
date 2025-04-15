@@ -10,11 +10,13 @@ export async function GET(req: Request) {
     }
 
     return success("로그인된 유저 정보입니다.", {
-        _id: user._id,
-        email: user.email,
-        nickname: user.nickname,
-        coupleId: user.coupleId,
-        profileImage: user.profileImage,
-        sharedCode: user.sharedCode,
+        user: {
+            _id: user._id,
+            email: user.email,
+            nickname: user.nickname,
+            coupleId: user.coupleId,
+            profileImage: user.profileImage,
+            sharedCode: user.sharedCode,
+        }
     });
 }
