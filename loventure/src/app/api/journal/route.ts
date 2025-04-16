@@ -11,8 +11,11 @@ export async function POST(req: Request) {
     }
 
     // Create ExchangeJournal
-    const { content, images, mood, weather } = await req.json();
+    const { date, title, content, images, mood, weather } = await req.json();
 
+    if (!title || typeof title !== "string") {
+        return error("제목을 입력해주세요.", 400);
+    }
     if (!content || typeof content !== "string") {
         return error("내용을 입력해주세요.", 400);
     }
@@ -24,6 +27,8 @@ export async function POST(req: Request) {
     const newEntry = await ExchangeJournal.create({
         coupleId: user.coupleId,
         senderId: user._id,
+        date,
+        title,
         content,
         images: images || [],
         mood: mood || null,

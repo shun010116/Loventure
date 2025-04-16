@@ -25,6 +25,7 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
 
     // Wait input
     const {
+        title,
         content,
         images,
         mood,
@@ -32,6 +33,7 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
     } = await req.json();
 
     // Change values
+    if (title !== undefined) journal.title = title;
     if (content !== undefined) journal.content = content;
     if (images !== undefined) journal.images = images;
     if (mood !== undefined) journal.mood = mood;

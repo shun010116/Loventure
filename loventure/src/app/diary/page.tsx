@@ -8,6 +8,21 @@ import { spec } from "node:test/reporters"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 
+interface Journal {
+	_id: string;
+	date: string;
+	title: string;
+	content: string;
+	mood?: string;
+	weather?: string;
+	createdAt: string;
+	senderId: {
+		_id: string;
+		nickname: string;
+		profileImage: string;
+	}
+}
+
 export default function Diary() {
 	const router = useRouter();
 	const { isLoggedIn, loading, user } = useAuth();
@@ -15,17 +30,136 @@ export default function Diary() {
 	const [currentDate, setCurrentDate] = useState(dayjs())
 	const [selectedDate, setSelectedDate] = useState<string | null>(null)
 	const [selectedWeather, setSelectedWeather] = useState<string | null>(null)
+	const [journals, setJournals] = useState<Journal[]>([]);
+	const [title, setTitle] = useState("");
+	const [content, setContent] = useState("");
+	const [mood, setMood] = useState("");
 
 	const startOfMonth = currentDate.startOf("month").startOf("week")
 	const endOfMonth = currentDate.endOf("month").endOf("week")
 	const days = []
 	let day = startOfMonth
 
+	const weatherEmojiMap: { [key: string]: string } = {
+		"☀️": "sunny",
+		"⛅": "cloudy",
+		"🌧️": "rainy",
+		"❄️": "snowy",
+		"🌩️": "stormy",
+		"🌬️": "windy",
+		"🌫️": "foggy",
+		"❓": "etc",
+	  };
+	const weatherCodeToEmoji = Object.fromEntries(
+		Object.entries(weatherEmojiMap).map(([emoji, code]) => [code, emoji])
+	);
+
+	const fetchJournals = async () => {
+		try {
+			const res = await fetch("/api/journal");
+			const data = await res.json();
+			//console.log("data:", data);
+			if (res.ok && data.data?.journals) {
+				setJournals(data.data.journals);
+			}
+		} catch (err) {
+			console.error("Error fetching journals:", err);
+		}
+	};
+
 	useEffect(() => {
 		if (!loading && !isLoggedIn) {
 			router.push("/login");
 		}
 	}, [loading, isLoggedIn, router]);
+
+	useEffect(() => {
+		fetchJournals();
+	}, []);
+
+	useEffect(() => {
+		const journalForDate = journals.find(
+			(j) => dayjs(j.createdAt).format("YYYY-MM-DD") === selectedDate
+		);
+
+		if (journalForDate) {
+			setTitle(journalForDate.title || "");
+			setContent(journalForDate.content || "");
+			setMood(journalForDate.mood || "");
+			setSelectedWeather(journalForDate.weather || "");
+		} else {
+			setTitle("");
+			setContent("");
+			setMood("");
+			setSelectedWeather("");
+		}
+	}, [selectedDate, journals]);
+
+	const filteredJournal = journals.find(
+		(j) => dayjs(j.date).format("YYYY-MM-DD") === selectedDate
+	);
+
+	const handleSubmit = async () => {
+		if (!title.trim() || !content.trim()) {
+			alert("Title and content are required.");
+			return;
+		}
+		try {
+			const res = await fetch("/api/journal", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					date: selectedDate,
+					title,
+					content,
+					mood,
+					weather: weatherEmojiMap[selectedWeather || ""] || "etc",
+				}),
+			});
+			//console.log("status", res.status);
+			//console.log("headers:", res.headers);
+
+			let data = null;
+			const contentType = res.headers.get("content-type");
+			//console.log("contentType:", contentType);
+			if (contentType && contentType.includes("application/json")) {
+				data = await res.json();
+				//console.log("data:", data);
+			} else {
+				console.warn("Response is not JSON:", res);
+			}
+			if (res.ok && data?.data.journal) {
+				await fetchJournals();
+				
+				setTitle("");
+				setContent("");
+				setMood("");
+				setSelectedWeather(null);
+				setSelectedDate(null);
+			} else {
+				alert(data.message);
+			}
+		} catch (err) {
+			console.error("Error submitting journal:", err);
+		}
+	};
+
+	const markAsRead = async (journalId: string) => {
+		try {
+			const res = await fetch(`/api/journal/${journalId}/read`, {
+				method: "PATCH",
+			});
+			if (res.ok) {
+				setJournals((prev) =>
+					prev.map((j) =>
+						j._id === journalId ? { ...j, isRead: true } : j
+					)
+				);
+			}
+		} catch (err) {
+			console.error("Error marking journal as read:", err);
+		}
+	} 
 
 	while (day.isBefore(endOfMonth)) {
 		days.push(day)
@@ -77,10 +211,11 @@ export default function Diary() {
 						))}
 						{days.map( (d) => {
 							const formatted = d.format("YYYY-MM-DD")
+							const isWritten = journals.some(j => dayjs(j.date).format("YYYY-MM-DD") === formatted);
 							return (
 								<div 
 									key = { formatted }
-									className="border rounded cursor-pointer p-2 h-24 hover:bg-blue-100 flex flex-col items-start"
+									className={`border rounded cursor-pointer p-2 h-24 hover:bg-blue-100 flex flex-col items-start ${isWritten ? "bg-yellow-100" : ""}`}
 									onClick={ () => setSelectedDate(formatted) }
 								>
 									<div className="font-bold text-sm">{d.date()}</div>
@@ -115,44 +250,63 @@ export default function Diary() {
 						</h2>
 
 						{/* ----------일기장 header---------- */}
-						<input
-							type="text"
-							placeholder="제목을 적어주세요"
-							className="text-xl font-bold p-3 border rounded-md w-full"
-						/>
-
-						<div className="flex items-center gap-4">
-							<label className="text-sm font-medium whitespace-nowrap">오늘의 날씨는?</label>
-
-							<div className="flex gap-2"> 
-								{ ["☀️", "⛅", "🌧️", "❄️"].map( (weather) => (
-									<button
-										key = { weather }
-										onClick = { () => setSelectedWeather(weather)}
-										className={`text-2xl p-2 rounded-full transition
-											${selectedWeather == weather
-												? "bg-blue-100 ring-1 ring-blue-400"
-												: "hover:bg-gray-100"}`}
-									>
-										{weather}
-									</button>
-								))}
+						{filteredJournal ? (
+							<div className="bg-gray-50 p-4 rounded border">
+								<p className="text-lg font-bold">제목: {filteredJournal.title}</p>
+								<p className="text-sm text-gray-500">
+									작성자: {filteredJournal.senderId.nickname}
+								</p>
+								{filteredJournal.mood && <p>기분: {filteredJournal.mood}</p>}
+								{filteredJournal.weather && <p>날씨: {weatherCodeToEmoji[filteredJournal.weather]}</p>}
+								<p className="mt-2 whitespace-pre-wrap">{filteredJournal.content}</p>
 							</div>
-						</div>
+						) : (
+							<>
+								<input
+									type="text"
+									placeholder="제목을 적어주세요"
+									className="text-xl font-bold p-3 border rounded-md w-full"
+									value={title}
+									onChange={(e) => setTitle(e.target.value)}
+								/>
 
-						{/* 일기장 content */}
-						<textarea
-							placeholder="오늘의 일기를 적어주세요"
-							className="h-80 p-4 border rounded resize-none outline-none"
-						/>
-						<div className="flex justify-end">
-							<button
-								className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-								onClick = { () => alert("저장하기")}
-							>
-								작성완료
-							</button>
-						</div>
+								<div className="flex items-center gap-4">
+									<label className="text-sm font-medium whitespace-nowrap">오늘의 날씨는?</label>
+
+									<div className="flex gap-2"> 
+										{Object.entries(weatherEmojiMap).map(([emoji, code]) => (
+											<button
+												key = { code }
+												onClick = { () => setSelectedWeather(emoji)}
+												className={`text-2xl p-2 rounded-full transition
+													${selectedWeather == emoji
+														? "bg-blue-100 ring-1 ring-blue-400"
+														: "hover:bg-gray-100"}`}
+											>
+												{emoji}
+											</button>
+										))}
+									</div>
+								</div>
+								
+								{/* 일기장 content */}
+								<textarea
+									placeholder="오늘의 일기를 적어주세요"
+									className="h-80 p-4 border rounded resize-none outline-none"
+									value={content}
+									onChange={(e) => setContent(e.target.value)}
+								/>
+								<div className="flex justify-end">
+									<button
+										className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+										onClick = {handleSubmit}
+									>
+										작성완료
+									</button>
+								</div>
+							</>
+						)}
+						
 					</motion.div>
 				)}
 			</AnimatePresence>
