@@ -2,10 +2,12 @@ import ExchangeJournal from "@/models/ExchangeJournal";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 import { getPartnerId } from "@/utils/getPartnerId";
+import { sendNotification } from "@/lib/notify";
 
 // POST /api/journal : 교환일기 작성
 export async function POST(req: Request) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const partnerId = await getPartnerId(user._id, user.coupleId);
 
     if (authError) {
         return error(authError.message, authError.status);
@@ -38,6 +40,14 @@ export async function POST(req: Request) {
         isReadBy: [],
         createdAt: new Date(),
     });
+
+    // Send notification to partner
+    await sendNotification({
+        userId: partnerId || "",
+        type: "exchange_journal",
+        content: `${user.nickname}님이 교환일기를 작성했어요`,
+        link: "/diary"
+    })
 
     // Return ExchangeJournal info
     return success("일기가 작성되었습니다.", {
