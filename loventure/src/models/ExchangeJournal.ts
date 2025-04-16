@@ -10,7 +10,7 @@ const exchangeJournalSchema = new mongoose.Schema({
     mood: String,
     weather: { type: String, enum: ["sunny", "cloudy", "rainy", "snowy", "stormy", "windy", "foggy", "etc"] },
     turnNuber: { type: Number },
-    isRead: { type: Boolean, default: false },
+    isReadBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     createdAt: { type: Date, default: Date.now }
 });
 

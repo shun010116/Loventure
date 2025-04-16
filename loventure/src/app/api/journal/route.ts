@@ -1,6 +1,7 @@
 import ExchangeJournal from "@/models/ExchangeJournal";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
+import { getPartnerId } from "@/utils/getPartnerId";
 
 // POST /api/journal : 교환일기 작성
 export async function POST(req: Request) {
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
         mood: mood || null,
         weather: weather || null,
         turnNumber,
-        isRead: false,
+        isReadBy: [],
         createdAt: new Date(),
     });
 
@@ -47,6 +48,9 @@ export async function POST(req: Request) {
 // GET /api/journal : 교환일기 목록 조회
 export async function GET(req: Request) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const partnerId = await getPartnerId(user._id, user.coupleId);
+
+    //console.log("partnerId:", partnerId);
 
     if (authError) {
         return error(authError.message, authError.status);
@@ -55,11 +59,17 @@ export async function GET(req: Request) {
     // Get ExchangeJournals
     const journals = await ExchangeJournal.find({ coupleId: user.coupleId })
         .sort({ turnNumber: 1})
-        .populate("senderId", "nickname profileImage");
+        .populate("senderId", "nickname profileImage")
+        .lean();
+
+    journals.forEach(j => {
+        j.isReadByCurrentUser = j.isReadBy?.includes(user._id);
+    });
 
     // Return ExchangeJournals info
     return success("교환일기 목록을 불러왔습니다.", {
         journals,
-        lastTurn: journals.at(-1)?.turnNumber || 0
+        lastTurn: journals.at(-1)?.turnNumber || 0,
+        partnerId,
     });
 }

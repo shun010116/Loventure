@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from "react"
 import dayjs from "dayjs"
 import {motion, AnimatePresence } from "framer-motion"
-import { spec } from "node:test/reporters"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 
@@ -20,7 +19,8 @@ interface Journal {
 		_id: string;
 		nickname: string;
 		profileImage: string;
-	}
+	};
+	isReadBy?: string[];
 }
 
 export default function Diary() {
@@ -34,6 +34,7 @@ export default function Diary() {
 	const [title, setTitle] = useState("");
 	const [content, setContent] = useState("");
 	const [mood, setMood] = useState("");
+	const [partnerId, setPartnerId] = useState<string | null>(null);
 
 	const startOfMonth = currentDate.startOf("month").startOf("week")
 	const endOfMonth = currentDate.endOf("month").endOf("week")
@@ -61,6 +62,7 @@ export default function Diary() {
 			//console.log("data:", data);
 			if (res.ok && data.data?.journals) {
 				setJournals(data.data.journals);
+				setPartnerId(data.data.partnerId);
 			}
 		} catch (err) {
 			console.error("Error fetching journals:", err);
@@ -76,6 +78,11 @@ export default function Diary() {
 	useEffect(() => {
 		fetchJournals();
 	}, []);
+
+	const filteredJournal = journals.find(
+		(j) => dayjs(j.date).format("YYYY-MM-DD") === selectedDate
+	);
+	//console.log("filteredJournal:", filteredJournal)
 
 	useEffect(() => {
 		const journalForDate = journals.find(
@@ -94,10 +101,6 @@ export default function Diary() {
 			setSelectedWeather("");
 		}
 	}, [selectedDate, journals]);
-
-	const filteredJournal = journals.find(
-		(j) => dayjs(j.date).format("YYYY-MM-DD") === selectedDate
-	);
 
 	const handleSubmit = async () => {
 		if (!title.trim() || !content.trim()) {
@@ -149,17 +152,30 @@ export default function Diary() {
 			const res = await fetch(`/api/journal/${journalId}/read`, {
 				method: "PATCH",
 			});
-			if (res.ok) {
+			if (res.ok && user) {
 				setJournals((prev) =>
 					prev.map((j) =>
-						j._id === journalId ? { ...j, isRead: true } : j
+						j._id === journalId && !j.isReadBy?.includes(user._id)
+							? { ...j, isReadBy: [...(j.isReadBy || []), user._id] }
+							: j
 					)
 				);
 			}
 		} catch (err) {
 			console.error("Error marking journal as read:", err);
 		}
-	} 
+	}
+
+	useEffect(() => {
+		if (!filteredJournal || !user) return;
+
+		const isMine = filteredJournal.senderId._id === user._id;
+		const alreadyRead = filteredJournal.isReadBy?.includes(user._id);
+
+		if (!isMine && !alreadyRead) {
+			markAsRead(filteredJournal._id);
+		}
+	}, [filteredJournal, user, journals]);
 
 	while (day.isBefore(endOfMonth)) {
 		days.push(day)
@@ -259,6 +275,15 @@ export default function Diary() {
 								{filteredJournal.mood && <p>기분: {filteredJournal.mood}</p>}
 								{filteredJournal.weather && <p>날씨: {weatherCodeToEmoji[filteredJournal.weather]}</p>}
 								<p className="mt-2 whitespace-pre-wrap">{filteredJournal.content}</p>
+
+								{/* ✅ 읽음 상태 표시 */}
+								{user && filteredJournal.senderId._id === user._id && (
+									<p className="text-xs mt-2">
+										{filteredJournal.isReadBy?.includes(partnerId || "")
+											? "✅ 상대방 읽음"
+											: "📖 상대방 읽지 않음"}
+									</p>
+								)}
 							</div>
 						) : (
 							<>
