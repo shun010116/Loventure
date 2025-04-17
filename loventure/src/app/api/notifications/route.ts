@@ -13,7 +13,10 @@ export async function GET(req: Request) {
     const notifications = await Notification.find({ userId: user._id })
         .sort({ createdAt: -1 });
 
+    const unreadCount = notifications.filter((n) => !n.isRead).length;
+
     return success("알림이 있습니다.", {
-        notifications
+        notifications,
+        unreadCount
     });
 }

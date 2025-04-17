@@ -8,33 +8,12 @@ export default function MyPage() {
   const router = useRouter();
   const { isLoggedIn, loading, user } = useAuth();
   const [sharedCode, setSharedCode] = useState('');
-  const [myCode, setMyCode]= useState('');
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
       router.push('/login');
     }
   }, [loading, isLoggedIn, router]);
-
-  useEffect(() => {
-    if (!isLoggedIn) return;
-
-    const fetchUserCode = async () => {
-      try {
-        const resUser = await fetch('/api/user/me');
-        const user = await resUser.json();
-        //console.log("user", user);
-
-        if (resUser.ok && user.data?.user.sharedCode) {
-          setMyCode(user.data?.user.sharedCode);
-        }
-      } catch (err) {
-        console.error('Error fetching user code:', err);
-      }
-    };
-
-    fetchUserCode();
-  }, []);
 
   const handleJoinCouple = async () => {
     const res = await fetch('/api/couple/join', {
@@ -55,11 +34,9 @@ export default function MyPage() {
 
   return (
     <div className='flex flex-col items-center p-8'>
-      {myCode && (
-        <p className='mb-4 text-center text-sm text-blue-700'>
-          나의 커플 초대 코드: <strong>{myCode}</strong>
-        </p>
-      )}
+      <p className='mb-4 text-center text-sm text-blue-700'>
+        나의 커플 초대 코드: <strong>{user.sharedCode}</strong>
+      </p>
 
       <div className='flex items-center gap-2'> 
         <input

@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import Image from 'next/image';
-import user_image from '../../public/user.png';
+// import Image from 'next/image';
+// import user_image from '../../public/user.png';
 import "../styles/globals.css";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ClientLayout({
   children,
@@ -14,6 +17,13 @@ export default function ClientLayout({
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isLoggedIn, user, loading, logout } = useAuth();
+
+  const { data: notificationData } = useSWR(
+    isLoggedIn ? "/api/notifications" : null,
+    fetcher
+  );
+
+  const unreadCount = notificationData?.data?.unreadCount || 0;
 
   return (
     <>
@@ -38,10 +48,16 @@ export default function ClientLayout({
             )
           )}
 
-          <button className="text-xl relative">
-            🔔
-            <span className="absolute -top-1 -right-2 text-xs text-red-500 font-bold">0</span>
-          </button>
+          {isLoggedIn && (
+            <Link href="/notifications" className="text-xl relative">
+              🔔
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-2 text-xs text-white bg-red-500 rounded-full px-1">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
 
           <button
             className="text-3xl"
