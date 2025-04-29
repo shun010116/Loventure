@@ -48,6 +48,14 @@ export type CoupleQuest = {
   updatedAt: string;
 }
 
+
+// 파트너 퀘스트 타입 정의     ?는 optional을
+export type PartnerQuest = {
+  _id: string;
+  title: string;
+  goalType?: string; // "Daily" | "Weekly" 같은 카테고리
+};
+
 const QUEST_CATEGORIES = ["All", "Daily", "Weekly"];
 const COUPLE_CATEGORIES = ["ALL", "Daily", "Bucket"]
 const RESET_OPTIONS = ["Daily", "Weekly", "One-time"];
@@ -63,6 +71,9 @@ export default function Home() {
   const [editingCoupleQuest, setEditingCoupleQuest] = useState<CoupleQuest | null>(null);
   const [isCoupleDialogOpen, setIsCoupleDialogOpen] = useState(false);
   const [selectedCoupleCategory, setSelectedCoupleCategory] = useState("All");
+
+  const [partnerQuests, setPartnerQuest] = useState<UserQuest[]>([]);
+  const [selectedPartnerCategory, setSelectedPartnerCategory] = useState("All");
   
 
   const openNewQuestDialog = () => {
@@ -174,7 +185,18 @@ export default function Home() {
     selectedCoupleCategory === "All"
       ? coupleQuests
       : coupleQuests.filter((q) => q.goalType === selectedCoupleCategory);
+
+
+
+
+  {/* -------Partner Quest 구간------ */}
+  const filteredPartnerQuests = selectedPartnerCategory == "All"
+    ? partnerQuests
+    : partnerQuests.filter( (q) => q.goalType === selectedPartnerCategory);
   
+
+
+  {/*======================== 메인 페이지 상단 ============================= */}
   return (
     <main className="min-h-screen bg-cream text-gray-800 p-4">
       {/* Characters Section */}
@@ -252,7 +274,7 @@ export default function Home() {
 
 
         {/* Couple Quests */}
-        <div className="bg-orange-100 rounded-xl p-4 col-span-2 h-[600px] overflow-y-auto">
+        <div className="bg-orange-100 rounded-xl p-4 col-span-1 h-[600px] overflow-y-auto">
             <div className="flex justify-end gap-4 mb-4">
               {COUPLE_CATEGORIES.map((category) => (
                 <button
@@ -301,9 +323,41 @@ export default function Home() {
 
 
 
-        {/* Partner Quest 자리 비움 */}
-      </section>
+        {/* Partner Quest */}
+          <div className="bg-purple-100 rounded-xl p-4 col-span-1 h-[600px] overflow-y-auto">
+            <div className="flex justify-end gap-4 mb-4">
+              {QUEST_CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedPartnerCategory(cat)}
+                  className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+                    selectedPartnerCategory === cat
+                      ? "text-purple-500 border-purple-500"
+                      : "text-gray-400 border-transparent"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
 
+            <ul className="space-y-[2px]">
+              {filteredPartnerQuests.map((quest) => (
+                <li
+                  key={quest._id}
+                  className="bg-white hover:bg-purple-200 px-4 py-4 rounded shadow-sm"
+                >
+                  <div className="text-base font-medium">{quest.title}</div>
+                </li>
+              ))}
+              {filteredPartnerQuests.length === 0 && (
+                <li className="text-center text-gray-400 py-4">No partner quests yet</li>
+              )}
+            </ul>
+          </div>
+    
+      </section>
+      {/* Quest창 end 부분 */}
 
         
 
@@ -418,7 +472,12 @@ export default function Home() {
                 </button>
                 <button
                   onClick = { ()  => {
-                    const form = document.forms.namedItem("title") as HTMLFormElement;
+                    const form = document.forms.namedItem("coupleQuestForm") as HTMLFormElement;
+                    if (!form) {
+                      console.error("잘못된 Form입니다.");
+                      return;
+                    }
+
                     const title = (form.elements.namedItem("title") as HTMLInputElement).value;
                     const description = (form.elements.namedItem("notes") as HTMLTextAreaElement).value;
                     const goalType = (form.elements.namedItem("reset") as HTMLSelectElement).value;
