@@ -456,6 +456,8 @@ export default function Home() {
       </Dialog>
 
 
+
+
       {/*-------------------Couple Quest Modal-------------------- */}
       <Dialog open = { isCoupleDialogOpen } onClose = { () => setIsCoupleDialogOpen(false)} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true"/>
