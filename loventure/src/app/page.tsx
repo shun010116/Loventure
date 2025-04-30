@@ -99,10 +99,11 @@ export default function Home() {
       // const userData = await userRes.json();
       // const coupleData = await coupleRes.json();
       const data = await res.json();
-      // console.log("data: ", data);
+      console.log("data: ", data);
       if (res.ok && data.data) {
         setQuests(data.data.userQuests || []);
         setCoupleQuests(data.data.coupleQuests || []);
+        setPartnerQuest(data.data.partnerQuests || []);
       }
     } catch (err) {
       console.error("Error fetching quests:", err);
@@ -115,6 +116,7 @@ export default function Home() {
     } else {
       setQuests([]);
       setCoupleQuests([]);
+      setPartnerQuest([]);
     }
   }, [loading, isLoggedIn]);
 
@@ -239,12 +241,13 @@ export default function Home() {
   {/* -------Partner Quest 구간------ */}
   const filteredPartnerQuests = selectedPartnerCategory == "All"
     ? partnerQuests
-    : partnerQuests.filter( (q) => q.goalType === selectedPartnerCategory);
+    : partnerQuests.filter((q) => q.goalType === selectedPartnerCategory);
 
   useEffect(() => {
     const handleLogout = () => {
       setQuests([]);
       setCoupleQuests([]);
+      setPartnerQuest([]);
       setEditingQuest(null);
       setEditingCoupleQuest(null);
       setIsDialogOpen(false);
@@ -409,17 +412,22 @@ export default function Home() {
             </div>
 
             <ul className="space-y-[2px]">
-              {filteredPartnerQuests.map((quest) => (
-                <li
-                  key={quest._id}
-                  className="bg-white hover:bg-purple-200 px-4 py-4 rounded shadow-sm"
-                >
-                  <div className="text-base font-medium">{quest.title}</div>
-                </li>
-              ))}
-              {filteredPartnerQuests.length === 0 && (
+              {loading ? (
+                <SkeletonUI />
+              ) : filteredPartnerQuests.length === 0 ? (
                 <li className="text-center text-gray-400 py-4">No partner quests yet</li>
+              ) : (
+                filteredPartnerQuests.map((quest) => (
+                  <li
+                    key={quest._id}
+                    className="bg-white hover:bg-purple-200 px-4 py-4 rounded shadow-sm"
+                  >
+                    <div className="text-base font-medium">{quest.title}</div>
+                  </li>
+                ))
               )}
+              
+              
             </ul>
           </div>
     
