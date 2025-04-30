@@ -99,7 +99,7 @@ export default function Home() {
       // const userData = await userRes.json();
       // const coupleData = await coupleRes.json();
       const data = await res.json();
-      console.log("data: ", data);
+      // console.log("data: ", data);
       if (res.ok && data.data) {
         setQuests(data.data.userQuests || []);
         setCoupleQuests(data.data.coupleQuests || []);
