@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from 'next/link';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { Plus } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 // 유저 퀘스트 타입 정의     ?는 optional을 의미
 export type UserQuest = {
@@ -30,9 +31,9 @@ export type UserQuest = {
 // 커플 퀘스트 타입 정의     ?는 optional을 의미
 export type CoupleQuest = {
   _id: string;
-  coupledId: string;
-  title: string
-  description?: string
+  coupleId: string;
+  title: string;
+  description?: string;
   goalType?: string;
   targetValue?: number;
   currentValue?: number;
@@ -57,10 +58,21 @@ export type PartnerQuest = {
 };
 
 const QUEST_CATEGORIES = ["All", "Daily", "Weekly"];
-const COUPLE_CATEGORIES = ["ALL", "Daily", "Bucket"]
+const COUPLE_CATEGORIES = ["All", "Daily", "Bucket"]
 const RESET_OPTIONS = ["Daily", "Weekly", "One-time"];
 
+function SkeletonUI() {
+  return (
+    <div className="animate-pulse space-y-2">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="h-10 bg-gray-200 rounded w-full"></div>
+      ))}
+    </div>
+  );
+}
+
 export default function Home() {
+  const { user, loading, isLoggedIn } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingQuest, setEditingQuest] = useState<UserQuest | null>(null);
   const [quests, setQuests] = useState<UserQuest[]>([]);
@@ -75,6 +87,36 @@ export default function Home() {
   const [partnerQuests, setPartnerQuest] = useState<UserQuest[]>([]);
   const [selectedPartnerCategory, setSelectedPartnerCategory] = useState("All");
   
+  // fetch
+  const fetchAllQuests = async () => {
+    try {
+      // const [userRes, coupleRes] = await Promise.all([
+      //   fetch("/api/userQuest"),
+      //   fetch("api/coupleQuest"),
+      // ]);
+      const res = await fetch("/api/allQuests")
+
+      // const userData = await userRes.json();
+      // const coupleData = await coupleRes.json();
+      const data = await res.json();
+      // console.log("data: ", data);
+      if (res.ok && data.data) {
+        setQuests(data.data.userQuests || []);
+        setCoupleQuests(data.data.coupleQuests || []);
+      }
+    } catch (err) {
+      console.error("Error fetching quests:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!loading && isLoggedIn) {
+      fetchAllQuests();
+    } else {
+      setQuests([]);
+      setCoupleQuests([]);
+    }
+  }, [loading, isLoggedIn]);
 
   const openNewQuestDialog = () => {
     setEditingQuest(null);
@@ -88,39 +130,44 @@ export default function Home() {
     setIsDialogOpen(true);
   };
 
-  const saveQuest = (quest: Partial<UserQuest>) => {
+  const saveQuest = async (quest: Partial<UserQuest>) => {
     if (editingQuest) {
       setQuests((prev) =>
         prev.map((q) => (q._id === editingQuest._id ? { ...q, ...quest } as UserQuest : q))
       );
     } else {
-      const newQuest: UserQuest = {
-        _id: Date.now().toString(),
-        userId: "",
-        assignedBy: "",
-        title: quest.title || "",
-        description: quest.description || "",
-        goalType: quest.goalType || "",
-        difficulty: quest.difficulty || 1,
-        targetValue: quest.targetValue || 0,
-        currentValue: 0,
-        isCompleted: false,
-        reward: {
-          exp: 0,
-          coins: 0,
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        completedAt: undefined,
-      };
-      setQuests((prev) => [...prev, newQuest]);
+      const res = await fetch("/api/userQuest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: quest.title,
+          description: quest.description,
+          goalType: quest.goalType,
+          targetValue: quest.targetValue || 1,
+          rewardExp: 0,
+          assignedToId: user?._id,
+        }),
+      });
+      if (res.ok) {
+        await fetchAllQuests();
+      }
     }
     setIsDialogOpen(false);
   };
 
-  const deleteQuest = () => {
+  const deleteQuest = async () => {
     if (editingQuest) {
-      setQuests((prev) => prev.filter((q) => q._id !== editingQuest._id));
+      const res = await fetch(`/api/userQuest/${editingQuest._id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await fetchAllQuests();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "삭제 실패");
+      }
+      
       setIsDialogOpen(false);
     }
   };
@@ -142,41 +189,44 @@ export default function Home() {
     setIsCoupleDialogOpen(true);
   };
   
-  const saveCoupleQuest = (quest: Partial<CoupleQuest>) => {
+  const saveCoupleQuest = async (quest: Partial<CoupleQuest>) => {
     if (editingCoupleQuest) {
       setCoupleQuests((prev) =>
-        prev.map((q) =>
-          q._id === editingCoupleQuest._id ? { ...q, ...quest } as CoupleQuest : q
-        )
+        prev.map((q) => (q._id === editingCoupleQuest._id ? { ...q, ...quest } as CoupleQuest : q))
       );
     } else {
-      const newQuest: CoupleQuest = {
-        _id: Date.now().toString(),
-        coupledId: "",
-        title: quest.title || "",
-        description: quest.description || "",
-        goalType: quest.goalType || "",
-        targetValue: quest.targetValue || 0,
-        currentValue: 0,
-        isCompleted: false,
-        reward: {
-          exp: 0,
-          coins: 0,
-        },
-        createdBy: "",
-        agreed: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        completedAt: undefined,
-      };
-      setCoupleQuests((prev) => [...prev, newQuest]);
+      const res = await fetch("/api/coupleQuest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: quest.title,
+          description: quest.description,
+          goalType: quest.goalType,
+          targetValue: quest.targetValue || 1,
+          rewardExp: 0,
+          rewardCoins: 0,
+        }),
+      });
+      if (res.ok) {
+        await fetchAllQuests();
+      }
     }
     setIsCoupleDialogOpen(false);
   };
   
-  const deleteCoupleQuest = () => {
+  const deleteCoupleQuest = async () => {
     if (editingCoupleQuest) {
-      setCoupleQuests((prev) => prev.filter((q) => q._id !== editingCoupleQuest._id));
+      const res = await fetch(`/api/coupleQuest/${editingCoupleQuest._id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await fetchAllQuests();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "삭제 실패");
+      }
+      
       setIsCoupleDialogOpen(false);
     }
   };
@@ -186,13 +236,24 @@ export default function Home() {
       ? coupleQuests
       : coupleQuests.filter((q) => q.goalType === selectedCoupleCategory);
 
-
-
-
   {/* -------Partner Quest 구간------ */}
   const filteredPartnerQuests = selectedPartnerCategory == "All"
     ? partnerQuests
     : partnerQuests.filter( (q) => q.goalType === selectedPartnerCategory);
+
+  useEffect(() => {
+    const handleLogout = () => {
+      setQuests([]);
+      setCoupleQuests([]);
+      setEditingQuest(null);
+      setEditingCoupleQuest(null);
+      setIsDialogOpen(false);
+      setIsCoupleDialogOpen(false);
+    };
+
+    window.addEventListener("loventure:logout", handleLogout);
+    return () => window.removeEventListener("loventure:logout", handleLogout);
+  }, []);
   
 
 
@@ -256,19 +317,22 @@ export default function Home() {
           </div>
 
           {/* Quest List */}
-          <ul className="space-y-[2px]">
-            {filteredQuests.map((quest) => (
-              <li
-                key={quest._id}
-                onClick={() => openEditQuestDialog(quest)}
-                className="bg-orange-100 hover:bg-orange-200 px-4 py-4 rounded shadow-sm cursor-pointer"
-              >
-                <div className="text-base font-medium">{quest.title}</div>
-              </li>
-            ))}
-            {filteredQuests.length === 0 && (
-              <li className="text-center text-gray-400 py-4">No quests yet</li>
-            )}
+            <ul className="space-y-[2px]">
+              {loading ? (
+                <SkeletonUI />
+              ) : filteredQuests.length === 0 ? (
+                <li className="text-center text-gray-400 py-4">No quests yet</li>
+              ) : (
+                filteredQuests.map((quest) => (
+                  <li
+                    key={quest._id}
+                    onClick={() => openEditQuestDialog(quest)}
+                    className="bg-orange-100 hover:bg-orange-200 px-4 py-4 rounded shadow-sm cursor-pointer"
+                  >
+                    <div className="text-base font-medium">{quest.title}</div>
+                  </li>
+                ))
+              )}
           </ul>
         </div>
 
@@ -301,23 +365,26 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Couple Quest List */}
+            {/* Couple Quest List */}              
             <ul className="space-y-[2px]">
-              {filteredCoupleQuests.map( (quest) => (
-                <li
-                  key={quest._id}
-                  onClick = { () => openEditCoupleQuestDialog(quest)}
-                  className="bg-white hover:bg-orange-200 px-4 py-4 rounded shadow-sm cursor-pointer "
-                >
-                  <div className="text-base font-medium">{quest.title}</div>
-                </li>
-              ))}
-              {filteredCoupleQuests.length === 0 && (
+              {loading ? (
+                <SkeletonUI />
+              ) : filteredCoupleQuests.length === 0 ? (
                 <li className="text-center text-gray-400 py-4">
                   No couple quests yet
                 </li>
+              ) : (
+                filteredCoupleQuests.map( (quest) => (
+                  <li
+                    key={quest._id}
+                    onClick = { () => openEditCoupleQuestDialog(quest)}
+                    className="bg-white hover:bg-orange-200 px-4 py-4 rounded shadow-sm cursor-pointer "
+                  >
+                    <div className="text-base font-medium">{quest.title}</div>
+                  </li>
+                ))
               )}
-            </ul>
+            </ul>            
         </div> {/* -------------couple quest end----------- */}
 
 

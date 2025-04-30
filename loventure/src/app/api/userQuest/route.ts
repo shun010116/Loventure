@@ -1,8 +1,9 @@
 import UserQuest from "@/models/UserQuest";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
+import { sendNotification } from "@/lib/notify";
 
-// POST /api/quest : 개인 퀘스트 생성
+// POST /api/userQuest : 개인 퀘스트 생성
 export async function POST(req: Request) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
 
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
     } = await req.json();
 
     // Check condition
-    if (!title || !goalType || !targetValue || !assignedToId || !rewardExp) {
+    if (!title || !goalType || !targetValue == null || !assignedToId || !rewardExp == null) {
         return error("필수 항목이 누락되었습니다.", 400);
     }
 
@@ -43,9 +44,14 @@ export async function POST(req: Request) {
         reward: {
             exp: rewardExp,
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
     });
+
+    sendNotification({
+        userId: assignedToId,
+        type: "quest",
+        content: `${user.nickname}님이 퀘스트를 생성했어요!`,
+        link: "/UserQuest",
+    })
 
     // Return UserQuest
     return success("개인 퀘스트가 생성되었습니다.", {
@@ -53,7 +59,7 @@ export async function POST(req: Request) {
     });
 }
 
-// GET /api/quest : 내가 받은 개인 퀘스트 목록
+// GET /api/userQuest : 내가 받은 개인 퀘스트 목록
 export async function GET(req: Request) {
     const { user, error: authError } = await getAuthenticatedUser(req);
 
