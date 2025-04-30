@@ -183,11 +183,15 @@ export default function Calendar({ compact = false, editable = true }: CalendarP
         <button onClick={() => setCurrentDate(currentDate.add(1, "month"))}>▶️</button>
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
+      {/* 달력 요일 header */}
+      <div className="grid grid-cols-7 mb-2">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
           <div key={d} className="text-center font-semibold">{d}</div>
         ))}
+      </div>
 
+      {/* 달력 날짜 cell */}
+      <div className="grid grid-cols-7 auto-rows-fr gap-2">
         {days.map((d) => {
           const formatted = d.format("YYYY-MM-DD");
           const isSelected = selectedDate === formatted;
@@ -196,7 +200,7 @@ export default function Calendar({ compact = false, editable = true }: CalendarP
           return (
             <div
               key={formatted}
-              className={`border rounded cursor-pointer flex flex-col items-start p-2 h-32 overflow-auto ${
+              className={`aspect-square rounded-2xl border p-2 cursor-pointer overflow-auto flex flex-col items-start justify-start text-sm transition-all ${
                 isSelected ? "bg-blue-300" : "hover:bg-blue-100"
               }`}
               onClick={() => {
@@ -204,9 +208,9 @@ export default function Calendar({ compact = false, editable = true }: CalendarP
                 setSelectedDaySchedules(events);
               }}
             >
-              <div className="font-bold">{d.date()}</div>
+              <div className="font-bold text-sm mb-1">{d.date()}</div>
               {events.map((e, idx) => (
-                <div key={idx} className="text-xs text-left mt-1 bg-gray-100 rounded px-1">
+                <div key={idx} className="text-xs text-left w-full bg-gray-100 rounded px-1">
                   <span>{e.title}</span>
                   {editable && e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
                 </div>

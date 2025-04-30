@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { Plus } from "lucide-react";
 
+import Calendar from "@/components/Calendar";
+
 // 유저 퀘스트 타입 정의     ?는 optional을 의미
 export type UserQuest = {
   _id: string;
@@ -358,8 +360,14 @@ export default function Home() {
     
       </section>
       {/* Quest창 end 부분 */}
-
+      
+      {/* ------------------------일정 공유 달력---------------------------  */}
+      <section className="mt-8">
+        <div className="rounded-lg p-4 w-full max-w-4xl mx-auto overflow-hidden">
+          <Calendar editable={false} compact={true} />
+        </div>
         
+      </section>
 
 
       {/*-------------------Quest Modal-------------------- */}
@@ -455,7 +463,7 @@ export default function Home() {
         </div>
       </Dialog>
 
-
+      
 
 
       {/*-------------------Couple Quest Modal-------------------- */}
