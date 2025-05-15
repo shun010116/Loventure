@@ -1,15 +1,16 @@
 import { dbConnect } from "@/lib/mongodb";
 import User from "@/models/User";
+import Character from "@/models/Character";
 import bcrypt from "bcrypt";
 import { success, error } from "@/utils/response";
 import { generateUniqueCoupleCode } from "@/utils/generateUniqueCoupleCode";
 
 // POST /api/user/register : 회원가입
 export async function POST(req: Request) {
+    const { email, password, nickname } = await req.json();
+
     try {
         await dbConnect();
-
-        const { email, password, nickname } = await req.json();
 
         // check required fields
         if (!email || !password || !nickname) {
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
         // check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return error("이미 가입된 이메일입니다.", 409);
+            return error("이미 가입된 이메일입니다.", 400);
         }
         
         // check password condition
