@@ -46,6 +46,11 @@ export async function POST(req: Request) {
         //console.log("받은 값:", email, password, nickname);
         //console.log("저장된 유저:", newUser);
 
+        // create Character
+        const newCharacter = await Character.create({
+            userId: newUser._id,
+        });
+
         return success("회원가입이 완료되었습니다.", {
             userId: newUser._id
         });
