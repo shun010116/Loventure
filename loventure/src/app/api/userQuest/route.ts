@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         userId: assignedToId,
         type: "quest",
         content: `${user.nickname}님이 퀘스트를 생성했어요!`,
-        link: "/UserQuest",
+        link: "/quest",
     })
 
     // Return UserQuest

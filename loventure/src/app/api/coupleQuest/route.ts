@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         userId: partnerId || "",
         type: "quest",
         content: `${user.nickname}님이 커플 퀘스트를 만들었어요!`,
-        link: "/coupleQuest"
+        link: "/quest"
     });
 
     return success("커플 퀘스트가 생성되었습니다.", {
