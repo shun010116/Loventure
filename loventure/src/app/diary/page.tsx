@@ -6,6 +6,7 @@ import dayjs from "dayjs"
 import {motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
+import ClientLayout from "@/app/ClientLayout";
 
 interface Journal {
 	_id: string;
@@ -185,7 +186,8 @@ export default function Diary() {
 	if (loading || !isLoggedIn || !user) return null;
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+		<ClientLayout>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
 
 			{/* 일기장 등장 효과 */}
 			<AnimatePresence mode="wait">
@@ -336,5 +338,6 @@ export default function Diary() {
 				)}
 			</AnimatePresence>
 		</div>
+    </ClientLayout>
 	);
 }

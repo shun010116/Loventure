@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import Calendar from "@/components/Calendar";
 import { ArrowRight, ArrowLeft, Plus } from "lucide-react";
 import { Dialog } from "@headlessui/react";
-import { UserCircle, HeartHandshake, CalendarDays, Settings, LogOut } from "lucide-react";
+import { UserCircle, BookHeart , CalendarDays, Settings, LogOut } from "lucide-react";
 import dayjs from "dayjs";
 import { useAuth } from "@/hooks/useAuth";
+import Link from 'next/link';
 
 interface Schedule {
   _id: string;
@@ -302,26 +303,6 @@ export default function MainLayout() {
 
   return (
     <div className="flex min-h-screen bg-cream">
-      <aside className="w-52 bg-white shadow px-4 py-6 flex flex-col gap-6">
-        <div className="text-lg font-bold">Loventure</div>
-        <nav className="flex flex-col gap-4 text-sm text-gray-700">
-          <div className="flex items-center gap-2 cursor-pointer hover:text-blue-500">
-            <UserCircle size={20} /> Profile
-          </div>
-          <div className="flex items-center gap-2 cursor-pointer hover:text-blue-500">
-            <HeartHandshake size={20} /> Couple
-          </div>
-          <div className="flex items-center gap-2 cursor-pointer hover:text-blue-500">
-            <CalendarDays size={20} /> Calendar
-          </div>
-          <div className="flex items-center gap-2 cursor-pointer hover:text-blue-500">
-            <Settings size={20} /> Settings
-          </div>
-          <div className="flex items-center gap-2 cursor-pointer hover:text-red-500 mt-auto">
-            <LogOut size={20} /> Logout
-          </div>
-        </nav>
-      </aside>
 
       <div className="flex-1 p-6 flex flex-col gap-4">
         <div className="flex gap-4">

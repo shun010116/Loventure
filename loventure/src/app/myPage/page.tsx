@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import ClientLayout from "@/app/ClientLayout";
 
 export default function MyPage() {
   const router = useRouter();
@@ -33,7 +34,8 @@ export default function MyPage() {
   if (loading || !isLoggedIn || !user) return null;
 
   return (
-    <div className='flex flex-col items-center p-8'>
+    <ClientLayout>
+      <div className='flex flex-col items-center p-8'>
       <p className='mb-4 text-center text-sm text-blue-700'>
         나의 커플 초대 코드: <strong>{user.sharedCode}</strong>
       </p>
@@ -57,7 +59,7 @@ export default function MyPage() {
       </div>
 
     </div>
+    </ClientLayout>
   );
-  
 }
   
