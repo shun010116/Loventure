@@ -60,7 +60,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode;}
         {/* 오른쪽 영역 : 상단 메뉴바 + 본문 */}
         <div className="flex flex-col flex-1 gap-0">
           {/* 상단 메뉴바 */}
-          <header className="bg-gray-100 shadow-mb rounded-2xl px-6 py-6 flex justify-end items-center">
+          <header className="bg-[#fdf6e3] shadow-mb rounded-2xl px-6 py-6 flex justify-end items-center ">
             <div className="flex items-center gap-4 relative">
               {!loading && isLoggedIn && user && (
                 <span className="text-sm font-semibold">
@@ -83,7 +83,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode;}
           </header>
             
           {/* 본문 내용 */}
-          <main className="flex-1 px-4 z-0 relative">
+          <main className="flex-1 px-4 z-0 relative bg-[#fdf6e3]">
             {children}
           </main>
         </div>

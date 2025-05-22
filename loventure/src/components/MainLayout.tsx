@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Calendar from "@/components/Calendar";
 import { ArrowRight, ArrowLeft, Plus } from "lucide-react";
 import { Dialog } from "@headlessui/react";
-import { UserCircle, BookHeart , CalendarDays, Settings, LogOut } from "lucide-react";
 import dayjs from "dayjs";
 import { useAuth } from "@/hooks/useAuth";
 import Link from 'next/link';
@@ -103,7 +102,6 @@ export default function MainLayout() {
   const [editingCoupleQuest, setEditingCoupleQuest] = useState<CoupleQuest | null>(null);
   
 
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -162,7 +160,6 @@ export default function MainLayout() {
     }
   };
 
-
   const openNewQuestDialog = () => {
     setEditingQuest(null);
     setSelectedDifficulty(null);
@@ -200,6 +197,7 @@ export default function MainLayout() {
     setIsDialogOpen(false);
   };
 
+  // 유저 퀘스트 삭제 함수
   const deleteQuest = async () => {
     if (editingQuest) {
       const res = await fetch(`/api/userQuest/${editingQuest._id}`, {
@@ -221,27 +219,83 @@ export default function MainLayout() {
 
 
 
-
-
-
   {/* =================================연인(Partner) Quest 구간============================= */}
   useEffect(() => {
     const handleLogout = () => {
       setQuests([]);
-      setCoupleQuests([]);
+      setPartnerQuests([]);
       setPartnerQuests([]);
       setEditingQuest(null);
-      setEditingCoupleQuest(null);
+      setEditingPartnerQuest(null);
       setIsDialogOpen(false);
-      setIsCoupleDialogOpen(false);
+      setIsPartnerDialogOpen(false);
     };
+
+
+    // 파트너 퀘스트창 열기
+    const openEditPartnerQuestDialog = (quest: UserQuest) => {
+      setEditingPartnerQuest(quest);
+      setSelectedDifficulty(quest.difficulty ?? null);
+      setIsPartnerDialogOpen(true);
+    };
+
+
+    // 파트너 퀘스트 수정 혹은 저장
+    const savePartnerQuest = async (quest: Partial<UserQuest>) => {
+      if (editingPartnerQuest) {
+        // 수정
+        setPartnerQuests((prev) =>
+          prev.map((q) =>
+            q._id === editingPartnerQuest._id ? { ...q, ...quest } as UserQuest : q
+          )
+        );
+      } else {
+        // 새로 등록
+        const res = await fetch("/api/userQuest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: quest.title,
+            description: quest.description,
+            goalType: quest.goalType,
+            targetValue: quest.targetValue || 1,
+            rewardExp: 0,
+            //assignedToId: coupleId, // 파트너 ID로 전송
+          }),
+        });
+        if (res.ok) {
+          await fetchAllQuests();
+        }
+      }
+      setIsPartnerDialogOpen(false);
+    };
+
+    // 파트너 퀘스트 삭제 함수
+    const deletePartnerQuest = async () => {
+      if (editingPartnerQuest) {
+        const res = await fetch(`/api/userQuest/${editingPartnerQuest._id}`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          await fetchAllQuests();
+        } else {
+          const data = await res.json();
+          alert(data?.message || "삭제 실패");
+        }
+
+        setIsPartnerDialogOpen(false);
+      }
+    };
+
 
     window.addEventListener("loventure:logout", handleLogout);
     return () => window.removeEventListener("loventure:logout", handleLogout);
-  }, []);
+    }, []);
+
+
 
   const filteredPartnerQuests = selectedPartnerCategory === "All" ? partnerQuests : partnerQuests.filter((q) => q.goalType === selectedPartnerCategory);
-
 
 
 
@@ -352,6 +406,9 @@ export default function MainLayout() {
 
             {!showCalendar ? (
               // =======================================퀘스트 구간=================================
+
+
+              // ======== 유저 퀘스트 + 파트너 퀘스트 ========
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid grid-cols-2 gap-4 col-span-2">
 
@@ -405,13 +462,10 @@ export default function MainLayout() {
 
 
 
-                  {/* ----------------------------------연인 Quest-----------------------------*/}
+                  {/* ----------------------------------파트너 Quest-----------------------------*/}
                   <div className="bg-purple-100 rounded-xl p-4 h-[300px] overflow-y-auto">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="font-semibold">연인 퀘스트</h3>
-                      <button className="text-purple-500 hover:text-purple-700">
-                        <Plus size={20} />
-                      </button>
                     </div>
                     <div className="flex gap-2 mb-2">
                       {QUEST_CATEGORIES.map((cat) => (
@@ -426,12 +480,26 @@ export default function MainLayout() {
                         </button>
                       ))}
                     </div>
+
+                    {/*======== 파트너 퀘스트 생성 버튼 ===========*/}
+                    <div className="flex justify-center mb-2">
+                      <button
+                        onClick={ openNewCoupleQuestDialog }
+                        className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:scale-105 transition"
+                      >
+                        <Plus size={24} />
+                      </button>
+                    </div>
+
+
+                    {/* 파트너 퀘스트 리스트 */}
                     <ul className="space-y-[2px]">
                       {filteredPartnerQuests.length > 0 ? (
                         filteredPartnerQuests.map((quest) => (
                           <li
                             key={quest._id}
-                            className="bg-white hover:bg-purple-200 px-4 py-2 rounded shadow-sm"
+                            onClick={ () => openEditPartnerQuestDialog}
+                            className="bg-white hover:bg-purple-200 px-4 py-2 rounded shadow-sm cursor-pointer"
                           >
                             <div className="text-sm font-medium">{quest.title}</div>
                           </li>
@@ -442,8 +510,6 @@ export default function MainLayout() {
                     </ul>
                   </div>
                 </div>
-
-
 
 
                 {/* ------------------------------커플 Quest-------------------- */}
@@ -481,7 +547,8 @@ export default function MainLayout() {
                       filteredCoupleQuests.map((quest) => (
                         <li
                           key={quest._id}
-                          className="bg-white hover:bg-orange-200 px-4 py-2 rounded shadow-sm"
+                          onClick={ () => openEditCoupleQuestDialog}
+                          className="bg-white hover:bg-orange-200 px-4 py-2 rounded shadow-sm cursor-pointer"
                         >
                           <div className="text-sm font-medium">{quest.title}</div>
                         </li>
@@ -586,7 +653,7 @@ export default function MainLayout() {
                 </Dialog>
 
                 
-
+                
                 {/*-------------------Couple Quest Modal-------------------- */}
                 <Dialog open = { isCoupleDialogOpen } onClose = { () => setIsCoupleDialogOpen(false)} className="relative z-50">
                   <div className="fixed inset-0 bg-black/30" aria-hidden="true"/>
