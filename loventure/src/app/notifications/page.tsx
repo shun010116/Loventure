@@ -3,6 +3,7 @@
 import useSWR from "swr";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import ClientLayout from "@/app/ClientLayout";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -19,6 +20,7 @@ export default function NotificationPage() {
     const notifications = data?.data?.notifications || [];
 
     return (
+      <ClientLayout>
         <div className="max-w-2xl mx-auto p-6">
           <h2 className="text-xl font-bold mb-4">📬 알림</h2>
           <ul className="space-y-3">
@@ -39,5 +41,7 @@ export default function NotificationPage() {
             {notifications.length === 0 && <p className="text-gray-500">알림이 없습니다.</p>}
           </ul>
         </div>
+      </ClientLayout>
+        
       );
 }
