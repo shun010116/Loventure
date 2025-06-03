@@ -8,6 +8,17 @@ import { UserCircle, BookHeart , CalendarDays, Settings, LogOut } from "lucide-r
 import dayjs from "dayjs";
 import { useAuth } from "@/hooks/useAuth";
 import Link from 'next/link';
+import { div } from "framer-motion/client";
+
+interface Character {
+  _id: string;
+  name: string;
+  level: number;
+  exp: number;
+  gold: number;
+  avatar: string;
+  statusMessage: string;
+}
 
 interface Schedule {
   _id: string;
@@ -72,7 +83,11 @@ const COUPLE_CATEGORIES = ["All", "Daily", "Bucket"];
 const RESET_OPTIONS = ["Daily", "Weekly", "One-time"];
 
 export default function MainLayout() {
-  const { user } = useAuth();
+  const { user, loading, isLoggedIn } = useAuth();
+
+  // character
+  const [myCharacter, setMyCharacter] = useState<Character | null>(null);
+  const [partnerCharacter, setPartnerCharacter] = useState<Character | null>(null);
 
   // calendar
   const [showCalendar, setShowCalendar] = useState(false);
@@ -101,22 +116,7 @@ export default function MainLayout() {
   const [selectedCoupleCategory, setSelectedCoupleCategory] = useState("All");
   const [isCoupleDialogOpen, setIsCoupleDialogOpen] = useState(false);
   const [editingCoupleQuest, setEditingCoupleQuest] = useState<CoupleQuest | null>(null);
-  
 
-  
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch("/api/allQuests");
-      const data = await res.json();
-      if (res.ok) {
-        setQuests(data.data.userQuests || []);
-        setCoupleQuests(data.data.coupleQuests || []);
-        setPartnerQuests(data.data.partnerQuests || []);
-      }
-    };
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -134,22 +134,29 @@ export default function MainLayout() {
     const today = dayjs().format("YYYY-MM-DD");
     const todayOnly = schedule.filter((e) => dayjs(e.startDate).format("YYYY-MM-DD") === today);
     setMyTodayEvents(todayOnly.filter((e) => e.participants.includes(user._id)));
-    setPartnerTodayEvents(todayOnly.filter((e) => !e.participants.includes(user._id)));
+    setPartnerTodayEvents(todayOnly.filter((e) => e.participants.length == 2 || !e.participants.includes(user._id)));
   }, [schedule, user]);
 
+  const fetchCharacter = async () => {
+    try {
+      const res = await fetch("/api/character");
+      const data = await res.json();
+      console.log("data: ", data);
+      if (res.ok && data.data) {
+        setMyCharacter(data.data.myCharacter || null);
+        setPartnerCharacter(data.data.partnerCharacter || null);
+      }
+      
+    } catch (err) {
+      console.log("Error fetching data:", err);
+    }
+  };
 
   // ==============================유저 퀘스트 보여주기 및 추가 삭제=================================
   // fetch
   const fetchAllQuests = async () => {
     try {
-      // const [userRes, coupleRes] = await Promise.all([
-      //   fetch("/api/userQuest"),
-      //   fetch("api/coupleQuest"),
-      // ]);
       const res = await fetch("/api/allQuests")
-
-      // const userData = await userRes.json();
-      // const coupleData = await coupleRes.json();
       const data = await res.json();
       // console.log("data: ", data);
       if (res.ok && data.data) {
@@ -300,16 +307,23 @@ export default function MainLayout() {
 
   const filteredCoupleQuests = selectedCoupleCategory === "All" ? coupleQuests : coupleQuests.filter((q) => q.goalType === selectedCoupleCategory);
   
+  useEffect(() => {
+    if (!loading && isLoggedIn) {
+      fetchCharacter();
+      fetchAllQuests();
+    }
+  }, [loading, isLoggedIn])
 
   return (
     <div className="flex min-h-screen bg-cream">
 
+      {/* 캐릭터 섹션 */}
       <div className="flex-1 p-6 flex flex-col gap-4">
         <div className="flex gap-4">
           <div className="flex flex-col items-center w-[22%] bg-white rounded shadow p-4 h-[400px]">
-            <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
-            <div className="text-sm font-bold">My Name</div>
-            <div className="text-xs">Lv.3</div>
+            <div className="w-24 h-24 rounded-full bg-gray-200 mb-2">{myCharacter?.avatar}</div>
+            <div className="text-sm font-bold">{myCharacter?.name ?? "-"}</div>
+            <div className="text-xs">Lv. {myCharacter?.level ?? "-"}</div>
             <div className="mt-4 text-xs w-full flex justify-center">
               {myTodayEvents.length > 0 ? (
                 <ul className="list-disc list-inside">
@@ -325,9 +339,9 @@ export default function MainLayout() {
 
           <div className="flex flex-col items-center w-[22%] bg-white rounded shadow p-4 h-[400px]">
             <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
-            <div className="text-sm font-bold">Partner</div>
-            <div className="text-xs">Lv.2</div>
-            <div className="mt-4 text-xs w-full flex justify-center">
+              <div className="text-sm font-bold">{partnerCharacter?.name ?? "No Partner"}</div>
+              <div className="text-xs">Lv. {partnerCharacter?.level ?? "-"}</div>
+              <div className="mt-4 text-xs w-full flex justify-center">
               {partnerTodayEvents.length > 0 ? (
                 <ul className="list-disc list-inside">
                   {partnerTodayEvents.map((e) => (

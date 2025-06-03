@@ -9,7 +9,9 @@ const characterSchema = new mongoose.Schema({
     gold: { type: Number, default: 0 },
     customization: {
         accessories: { type: [String], default: [] },
-    }
+    },
+    avatar: { type: String, default: "default.png" },
+    statusMessage: { type: String, default: "" }
 }, { timestamps: true });
 
 export default mongoose.models.Character || mongoose.model("Character", characterSchema);
