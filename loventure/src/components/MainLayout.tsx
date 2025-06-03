@@ -45,12 +45,12 @@ interface CoupleQuest {
   coupleId: string;
   title: string;
   description?: string;
-  goalType?: string;
+  goalType?: String;
+  isComple?: string;
   targetValue?: number;
-  currentValue?: number;
-  isCompleted: boolean;
+  currentVted: boolean;
   reward: {
-    exp: number;
+    exp: number; 
     coins: number;
   };
   createdBy: string;
@@ -62,8 +62,22 @@ interface CoupleQuest {
 
 interface PartnerQuest {
   _id: string;
+  userId: string;
+  assignedBy: string;
   title: string;
+  description?: string;
   goalType?: string;
+  difficulty?: number;
+  targetValue?: number;
+  currentValue?: number;
+  isCompleted: boolean;
+  reward: {
+    exp: number;
+    coins: number;
+  };
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const QUEST_CATEGORIES = ["All", "Daily", "Weekly"];
@@ -92,6 +106,7 @@ export default function MainLayout() {
   const [partnerQuests, setPartnerQuests] = useState<PartnerQuest[]>([]);
   const [selectedPartnerCategory, setSelectedPartnerCategory] = useState("All");
   const [isPartnereDialogOpen, setIsPartnerDialogOpen] = useState(false);
+  const [viewingPartnerQuest, setViewingPartnerQuest] = useState<PartnerQuest | null>(null);
   const [editingPartnerQuest, setEditingPartnerQuest] = useState<PartnerQuest | null>(null);
 
 
@@ -224,34 +239,30 @@ export default function MainLayout() {
     const handleLogout = () => {
       setQuests([]);
       setPartnerQuests([]);
-      setPartnerQuests([]);
       setEditingQuest(null);
       setEditingPartnerQuest(null);
       setIsDialogOpen(false);
       setIsPartnerDialogOpen(false);
+      setViewingPartnerQuest(null);
     };
 
-
-    // 파트너 퀘스트창 열기
-    const openEditPartnerQuestDialog = (quest: UserQuest) => {
-      setEditingPartnerQuest(quest);
-      setSelectedDifficulty(quest.difficulty ?? null);
-      setIsPartnerDialogOpen(true);
+    // 파트너 퀘스트 클릭 시 정보 보기
+    const openViewPartnerQuestDialog = (quest: PartnerQuest) => {
+      setViewingPartnerQuest(quest);
     };
-
 
     // 파트너 퀘스트 수정 혹은 저장
-    const savePartnerQuest = async (quest: Partial<UserQuest>) => {
+    const savePartnerQuest = async (quest: Partial<PartnerQuest>) => {
       if (editingPartnerQuest) {
         // 수정
         setPartnerQuests((prev) =>
           prev.map((q) =>
-            q._id === editingPartnerQuest._id ? { ...q, ...quest } as UserQuest : q
+            q._id === editingPartnerQuest._id ? { ...q, ...quest } as PartnerQuest : q
           )
         );
       } else {
         // 새로 등록
-        const res = await fetch("/api/userQuest", {
+        const res = await fetch("/api/PartnerQuest", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -273,7 +284,7 @@ export default function MainLayout() {
     // 파트너 퀘스트 삭제 함수
     const deletePartnerQuest = async () => {
       if (editingPartnerQuest) {
-        const res = await fetch(`/api/userQuest/${editingPartnerQuest._id}`, {
+        const res = await fetch(`/api/PartnerQuest/${editingPartnerQuest._id}`, {
           method: "DELETE",
         });
 
@@ -288,15 +299,11 @@ export default function MainLayout() {
       }
     };
 
-
     window.addEventListener("loventure:logout", handleLogout);
     return () => window.removeEventListener("loventure:logout", handleLogout);
-    }, []);
-
-
+  }, []);
 
   const filteredPartnerQuests = selectedPartnerCategory === "All" ? partnerQuests : partnerQuests.filter((q) => q.goalType === selectedPartnerCategory);
-
 
 
   {/* =================================Couple Quest 구간============================= */}
@@ -461,7 +468,6 @@ export default function MainLayout() {
 
 
 
-
                   {/* ----------------------------------파트너 Quest-----------------------------*/}
                   <div className="bg-purple-100 rounded-xl p-4 h-[300px] overflow-y-auto">
                     <div className="flex justify-between items-center mb-4">
@@ -482,14 +488,14 @@ export default function MainLayout() {
                     </div>
 
                     {/*======== 파트너 퀘스트 생성 버튼 ===========*/}
-                    <div className="flex justify-center mb-2">
+                    {/* <div className="flex justify-center mb-2">
                       <button
-                        onClick={ openNewCoupleQuestDialog }
+                        onClick={ openNewPartnerQuestDialog }
                         className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:scale-105 transition"
                       >
                         <Plus size={24} />
                       </button>
-                    </div>
+                    </div> */}
 
 
                     {/* 파트너 퀘스트 리스트 */}
@@ -498,7 +504,7 @@ export default function MainLayout() {
                         filteredPartnerQuests.map((quest) => (
                           <li
                             key={quest._id}
-                            onClick={ () => openEditPartnerQuestDialog}
+                            onClick={ () => setViewingPartnerQuest(quest)}
                             className="bg-white hover:bg-purple-200 px-4 py-2 rounded shadow-sm cursor-pointer"
                           >
                             <div className="text-sm font-medium">{quest.title}</div>
@@ -547,7 +553,7 @@ export default function MainLayout() {
                       filteredCoupleQuests.map((quest) => (
                         <li
                           key={quest._id}
-                          onClick={ () => openEditCoupleQuestDialog}
+                          onClick={ () => openEditCoupleQuestDialog(quest) }
                           className="bg-white hover:bg-orange-200 px-4 py-2 rounded shadow-sm cursor-pointer"
                         >
                           <div className="text-sm font-medium">{quest.title}</div>
@@ -652,6 +658,28 @@ export default function MainLayout() {
                   </div>
                 </Dialog>
 
+
+                {/* ------------------- View Partner Quest Modal ------------------- */}
+                <Dialog open={!!viewingPartnerQuest} onClose={() => setViewingPartnerQuest(null)} className="relative z-50">
+                  <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+                  <div className="fixed inset-0 flex items-center justify-center p-4">
+                    <Dialog.Panel className="w-full max-w-md bg-white rounded-lg shadow p-6 max-h-[90vh] overflow-y-auto">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">Partner Quest Details</h3>
+                        <button
+                          onClick={() => setViewingPartnerQuest(null)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          Close
+                        </button>
+                      </div>
+                      <div className="text-sm space-y-2">
+                        <div><span className="font-semibold">Title:</span> {viewingPartnerQuest?.title}</div>
+                        <div><span className="font-semibold">Goal Type:</span> {viewingPartnerQuest?.goalType || "-"}</div>
+                      </div>
+                    </Dialog.Panel>
+                  </div>
+                </Dialog>
                 
                 
                 {/*-------------------Couple Quest Modal-------------------- */}
@@ -707,7 +735,7 @@ export default function MainLayout() {
                           <label className="block mb-1">Reset Counter</label>
                           <select
                             name="reset"
-                            defaultValue={editingCoupleQuest?.goalType || "Daily"}
+                            defaultValue={editingCoupleQuest?.goalType?.toString() || "Daily"}
                             className="border rounded px-2 py-1 w-full"
                           >
                             {RESET_OPTIONS.map((opt) => (
