@@ -8,7 +8,6 @@ import { UserCircle, BookHeart , CalendarDays, Settings, LogOut } from "lucide-r
 import dayjs from "dayjs";
 import { useAuth } from "@/hooks/useAuth";
 import Link from 'next/link';
-import { div } from "framer-motion/client";
 
 interface Character {
   _id: string;
@@ -139,7 +138,7 @@ export default function MainLayout() {
 
   const fetchCharacter = async () => {
     try {
-      const res = await fetch("/api/character");
+      const res = await fetch("/api/character/me");
       const data = await res.json();
       console.log("data: ", data);
       if (res.ok && data.data) {
@@ -321,7 +320,9 @@ export default function MainLayout() {
       <div className="flex-1 p-6 flex flex-col gap-4">
         <div className="flex gap-4">
           <div className="flex flex-col items-center w-[22%] bg-white rounded shadow p-4 h-[400px]">
-            <div className="w-24 h-24 rounded-full bg-gray-200 mb-2">{myCharacter?.avatar}</div>
+            <div>
+              <img src={`/uploads/${myCharacter?.avatar}`} alt='myCharacter' className="w-24 h-24 rounded-full mb-2"/>
+            </div>
             <div className="text-sm font-bold">{myCharacter?.name ?? "-"}</div>
             <div className="text-xs">Lv. {myCharacter?.level ?? "-"}</div>
             <div className="mt-4 text-xs w-full flex justify-center">
@@ -338,10 +339,12 @@ export default function MainLayout() {
           </div>
 
           <div className="flex flex-col items-center w-[22%] bg-white rounded shadow p-4 h-[400px]">
-            <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
-              <div className="text-sm font-bold">{partnerCharacter?.name ?? "No Partner"}</div>
-              <div className="text-xs">Lv. {partnerCharacter?.level ?? "-"}</div>
-              <div className="mt-4 text-xs w-full flex justify-center">
+            <div>
+              <img src={`/uploads/${partnerCharacter?.avatar}`} alt='partnerCharacter' className="w-24 h-24 rounded-full mb-2" />
+            </div>
+            <div className="text-sm font-bold">{partnerCharacter?.name ?? "No Partner"}</div>
+            <div className="text-xs">Lv. {partnerCharacter?.level ?? "-"}</div>
+            <div className="mt-4 text-xs w-full flex justify-center">
               {partnerTodayEvents.length > 0 ? (
                 <ul className="list-disc list-inside">
                   {partnerTodayEvents.map((e) => (
