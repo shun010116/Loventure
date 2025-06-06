@@ -8,6 +8,18 @@ import dayjs from "dayjs";
 import { useAuth } from "@/hooks/useAuth";
 import Link from 'next/link';
 
+// Type improt 
+import { UserQuest, CoupleQuest, PartnerQuest } from "./qeustTypes";
+import { UserQuestModal, PartnerQuestModal, CoupleQuestModal } from "./Modal";
+
+// 모바일 네비게이션 바 import 
+import MobileNav from "@/components/MobileNav";
+
+// 모바일, PC 레이아웃 import
+import MobileLayout from "@/components/Layouts/MobileLayout";
+import DesktopLayout from "@/components/Layouts/DesktopLayout";
+
+
 interface Schedule {
   _id: string;
   title: string;
@@ -20,72 +32,19 @@ interface Schedule {
   participants: string[];
 }
 
-interface UserQuest {
-  _id: string;
-  userId: string;
-  assignedBy: string;
-  title: string;
-  description?: string;
-  goalType?: string;
-  difficulty?: number;
-  targetValue?: number;
-  currentValue?: number;
-  isCompleted: boolean;
-  reward: {
-    exp: number;
-    coins: number;
-  };
-  completedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// 모바일 화면 메뉴 바
 
-interface CoupleQuest {
-  _id: string;
-  coupleId: string;
-  title: string;
-  description?: string;
-  goalType?: String;
-  isComple?: string;
-  targetValue?: number;
-  currentVted: boolean;
-  reward: {
-    exp: number; 
-    coins: number;
-  };
-  createdBy: string;
-  agreed: boolean;
-  completedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface PartnerQuest {
-  _id: string;
-  userId: string;
-  assignedBy: string;
-  title: string;
-  description?: string;
-  goalType?: string;
-  difficulty?: number;
-  targetValue?: number;
-  currentValue?: number;
-  isCompleted: boolean;
-  reward: {
-    exp: number;
-    coins: number;
-  };
-  completedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-const QUEST_CATEGORIES = ["All", "Daily", "Weekly"];
-const COUPLE_CATEGORIES = ["All", "Daily", "Bucket"];
-const RESET_OPTIONS = ["Daily", "Weekly", "One-time"];
 
 export default function MainLayout() {
   const { user } = useAuth();
+
+  // 모바일 화면에서는 탭으로 구성
+  const [activeTab, setActiveTab] = useState<"character" | "quest" | "couple" | "calendar">("character");
+
+  const QUEST_CATEGORIES = ["All", "Daily", "Weekly"];
+  const COUPLE_CATEGORIES = ["All", "Daily", "Bucket"];
+  const RESET_OPTIONS = ["Daily", "Weekly", "One-time"];
+
 
   // calendar
   const [showCalendar, setShowCalendar] = useState(false);
@@ -363,413 +322,265 @@ export default function MainLayout() {
   
 
   return (
-    <div className="flex min-h-screen bg-cream">
 
-      <div className="flex-1 p-6 flex flex-col gap-4">
-        <div className="flex gap-4">
-          <div className="flex flex-col items-center w-[22%] bg-white rounded shadow p-4 h-[400px]">
-            <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
-            <div className="text-sm font-bold">My Name</div>
-            <div className="text-xs">Lv.3</div>
-            <div className="mt-4 text-xs w-full flex justify-center">
-              {myTodayEvents.length > 0 ? (
-                <ul className="list-disc list-inside">
-                  {myTodayEvents.map((e) => (
-                    <li key={e._id}>{e.title}</li>
-                  ))}
-                </ul>
-              ) : (
-                "No Events"
-              )}
-            </div>
-          </div>
+    <>
+      {/* 모바일 전용 */}
+      <MobileLayout
+        myEvents={myTodayEvents}
+        partnerEvents={partnerTodayEvents}
+        userQuests={filteredQuests}
+        partnerQuests={filteredPartnerQuests}
+        coupleQuests={filteredCoupleQuests}
+        onUserClick={openEditQuestDialog}
+        onPartnerClick={(q : PartnerQuest) => setViewingPartnerQuest(q)}
+        onCoupleClick={openEditCoupleQuestDialog}
+      />
+        
+      {/* PC 전용 */}
+      <DesktopLayout>
+        {/* 기존 카드형 전체 구조 */}
+        <div className="flex flex-col lg:flex-row min-h-screen bg-cream">
+          {/* ───────── (1) 메인 래핑 ───────── */}
 
-          <div className="flex flex-col items-center w-[22%] bg-white rounded shadow p-4 h-[400px]">
-            <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
-            <div className="text-sm font-bold">Partner</div>
-            <div className="text-xs">Lv.2</div>
-            <div className="mt-4 text-xs w-full flex justify-center">
-              {partnerTodayEvents.length > 0 ? (
-                <ul className="list-disc list-inside">
-                  {partnerTodayEvents.map((e) => (
-                    <li key={e._id}>{e.title}</li>
-                  ))}
-                </ul>
-              ) : (
-                "No Events"
-              )}
-            </div>
-          </div>
+          <div className="flex-1 p-4 sm:p-6 flex flex-col gap-4">
+            {/* ───────── (2) 메인 ───────── */}
 
-          <div className="flex-1 relative">
-            <div className="absolute top-2 -right-6 z-10">
-              <button
-                onClick={() => setShowCalendar(!showCalendar)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                {showCalendar ? <ArrowLeft /> : <ArrowRight />}
-              </button>
-            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* ───────── (3) 캐릭터 영역 ───────── */}
 
-            {!showCalendar ? (
-              // =======================================퀘스트 구간=================================
-
-
-              // ======== 유저 퀘스트 + 파트너 퀘스트 ========
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid grid-cols-2 gap-4 col-span-2">
-
-                  {/* =============================User Quest ========================*/}
-                  <div className="bg-blue-50 rounded-xl p-4 h-[300px] overflow-y-auto">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="font-semibold">유저 퀘스트</h3>
-                    </div>
-                    <div className="flex gap-2 mb-2">
-                      {QUEST_CATEGORIES.map((cat) => (
-                        <button
-                          key={cat}
-                          onClick={ () => setSelectedCategory(cat)}
-                          className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
-                            selectedCategory === cat ? "text-blue-500 border-blue-500" : "text-gray-400 border-transparent"
-                          }`}
-                        >
-                          {cat}
-                        </button>
+              {/* 내 캐릭터 */}
+              <div className="flex flex-col items-center w-full sm:w-1/2 lg:w-[22%] bg-white rounded shadow p-4 h-[400px]">
+                <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
+                <div className="text-sm font-bold">My Name</div>
+                <div className="text-xs">Lv.3</div>
+                <div className="mt-4 text-xs w-full flex justify-center">
+                  {myTodayEvents.length > 0 ? (
+                    <ul className="list-disc list-inside">
+                      {myTodayEvents.map((e) => (
+                        <li key={e._id}>{e.title}</li>
                       ))}
-                    </div>
-
-                    {/*======== 퀘스트 생성 버튼 ===========*/}
-                    <div className="flex justify-center mb-2">
-                      <button
-                        onClick={openNewQuestDialog}
-                        className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:scale-105 transition"
-                      >
-                        <Plus size={24} />
-                      </button>
-                    </div>
-
-                    {/* =================퀘스트 리스트============== */}
-                    <ul className="space-y-[2px]">
-                      {filteredQuests.length > 0 ? (
-                        filteredQuests.map((q) => (
-                          <li
-                            key={q._id}
-                            onClick={ () => openEditQuestDialog(q)}
-                            className="bg-white hover:bg-blue-100 px-4 py-2 rounded shadow-sm cursor-pointer"
-                          >
-                            <div className="text-sm font-medium">{q.title}</div>
-                          </li>
-                        ))
-                      ) : (
-                        <li className="text-center text-gray-400 py-4">No quests yet</li>
-                      )}
                     </ul>
-                  </div>
+                  ) : (
+                    "No Events"
+                  )}
+                </div>
+              </div>
 
-
-
-                  {/* ----------------------------------파트너 Quest-----------------------------*/}
-                  <div className="bg-purple-100 rounded-xl p-4 h-[300px] overflow-y-auto">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="font-semibold">연인 퀘스트</h3>
-                    </div>
-                    <div className="flex gap-2 mb-2">
-                      {QUEST_CATEGORIES.map((cat) => (
-                        <button
-                          key={cat}
-                          onClick={() => setSelectedPartnerCategory(cat)}
-                          className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
-                            selectedPartnerCategory === cat ? "text-purple-500 border-purple-500" : "text-gray-400 border-transparent"
-                          }`}
-                        >
-                          {cat}
-                        </button>
+              {/* 파트너 캐릭터 */}
+              <div className="flex flex-col items-center w-full sm:w-1/2 lg:w-[22%] bg-white rounded shadow p-4 h-[400px]">
+                <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
+                <div className="text-sm font-bold">Partner</div>
+                <div className="text-xs">Lv.2</div>
+                <div className="mt-4 text-xs w-full flex justify-center">
+                  {partnerTodayEvents.length > 0 ? (
+                    <ul className="list-disc list-inside">
+                      {partnerTodayEvents.map((e) => (
+                        <li key={e._id}>{e.title}</li>
                       ))}
-                    </div>
-
-                    {/*======== 파트너 퀘스트 생성 버튼 ===========*/}
-                    {/* <div className="flex justify-center mb-2">
-                      <button
-                        onClick={ openNewPartnerQuestDialog }
-                        className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:scale-105 transition"
-                      >
-                        <Plus size={24} />
-                      </button>
-                    </div> */}
-
-
-                    {/* 파트너 퀘스트 리스트 */}
-                    <ul className="space-y-[2px]">
-                      {filteredPartnerQuests.length > 0 ? (
-                        filteredPartnerQuests.map((quest) => (
-                          <li
-                            key={quest._id}
-                            onClick={ () => setViewingPartnerQuest(quest)}
-                            className="bg-white hover:bg-purple-200 px-4 py-2 rounded shadow-sm cursor-pointer"
-                          >
-                            <div className="text-sm font-medium">{quest.title}</div>
-                          </li>
-                        ))
-                      ) : (
-                        <li className="text-center text-gray-400 py-4">No partner quests yet</li>
-                      )}
                     </ul>
-                  </div>
+                  ) : (
+                    "No Events"
+                  )}
                 </div>
+              </div>
 
+              {/* ───────── (4) 퀘스트 / 달력 구간 ───────── */}
+              <div className="flex-1 relative mt-4">
+                {/* 토글 버튼: 항상 이 div(퀘스트/달력 컨테이너) 내부에서 절대 위치 */}
+                <button
+                  onClick={() => setShowCalendar(!showCalendar)}
+                  className="absolute top-2 -right-6 z-10 text-gray-600 hover:text-gray-800"
+                >
+                  {showCalendar ? <ArrowLeft /> : <ArrowRight />}
+                </button>
 
-                {/* ------------------------------커플 Quest-------------------- */}
-                <div className="bg-orange-100 rounded-xl p-4 col-span-2 h-[300px] overflow-y-auto">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-semibold">커플 퀘스트</h3>
-                  </div>
-                  <div className="flex gap-2 mb-2">
-                    {COUPLE_CATEGORIES.map((cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => setSelectedCoupleCategory(cat)}
-                        className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
-                          selectedCoupleCategory === cat ? "text-orange-500 border-orange-500" : "text-gray-400 border-transparent"
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
+                {!showCalendar ? (
+                  <>
+                    {/* ───────────────── 퀘스트 구간 ───────────────── */}
 
-                   {/* -----------------커플 퀘스트 생성 버튼---------- */}
-                  <div className="flex justify-center mb-2">
-                    <button
-                      onClick = {openNewCoupleQuestDialog}
-                        className="w-10 h-10 bg-orange-500 textwhite rounded-full flex items-center justify-center hover:scale-105 transition"
-                    >
-                    <Plus size={24}/>
-                    </button>
-                  </div>
+                    {/* ── 유저 + 파트너 퀘스트 그리드 ── */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* ===================== User Quest ===================== */}
+                      <div className="bg-blue-50 rounded-xl p-4 h-[300px] sm:h-[360px] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="font-semibold">유저 퀘스트</h3>
+                        </div>
+                        <div className="flex gap-2 mb-2">
+                          {QUEST_CATEGORIES.map((cat) => (
+                            <button
+                              key={cat}
+                              onClick={() => setSelectedCategory(cat)}
+                              className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+                                selectedCategory === cat
+                                  ? "text-blue-500 border-blue-500"
+                                  : "text-gray-400 border-transparent"
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
 
-                    {/* -----------------커플 퀘스트 리스트----------*/}
-                  <ul className="space-y-[2px]">
-                    {filteredCoupleQuests.length > 0 ? (
-                      filteredCoupleQuests.map((quest) => (
-                        <li
-                          key={quest._id}
-                          onClick={ () => openEditCoupleQuestDialog(quest) }
-                          className="bg-white hover:bg-orange-200 px-4 py-2 rounded shadow-sm cursor-pointer"
-                        >
-                          <div className="text-sm font-medium">{quest.title}</div>
-                        </li>
-                      ))
-                    ) : (
-                      <li className="text-center text-gray-400 py-4">No couple quests yet</li>
-                    )}
-                  </ul>
-                </div>
-
-                {/*-------------------Quest Modal-------------------- */}
-                {/*-------------------User Quest Modal--------------------*/}
-                <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)} className="relative z-50">
-                  <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-                  <div className="fixed inset-0 flex items-center justify-center p-4">
-                    <Dialog.Panel className="w-full max-w-md bg-white rounded-lg shadow p-6 max-h-[90vh] h-[600px] overflow-y-auto">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold">Quest</h3>
-                        <div className="flex gap-2">
+                        {/* 퀘스트 생성 버튼 */}
+                        <div className="flex justify-center mb-2">
                           <button
-                            onClick={() => setIsDialogOpen(false)}
-                            className="text-red-500 hover:underline"
+                            onClick={openNewQuestDialog}
+                            className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:scale-105 transition"
                           >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => {
-                              const form = document.forms.namedItem("questForm") as HTMLFormElement;
-                              const title = (form.elements.namedItem("title") as HTMLInputElement).value;
-                              const description = (form.elements.namedItem("notes") as HTMLTextAreaElement).value;
-                              const difficulty = selectedDifficulty ?? 1;
-                              const goalType = (form.elements.namedItem("reset") as HTMLSelectElement).value;
-
-                              saveQuest({ title, description, difficulty, goalType });
-                            }}
-                            className="text-blue-600 font-semibold hover:underline"
-                          >
-                            Save
+                            <Plus size={24} />
                           </button>
                         </div>
-                      </div>
 
-                      <form name="questForm" className="flex flex-col gap-3">
-                        <input
-                          name="title"
-                          placeholder="Title"
-                          defaultValue={editingQuest?.title || ""}
-                          className="border rounded px-2 py-1"
-                        />
-                        <textarea
-                          name="notes"
-                          placeholder="Notes"
-                          defaultValue={editingQuest?.description || ""}
-                          className="border rounded px-2 py-1"
-                        />
-
-                        <div>
-                          <label className="block mb-1">Difficulty</label>
-                          <div className="flex gap-2">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                onClick={() => setSelectedDifficulty(star)}
-                                className={`w-8 h-8 rounded-full border flex items-center justify-center text-sm transition-colors ${
-                                  selectedDifficulty === star ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"
-                                }`}
+                        {/* 퀘스트 리스트 */}
+                        <ul className="space-y-[2px]">
+                          {filteredQuests.length > 0 ? (
+                            filteredQuests.map((q) => (
+                              <li
+                                key={q._id}
+                                onClick={() => openEditQuestDialog(q)}
+                                className="bg-white hover:bg-blue-100 px-4 py-2 rounded shadow-sm cursor-pointer"
                               >
-                                {star}
-                              </button>
-                            ))}
-                          </div>
+                                <div className="text-sm font-medium">{q.title}</div>
+                              </li>
+                            ))
+                          ) : (
+                            <li className="text-center text-gray-400 py-4">No quests yet</li>
+                          )}
+                        </ul>
+                      </div>
+
+                      {/* ===================== Partner Quest ===================== */}
+                      <div className="bg-purple-100 rounded-xl p-4 h-[300px] sm:h-[360px] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="font-semibold">연인 퀘스트</h3>
+                        </div>
+                        <div className="flex gap-2 mb-2">
+                          {QUEST_CATEGORIES.map((cat) => (
+                            <button
+                              key={cat}
+                              onClick={() => setSelectedPartnerCategory(cat)}
+                              className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+                                selectedPartnerCategory === cat
+                                  ? "text-purple-500 border-purple-500"
+                                  : "text-gray-400 border-transparent"
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
                         </div>
 
-                        <div>
-                          <label className="block mb-1">Reset Counter</label>
-                          <select
-                            name="reset"
-                            defaultValue={editingQuest?.goalType || "Daily"}
-                            className="border rounded px-2 py-1 w-full"
-                          >
-                            {RESET_OPTIONS.map((opt) => (
-                              <option key={opt} value={opt}>
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                        {/* Partner Quest 리스트 (클릭하면 모달 오픈) */}
+                        <ul className="space-y-[2px]">
+                          {filteredPartnerQuests.length > 0 ? (
+                            filteredPartnerQuests.map((quest) => (
+                              <li
+                                key={quest._id}
+                                onClick={() => setViewingPartnerQuest(quest)}
+                                className="bg-white hover:bg-purple-200 px-4 py-2 rounded shadow-sm cursor-pointer"
+                              >
+                                <div className="text-sm font-medium">{quest.title}</div>
+                              </li>
+                            ))
+                          ) : (
+                            <li className="text-center text-gray-400 py-4">No partner quests yet</li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
 
-                        {editingQuest && (
-                          <button
-                            type="button"
-                            onClick={deleteQuest}
-                            className="mt-4 text-sm text-red-500 hover:underline"
-                          >
-                            Delete this Quest
-                          </button>
-                        )}
-                      </form>
-                    </Dialog.Panel>
-                  </div>
-                </Dialog>
-
-
-                {/* ------------------- View Partner Quest Modal ------------------- */}
-                <Dialog open={!!viewingPartnerQuest} onClose={() => setViewingPartnerQuest(null)} className="relative z-50">
-                  <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-                  <div className="fixed inset-0 flex items-center justify-center p-4">
-                    <Dialog.Panel className="w-full max-w-md bg-white rounded-lg shadow p-6 max-h-[90vh] overflow-y-auto">
+                    {/* ── Couple Quest (가로 전체) ── */}
+                    <div className="bg-orange-100 rounded-xl p-4 h-[300px] sm:h-[360px] col-span-full overflow-y-auto mt-4">
                       <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold">Partner Quest Details</h3>
+                        <h3 className="font-semibold">커플 퀘스트</h3>
+                      </div>
+                      <div className="flex gap-2 mb-2">
+                        {COUPLE_CATEGORIES.map((cat) => (
+                          <button
+                            key={cat}
+                            onClick={() => setSelectedCoupleCategory(cat)}
+                            className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+                              selectedCoupleCategory === cat
+                                ? "text-orange-500 border-orange-500"
+                                : "text-gray-400 border-transparent"
+                            }`}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Couple Quest 생성 버튼 */}
+                      <div className="flex justify-center mb-2">
                         <button
-                          onClick={() => setViewingPartnerQuest(null)}
-                          className="text-gray-500 hover:text-gray-700"
+                          onClick={openNewCoupleQuestDialog}
+                          className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center hover:scale-105 transition"
                         >
-                          Close
+                          <Plus size={24} />
                         </button>
                       </div>
-                      <div className="text-sm space-y-2">
-                        <div><span className="font-semibold">Title:</span> {viewingPartnerQuest?.title}</div>
-                        <div><span className="font-semibold">Goal Type:</span> {viewingPartnerQuest?.goalType || "-"}</div>
-                      </div>
-                    </Dialog.Panel>
-                  </div>
-                </Dialog>
-                
-                
-                {/*-------------------Couple Quest Modal-------------------- */}
-                <Dialog open = { isCoupleDialogOpen } onClose = { () => setIsCoupleDialogOpen(false)} className="relative z-50">
-                  <div className="fixed inset-0 bg-black/30" aria-hidden="true"/>
-                  <div className="fixed inset-0 flex items-center justify-center p-4">
-                    <Dialog.Panel className="w-full max-w-md bg-white rounded-lg shadow p-6 max-6-[90vh] h-[600px] overflow-y-auto">
-                      <div className="flex justify-between items-center mb-4"> 
-                        <h3 className="text-lg font-semibold">Couple Quest</h3>
-                        <div className="flex gap-2">
-                          <button
-                            onClick = { () => setIsCoupleDialogOpen(false)}
-                            className="text-red-500 hover:underline"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick = { ()  => {
-                              const form = document.forms.namedItem("coupleQuestForm") as HTMLFormElement;
-                              if (!form) {
-                                console.error("잘못된 Form입니다.");
-                                return;
-                              }
 
-                              const title = (form.elements.namedItem("title") as HTMLInputElement).value;
-                              const description = (form.elements.namedItem("notes") as HTMLTextAreaElement).value;
-                              const goalType = (form.elements.namedItem("reset") as HTMLSelectElement).value;
-
-                              saveCoupleQuest({ title, description, goalType });
-                            }}
-                            className="text-orange-600 font-semibold hover:underline"
-                          >
-                            Save
-                          </button>
-                        </div>
-                      </div>
-
-                      <form name="coupleQuestForm" className="flex flex-col gap-3">
-                        <input
-                          name="title"
-                          placeholder="Title"
-                          defaultValue={editingCoupleQuest?.title || ""}
-                          className="border rounded px-2 py-1"
-                        />
-                        <textarea
-                          name="notes"
-                          placeholder="Notes"
-                          defaultValue={editingCoupleQuest?.description || ""}
-                          className="border rounded px-2 py-1"
-                        />
-
-                        <div>
-                          <label className="block mb-1">Reset Counter</label>
-                          <select
-                            name="reset"
-                            defaultValue={editingCoupleQuest?.goalType?.toString() || "Daily"}
-                            className="border rounded px-2 py-1 w-full"
-                          >
-                            {RESET_OPTIONS.map((opt) => (
-                              <option key={opt} value={opt}>
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {editingCoupleQuest && (
-                          <button
-                            type="button"
-                            onClick={deleteCoupleQuest}
-                            className="mt-4 text-sm text-red-500 hover:underline"
-                          >
-                            Delete this Couple Quest
-                          </button>
+                      {/* Couple Quest 리스트 */}
+                      <ul className="space-y-[2px]">
+                        {filteredCoupleQuests.length > 0 ? (
+                          filteredCoupleQuests.map((quest) => (
+                            <li
+                              key={quest._id}
+                              onClick={() => openEditCoupleQuestDialog(quest)}
+                              className="bg-white hover:bg-orange-200 px-4 py-2 rounded shadow-sm cursor-pointer"
+                            >
+                              <div className="text-sm font-medium">{quest.title}</div>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-center text-gray-400 py-4">No couple quests yet</li>
                         )}
-                      </form>
-                    </Dialog.Panel>
-                  </div>
-                </Dialog>
-              </div>
+                      </ul>
+                    </div>
 
-          
-            ) : (
-              <div className="bg-white rounded shadow p-4 h-full transition-transform duration-500">
-                <Calendar editable={false} compact={true} />
+                    {/* ── Quest Modal들 삽입 ── */}
+                    <UserQuestModal
+                      isOpen={isDialogOpen}
+                      onClose={() => setIsDialogOpen(false)}
+                      editingQuest={editingQuest}
+                      selectedDifficulty={selectedDifficulty}
+                      setSelectedDifficulty={setSelectedDifficulty}
+                      saveQuest={saveQuest}
+                      deleteQuest={deleteQuest}
+                    />
+
+                    <PartnerQuestModal
+                      viewingPartnerQuest={viewingPartnerQuest}
+                      onClose={() => setViewingPartnerQuest(null)}
+                    />
+
+                    <CoupleQuestModal
+                      isOpen={isCoupleDialogOpen}
+                      onClose={() => setIsCoupleDialogOpen(false)}
+                      editingCoupleQuest={editingCoupleQuest}
+                      saveCoupleQuest={saveCoupleQuest}
+                      deleteCoupleQuest={deleteCoupleQuest}
+                    />
+                    {/* ───────────────── 퀘스트 구간 끝 ───────────────── */}
+                  </>
+                ) : (
+                  /* ── 달력 부분 ── */
+                  <div className="bg-white rounded shadow p-4 h-[480px] sm:h-full">
+                    <Calendar editable={false} compact={true} />
+                  </div>
+                )}
               </div>
-            )}
+              {/* ───────── /퀘스트 / 달력 영역 ───────── */}
+            </div>
+            {/* ───────── /캐릭터 영역 ───────── */}
           </div>
+          {/* ───────── /메인 래핑 ───────── */}
         </div>
-      </div>
-    </div>
+      </DesktopLayout>
+    
+    </>
+
+
+    
   );
 }
