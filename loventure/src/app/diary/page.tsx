@@ -186,7 +186,6 @@ export default function Diary() {
 	if (loading || !isLoggedIn || !user) return null;
 
 	return (
-		<ClientLayout>
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
 
 			{/* 일기장 등장 효과 */}
@@ -338,6 +337,5 @@ export default function Diary() {
 				)}
 			</AnimatePresence>
 		</div>
-    </ClientLayout>
 	);
 }

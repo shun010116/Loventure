@@ -34,7 +34,6 @@ export default function MyPage() {
   if (loading || !isLoggedIn || !user) return null;
 
   return (
-    <ClientLayout>
       <div className='flex flex-col items-center p-8'>
       <p className='mb-4 text-center text-sm text-blue-700'>
         나의 커플 초대 코드: <strong>{user.sharedCode}</strong>
@@ -59,7 +58,6 @@ export default function MyPage() {
       </div>
 
     </div>
-    </ClientLayout>
   );
 }
   

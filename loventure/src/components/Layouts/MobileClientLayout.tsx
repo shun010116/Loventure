@@ -59,7 +59,7 @@ export default function MobileClientLayout() {
 
   //  레이아웃 구성
   return (
-    <div className="sm:hidden bg-white min-h-screen pb-16">
+    <div className="sm:hidden bg-[#fdf6e3] min-h-screen pb-16">
       {/* 상단 바 */}
       <MobileTopBar />
 
