@@ -1,18 +1,23 @@
-// components/MobileNav.tsx
+// components/Layouts/MobileNav.tsx
 "use client";
 
 import { useEffect } from "react";
-import { Home, ListTodo, Heart, Calendar } from "lucide-react";
+import { Home, ListTodo, Heart, Calendar, BookHeart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from 'next/link';
+
+import { TabKey } from "./Types";
 
 interface MobileNavProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: TabKey;
+  setActiveTab: (tab: TabKey) => void;
 }
 
 export default function MobileNav({ activeTab, setActiveTab }: MobileNavProps) {
-  // prevent background scroll when nav active (optional)
+  const router = useRouter();
+
   useEffect(() => {
-    document.body.style.paddingBottom = "64px"; // bottom nav height
+    document.body.style.paddingBottom = "64px";
     return () => {
       document.body.style.paddingBottom = "0px";
     };
@@ -23,6 +28,7 @@ export default function MobileNav({ activeTab, setActiveTab }: MobileNavProps) {
     { key: "quest", icon: <ListTodo size={24} /> },
     { key: "couple", icon: <Heart size={24} /> },
     { key: "calendar", icon: <Calendar size={24} /> },
+    { key: "diary", icon: <BookHeart size={24} />, route: "/diary" }, // 새로 추가
   ];
 
   return (
@@ -31,7 +37,7 @@ export default function MobileNav({ activeTab, setActiveTab }: MobileNavProps) {
         {items.map((item) => (
           <li key={item.key}>
             <button
-              onClick={() => setActiveTab(item.key)}
+              onClick={() => setActiveTab(item.key as TabKey)}
               className={`flex flex-col items-center justify-center w-16 h-full ${
                 activeTab === item.key ? "text-blue-600" : "text-gray-400"
               }`}

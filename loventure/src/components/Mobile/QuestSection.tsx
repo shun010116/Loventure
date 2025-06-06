@@ -1,6 +1,6 @@
 // components/QuestSection.tsx
 import React from "react";
-import { UserQuest, PartnerQuest } from "../qeustTypes";
+import { UserQuest, PartnerQuest } from "../Types";
 
 interface QuestSectionProps {
   userQuests: UserQuest[];
@@ -16,30 +16,26 @@ export default function QuestSection({
   onPartnerClick,
 }: QuestSectionProps) {
   return (
-    <div className="flex gap-4 overflow-x-auto sm:hidden">
-      <div className="min-w-[260px] flex-shrink-0 bg-blue-50 p-4 rounded-xl">
+    <div className="flex flex-col gap-4 sm:hidden">
+      <div className="bg-blue-50 p-4 rounded-xl">
         <h3 className="font-semibold mb-2">유저 퀘스트</h3>
         <ul className="space-y-1">
-          {userQuests.length > 0
-            ? userQuests.map(q => (
-                <li key={q._id} className="bg-white px-3 py-2 rounded cursor-pointer" onClick={() => onUserClick(q)}>
-                  {q.title}
-                </li>
-              ))
-            : <li className="text-sm text-gray-400">No quests</li>}
+          {userQuests.map(q => (
+            <li key={q._id} onClick={() => onUserClick(q)} className="bg-white p-2 rounded">
+              {q.title}
+            </li>
+          ))}
         </ul>
       </div>
 
-      <div className="min-w-[260px] flex-shrink-0 bg-purple-100 p-4 rounded-xl">
+      <div className="bg-purple-100 p-4 rounded-xl">
         <h3 className="font-semibold mb-2">연인 퀘스트</h3>
         <ul className="space-y-1">
-          {partnerQuests.length > 0
-            ? partnerQuests.map(q => (
-                <li key={q._id} className="bg-white px-3 py-2 rounded cursor-pointer" onClick={() => onPartnerClick(q)}>
-                  {q.title}
-                </li>
-              ))
-            : <li className="text-sm text-gray-400">No partner quests</li>}
+          {partnerQuests.map(q => (
+            <li key={q._id} onClick={() => onPartnerClick(q)} className="bg-white p-2 rounded">
+              {q.title}
+            </li>
+          ))}
         </ul>
       </div>
     </div>

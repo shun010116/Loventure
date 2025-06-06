@@ -1,6 +1,6 @@
 // components/CoupleQuestSection.tsx
 import React from "react";
-import { CoupleQuest } from "../qeustTypes";
+import { CoupleQuest } from "../Types";
 
 interface CoupleQuestSectionProps {
   quests: CoupleQuest[];

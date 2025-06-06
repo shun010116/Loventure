@@ -5,5 +5,5 @@ import MainLayout from "@/components/MainLayout";
 import ClientLayout from '@/app/ClientLayout';
 
 export default function HomePage() {
-  return <ClientLayout><MainLayout/></ClientLayout>;
+  return <MainLayout/>;
 }

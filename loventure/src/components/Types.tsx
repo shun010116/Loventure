@@ -1,4 +1,18 @@
-// src/types/questTypes.ts
+// src/types/Types.ts
+
+export type TabKey = "character" | "quest" | "couple" | "calendar" | "diary";
+
+export interface Schedule {
+  _id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  repeat: string;
+  isCompleted: boolean;
+  createdBy: string;
+  participants: string[];
+}
 
 export interface UserQuest {
   _id: string;

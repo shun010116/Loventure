@@ -9,18 +9,35 @@ import "../styles/globals.css";
 import useSWR from "swr";
 import { UserCircle, BookHeart , CalendarDays, Settings, LogOut, LogIn, Bell } from "lucide-react";
 
+// 모바일에서만 적용할 Layout import
+import MobileClientLayout from "@/components/Layouts/MobileClientLayout";
+
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function ClientLayout({ children }: { children: React.ReactNode;}) {
+export default function ClientLayout({ children }: { children: React.ReactNode }) {
+  const [isMobile, setIsMobile] = useState(false);
   const { isLoggedIn, user, loading, logout } = useAuth();
-
-  const { data: notificationData } = useSWR(
-    isLoggedIn ? "/api/notifications" : null,
-    fetcher
-  );
-
+  const { data: notificationData } = useSWR(isLoggedIn ? "/api/notifications" : null, fetcher);
   const unreadCount = notificationData?.data?.unreadCount || 0;
 
+
+  // 모바일 화면 감지 
+  useEffect( () => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    handleResize();
+    window.addEventListener("resize",handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // 모바일일 경우 모바일 전용 Layout으로 지정
+  if ( isMobile ) {
+    return <MobileClientLayout />;
+  }
+
+  // Pc는 기존의 레이아웃 유지
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="flex gap-4 h-full">

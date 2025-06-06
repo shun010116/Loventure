@@ -6,40 +6,27 @@ import { ArrowRight, ArrowLeft, Plus } from "lucide-react";
 import { Dialog } from "@headlessui/react";
 import dayjs from "dayjs";
 import { useAuth } from "@/hooks/useAuth";
-import Link from 'next/link';
+
 
 // Type improt 
-import { UserQuest, CoupleQuest, PartnerQuest } from "./qeustTypes";
+import { TabKey, Schedule, UserQuest, CoupleQuest, PartnerQuest } from "./Types";
 import { UserQuestModal, PartnerQuestModal, CoupleQuestModal } from "./Modal";
+
+
 
 // 모바일 네비게이션 바 import 
 import MobileNav from "@/components/MobileNav";
+
 
 // 모바일, PC 레이아웃 import
 import MobileLayout from "@/components/Layouts/MobileLayout";
 import DesktopLayout from "@/components/Layouts/DesktopLayout";
 
-
-interface Schedule {
-  _id: string;
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  repeat: string;
-  isCompleted: boolean;
-  createdBy: string;
-  participants: string[];
-}
-
-// 모바일 화면 메뉴 바
-
-
 export default function MainLayout() {
   const { user } = useAuth();
 
   // 모바일 화면에서는 탭으로 구성
-  const [activeTab, setActiveTab] = useState<"character" | "quest" | "couple" | "calendar">("character");
+  const [activeTab, setActiveTab] = useState<TabKey>("character");
 
   const QUEST_CATEGORIES = ["All", "Daily", "Weekly"];
   const COUPLE_CATEGORIES = ["All", "Daily", "Bucket"];
@@ -326,13 +313,15 @@ export default function MainLayout() {
     <>
       {/* 모바일 전용 */}
       <MobileLayout
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         myEvents={myTodayEvents}
         partnerEvents={partnerTodayEvents}
         userQuests={filteredQuests}
         partnerQuests={filteredPartnerQuests}
         coupleQuests={filteredCoupleQuests}
         onUserClick={openEditQuestDialog}
-        onPartnerClick={(q : PartnerQuest) => setViewingPartnerQuest(q)}
+        onPartnerClick={(q: PartnerQuest) => setViewingPartnerQuest(q)}
         onCoupleClick={openEditCoupleQuestDialog}
       />
         

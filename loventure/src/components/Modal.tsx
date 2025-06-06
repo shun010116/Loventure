@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog } from "@headlessui/react"
-import { UserQuest, CoupleQuest, PartnerQuest } from "./qeustTypes";
+import { UserQuest, CoupleQuest, PartnerQuest } from "./Types";
 
 import React, { Dispatch, SetStateAction } from "react";
 
