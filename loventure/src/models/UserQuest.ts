@@ -5,8 +5,9 @@ const userQuestSchema = new mongoose.Schema({
     assignedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     title: { type: String, required: true },
     description: String,
+    difficulty: { type: Number, default: 1 }, // 1 ~ 5
     goalType: String,
-    targetValue: Number,
+    targetValue: { type: Number, default: 0 },
     currentValue: { type: Number, default: 0 },
     isCompleted: { type: Boolean, default: false },
     reward: {

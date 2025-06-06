@@ -195,8 +195,11 @@ export default function MainLayout() {
           description: quest.description,
           goalType: quest.goalType,
           targetValue: quest.targetValue || 1,
-          rewardExp: 0,
           assignedToId: user?._id,
+          reward: {
+            exp: quest.reward?.exp || 0,
+            coins: quest.reward?.coins || 0,
+          }
         }),
       });
       if (res.ok) {
@@ -530,7 +533,7 @@ export default function MainLayout() {
                               const title = (form.elements.namedItem("title") as HTMLInputElement).value;
                               const description = (form.elements.namedItem("notes") as HTMLTextAreaElement).value;
                               const difficulty = selectedDifficulty ?? 1;
-                              const goalType = (form.elements.namedItem("reset") as HTMLSelectElement).value;
+                              const goalType = (form.elements.namedItem("reset") as HTMLSelectElement).value
 
                               saveQuest({ title, description, difficulty, goalType });
                             }}
