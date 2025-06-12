@@ -53,6 +53,8 @@ export default function MobileLayout({
           partnerQuests={partnerQuests}
           onUserClick={onUserClick}
           onPartnerClick={onPartnerClick}
+          onAddUserQuest={() => setIsDialogOpen(true)}     
+          onAddPartnerQuest={() => setIsPartnerDialogOpen(true)} 
         />
       )}
       {activeTab === "couple" && <CoupleQuestSection quests={coupleQuests} onClick={onCoupleClick} />}
