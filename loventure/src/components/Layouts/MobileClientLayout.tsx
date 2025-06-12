@@ -20,9 +20,13 @@ interface MobileClientLayoutProps {
 }
 
 export default function MobileClientLayout({ children }: MobileClientLayoutProps) {
-  const { user } = useAuth();
+  const { user, partner } = useAuth();
   const pathname = usePathname();   // 현재 경로 가져오기
   
+  /* ───────── 유저 & 파트너 정보 ───────── */
+  const [userNickname, setUserNickname] = useState<string>("");
+  const [partnerNickname, setPartnerNickname] = useState<string>("");
+
    /* ───────── 캐릭터 & 이벤트 ───────── */
   const [myCharacter,      setMyCharacter]      = useState<Character | null>(null);
   const [partnerCharacter, setPartnerCharacter] = useState<Character | null>(null);
@@ -54,6 +58,14 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
       setActiveTab(null);
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+    setUserNickname(user.nickname);
+    if (partner) {
+      setPartnerNickname(partner.nickname);
+    }
+  }, [user, partner]);
 
   ///* ───────── 1. 퀘스트 fetch ─────── */
   useEffect(() => {
@@ -160,6 +172,8 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
             userQuests={userQuests}
             partnerQuests={partnerQuests}
             coupleQuests={coupleQuests}
+            userNickname={userNickname}
+            partnerNickname={partnerNickname}
 
             /* 카드 클릭 → 수정 */
             onUserClick={(q)      => openEditQuest("user", q)}

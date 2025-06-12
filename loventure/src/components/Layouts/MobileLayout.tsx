@@ -23,6 +23,9 @@ interface MobileLayoutProps {
   partnerQuests: PartnerQuest[];
   coupleQuests: any;
 
+  userNickname: string;
+  partnerNickname: string;
+
   /* 콜백 */
   onUserClick:      (q: UserQuest)      => void;
   onPartnerClick:   (q: PartnerQuest)   => void;
@@ -41,6 +44,8 @@ export default function MobileLayout({
   userQuests,
   partnerQuests,
   coupleQuests,
+  userNickname,
+  partnerNickname,
   onUserClick,
   onPartnerClick,
   onCoupleClick,
@@ -63,6 +68,8 @@ export default function MobileLayout({
       {/* 퀘스트 탭 */}
       {activeTab === "quest" && (
         <QuestSection
+          userNickname={userNickname}
+          partnerNickname={partnerNickname}
           userQuests={userQuests}
           partnerQuests={partnerQuests}
           onUserClick={onUserClick}

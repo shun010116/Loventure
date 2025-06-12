@@ -6,6 +6,8 @@ import { CirclePlus  } from "lucide-react";
 import { UserQuest, PartnerQuest } from "../Types";
 
 interface QuestSectionProps {
+  userNickname: string;
+  partnerNickname: string;
   userQuests: UserQuest[];
   partnerQuests: PartnerQuest[];
   onUserClick:      (q: UserQuest)    => void;
@@ -15,6 +17,8 @@ interface QuestSectionProps {
 }
 
 export default function QuestSection({
+  userNickname,
+  partnerNickname,
   userQuests,
   partnerQuests,
   onUserClick,
@@ -24,11 +28,11 @@ export default function QuestSection({
 }: QuestSectionProps) {
   /* 공통 헤더 구성 함수 */
   const renderHeader = (
-    title: string,
+    nickname: string,
     onAdd?: () => void
   ) => (
     <div className="flex items-center justify-between mb-2">
-      <h3 className="font-semibold">{title}</h3>
+      <h3 className="font-semibold">{nickname}님의 퀘스트</h3>
       {onAdd && (
         <button
           onClick={onAdd}
@@ -44,7 +48,7 @@ export default function QuestSection({
     <div className="flex flex-col gap-4 sm:hidden">
       {/* 유저 퀘스트 */}
       <div className="bg-blue-50 p-4 rounded-xl">
-        {renderHeader("유저 퀘스트", onAddUserQuest)}
+        {renderHeader(userNickname, onAddUserQuest)}
         <ul className="space-y-1">
           {userQuests.map((q) => (
             <li
@@ -60,7 +64,7 @@ export default function QuestSection({
 
       {/* 파트너 퀘스트 */}
       <div className="bg-purple-100 p-4 rounded-xl">
-        {renderHeader("연인 퀘스트", onAddPartnerQuest)}
+        {renderHeader(partnerNickname, onAddPartnerQuest)}
         <ul className="space-y-1">
           {partnerQuests.map((q) => (
             <li
