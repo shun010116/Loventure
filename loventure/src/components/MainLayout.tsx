@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 
 // Type improt 
-import { TabKey, Schedule, UserQuest, CoupleQuest, PartnerQuest } from "./Types";
+import { TabKey, Schedule, UserQuest, CoupleQuest, PartnerQuest, Character } from "./Types";
 import { UserQuestModal, PartnerQuestModal, CoupleQuestModal } from "./Modal";
 
 
@@ -23,7 +23,11 @@ import MobileLayout from "@/components/Layouts/MobileLayout";
 import DesktopLayout from "@/components/Layouts/DesktopLayout";
 
 export default function MainLayout() {
-  const { user } = useAuth();
+  const { user, loading, isLoggedIn } = useAuth();
+
+  // character
+  const [myCharacter, setMyCharacter] = useState<Character | null>(null);
+  const [partnerCharacter, setPartnerCharacter] = useState<Character | null>(null);
 
   // 모바일 화면에서는 탭으로 구성
   const [activeTab, setActiveTab] = useState<TabKey>("character");
@@ -61,21 +65,7 @@ export default function MainLayout() {
   const [selectedCoupleCategory, setSelectedCoupleCategory] = useState("All");
   const [isCoupleDialogOpen, setIsCoupleDialogOpen] = useState(false);
   const [editingCoupleQuest, setEditingCoupleQuest] = useState<CoupleQuest | null>(null);
-  
 
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch("/api/allQuests");
-      const data = await res.json();
-      if (res.ok) {
-        setQuests(data.data.userQuests || []);
-        setCoupleQuests(data.data.coupleQuests || []);
-        setPartnerQuests(data.data.partnerQuests || []);
-      }
-    };
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -93,22 +83,29 @@ export default function MainLayout() {
     const today = dayjs().format("YYYY-MM-DD");
     const todayOnly = schedule.filter((e) => dayjs(e.startDate).format("YYYY-MM-DD") === today);
     setMyTodayEvents(todayOnly.filter((e) => e.participants.includes(user._id)));
-    setPartnerTodayEvents(todayOnly.filter((e) => !e.participants.includes(user._id)));
+    setPartnerTodayEvents(todayOnly.filter((e) => e.participants.length == 2 || !e.participants.includes(user._id)));
   }, [schedule, user]);
 
+  const fetchCharacter = async () => {
+    try {
+      const res = await fetch("/api/character/me");
+      const data = await res.json();
+      //console.log("data: ", data);
+      if (res.ok && data.data) {
+        setMyCharacter(data.data.myCharacter || null);
+        setPartnerCharacter(data.data.partnerCharacter || null);
+      }
+      
+    } catch (err) {
+      console.log("Error fetching data:", err);
+    }
+  };
 
   // ==============================유저 퀘스트 보여주기 및 추가 삭제=================================
   // fetch
   const fetchAllQuests = async () => {
     try {
-      // const [userRes, coupleRes] = await Promise.all([
-      //   fetch("/api/userQuest"),
-      //   fetch("api/coupleQuest"),
-      // ]);
       const res = await fetch("/api/allQuests")
-
-      // const userData = await userRes.json();
-      // const coupleData = await coupleRes.json();
       const data = await res.json();
       // console.log("data: ", data);
       if (res.ok && data.data) {
@@ -146,9 +143,12 @@ export default function MainLayout() {
           title: quest.title,
           description: quest.description,
           goalType: quest.goalType,
-          targetValue: quest.targetValue || 1,
-          rewardExp: 0,
+          difficulty: quest.difficulty,
           assignedToId: user?._id,
+          reward: {
+            exp: quest.reward?.exp || 0,
+            coins: quest.reward?.coins || 0,
+          }
         }),
       });
       if (res.ok) {
@@ -172,6 +172,26 @@ export default function MainLayout() {
         alert(data?.message || "삭제 실패");
       }
       
+      setIsDialogOpen(false);
+    }
+  };
+
+  // 유저 퀘스트 완료 함수
+  const completeQuest = async () => {
+    if (editingQuest) {
+      const res = await fetch(`/api/userQuest/${editingQuest._id}`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        alert(`퀘스트 완료! Exp: ${editingQuest.reward.exp}, Coins: ${editingQuest.reward.coins} 획득!`);
+        await fetchAllQuests();
+        await fetchCharacter();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "퀘스트 완료 실패");
+      }
+
       setIsDialogOpen(false);
     }
   };
@@ -305,8 +325,33 @@ export default function MainLayout() {
     }
   };
 
+  const completeCoupleQuest = async () => {
+    if (editingCoupleQuest) {
+      const res = await fetch(`/api/coupleQuest/${editingCoupleQuest._id}/complete/`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        alert(`커플 퀘스트 완료! Exp: ${editingCoupleQuest.reward.exp}, Coins: ${editingCoupleQuest.reward.coins} 획득!`);
+        await fetchAllQuests();
+        await fetchCharacter();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "커플 퀘스트 완료 실패");
+      }
+
+      setIsCoupleDialogOpen(false);
+      }
+    };
+
   const filteredCoupleQuests = selectedCoupleCategory === "All" ? coupleQuests : coupleQuests.filter((q) => q.goalType === selectedCoupleCategory);
   
+  useEffect(() => {
+    if (!loading && isLoggedIn) {
+      fetchCharacter();
+      fetchAllQuests();
+    }
+  }, [loading, isLoggedIn])
 
   return (
 
@@ -339,9 +384,14 @@ export default function MainLayout() {
 
               {/* 내 캐릭터 */}
               <div className="flex flex-col items-center w-full sm:w-1/2 lg:w-[22%] bg-white rounded shadow p-4 h-[400px]">
-                <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
-                <div className="text-sm font-bold">My Name</div>
-                <div className="text-xs">Lv.3</div>
+                <div>
+                  <img src={`/character/${myCharacter?.evolutionStage}/${myCharacter?.avatar}`} alt='myCharacter' className="w-24 h-24 rounded-full mb-2"/>
+                </div>
+                <div className="text-sm font-bold">{myCharacter?.name ?? "-"}</div>
+                <div className="text-xs">Lv. {myCharacter?.level ?? "-"}</div>
+                <div className="text-xs">
+                  EXP {myCharacter?.exp ?? 0} / Next: {myCharacter?.level ? 50 * myCharacter.level * myCharacter.level : 0}
+                </div>
                 <div className="mt-4 text-xs w-full flex justify-center">
                   {myTodayEvents.length > 0 ? (
                     <ul className="list-disc list-inside">
@@ -357,9 +407,14 @@ export default function MainLayout() {
 
               {/* 파트너 캐릭터 */}
               <div className="flex flex-col items-center w-full sm:w-1/2 lg:w-[22%] bg-white rounded shadow p-4 h-[400px]">
-                <div className="w-24 h-24 rounded-full bg-gray-200 mb-2" />
-                <div className="text-sm font-bold">Partner</div>
-                <div className="text-xs">Lv.2</div>
+                <div>
+                  <img src={`/character/${partnerCharacter?.evolutionStage}/${partnerCharacter?.avatar}`} alt='partnerCharacter' className="w-24 h-24 rounded-full mb-2" />
+                </div>
+                <div className="text-sm font-bold">{partnerCharacter?.name ?? "No Partner"}</div>
+                <div className="text-xs">Lv. {partnerCharacter?.level ?? "-"}</div>
+                <div className="text-xs">
+                  EXP {partnerCharacter?.exp ?? 0} / Next: {partnerCharacter?.level ? 50 * partnerCharacter.level * partnerCharacter.level : 0}
+                </div>
                 <div className="mt-4 text-xs w-full flex justify-center">
                   {partnerTodayEvents.length > 0 ? (
                     <ul className="list-disc list-inside">
@@ -536,6 +591,7 @@ export default function MainLayout() {
                       setSelectedDifficulty={setSelectedDifficulty}
                       saveQuest={saveQuest}
                       deleteQuest={deleteQuest}
+                      completeQuest={completeQuest}
                     />
 
                     <PartnerQuestModal
@@ -549,6 +605,7 @@ export default function MainLayout() {
                       editingCoupleQuest={editingCoupleQuest}
                       saveCoupleQuest={saveCoupleQuest}
                       deleteCoupleQuest={deleteCoupleQuest}
+                      completeCoupleQuest={completeCoupleQuest}
                     />
                     {/* ───────────────── 퀘스트 구간 끝 ───────────────── */}
                   </>

@@ -20,20 +20,20 @@ export async function GET(req: Request) {
     }
 
     // 유저 퀘스트 가져오기
-    const userQuests = await UserQuest.find({ userId: user._id })
+    const userQuests = await UserQuest.find({ userId: user._id, isCompleted: false })
         .sort({ createdAt: -1 })
         .populate("assignedBy", "nickname");
     // console.log("userQuests: ", userQuests);
 
     // 커플 퀘스트 가져오기
-    const coupleQuests = await CoupleQuest.find({ coupleId: user.coupleId })
+    const coupleQuests = await CoupleQuest.find({ coupleId: user.coupleId, isCompleted: false })
         .sort({ createdAt: -1 });
     // console.log("coupleQuests: ", coupleQuests);
 
     // 파트너 퀘스트 가져오기
     let partnerQuests=[];
     if (partnerId) {
-        partnerQuests = await UserQuest.find({ userId: partnerId })
+        partnerQuests = await UserQuest.find({ userId: partnerId, isCompleted: false })
             .sort({ createdAt: -1})
             .populate("assignedBy", "nickname");
     }

@@ -2,6 +2,7 @@ import UserQuest from "@/models/UserQuest";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 import { sendNotification } from "@/lib/notify";
+import { calculateReward } from "@/utils/rewardCalculator";
 
 // POST /api/userQuest : 개인 퀘스트 생성
 export async function POST(req: Request) {
@@ -15,16 +16,18 @@ export async function POST(req: Request) {
     const {
         title,
         description,
+        difficulty,
         goalType,
         targetValue,
-        rewardExp,
         assignedToId,
     } = await req.json();
 
     // Check condition
-    if (!title || !goalType || !targetValue == null || !assignedToId || !rewardExp == null) {
+    if (!title || !goalType || !assignedToId || !difficulty) {
         return error("필수 항목이 누락되었습니다.", 400);
     }
+
+    const { rewardExp, rewardCoins } = calculateReward(difficulty, goalType);
 
     // Check couple exists
     if (String(assignedToId) !== String(user._id) && !user.coupleId) {
@@ -37,12 +40,14 @@ export async function POST(req: Request) {
         assignedBy: user._id,
         title,
         description,
+        difficulty,
         goalType,
         targetValue,
         currentValue: 0,
         isCompleted: false,
         reward: {
             exp: rewardExp,
+            coins: rewardCoins,
         },
     });
 
