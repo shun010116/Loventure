@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import { dbConnect } from "@/lib/mongodb";
+import { getPartnerId } from "@/utils/getPartnerId";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 if (!JWT_SECRET) {
@@ -44,11 +45,17 @@ export async function getAuthenticatedUser(req: Request, requireCouple = false) 
     if (!user) {
         return { error: { message: "유효하지 않은 유저입니다.", status: 404 } };
     }
+    const partnerId = await getPartnerId(user._id, user.coupleId);
+
+    const partner = await User.findById(partnerId);
 
     // Check if user has coupleId
     if (requireCouple && !user.coupleId) {   
         return { error: { message: "커플이 아닙니다.", status: 400 } };
     }
 
-    return { user };
+    return { 
+        user,
+        partner,
+    };
 }

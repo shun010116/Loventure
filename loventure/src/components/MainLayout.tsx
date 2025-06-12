@@ -23,7 +23,7 @@ import MobileLayout from "@/components/Layouts/MobileLayout";
 import DesktopLayout from "@/components/Layouts/DesktopLayout";
 
 export default function MainLayout() {
-  const { user, loading, isLoggedIn } = useAuth();
+  const { user, partner, loading, isLoggedIn } = useAuth();
 
   // character
   const [myCharacter, setMyCharacter] = useState<Character | null>(null);
@@ -199,8 +199,6 @@ export default function MainLayout() {
   const filteredQuests = selectedCategory === "All" ? quests : quests.filter((q) => q.goalType === selectedCategory);
 
 
-
-  {/* =================================연인(Partner) Quest 구간============================= */}
   useEffect(() => {
     const handleLogout = () => {
       setQuests([]);
@@ -210,8 +208,14 @@ export default function MainLayout() {
       setIsDialogOpen(false);
       setIsPartnerDialogOpen(false);
       setViewingPartnerQuest(null);
+      setCoupleQuests([]);
+      setEditingCoupleQuest(null);
+      setIsCoupleDialogOpen(false);
+      setMyCharacter(null);
+      setPartnerCharacter(null);
     };
 
+    {/* =================================연인(Partner) Quest 구간============================= */}
     // 파트너 퀘스트 클릭 시 정보 보기
     const openViewPartnerQuestDialog = (quest: PartnerQuest) => {
       setViewingPartnerQuest(quest);
@@ -327,7 +331,7 @@ export default function MainLayout() {
 
   const completeCoupleQuest = async () => {
     if (editingCoupleQuest) {
-      const res = await fetch(`/api/coupleQuest/${editingCoupleQuest._id}/complete/`, {
+      const res = await fetch(`/api/coupleQuest/${editingCoupleQuest._id}`, {
         method: "POST",
       });
 
@@ -362,8 +366,6 @@ export default function MainLayout() {
         setActiveTab={setActiveTab}
         myEvents={myTodayEvents}
         partnerEvents={partnerTodayEvents}
-        myCharacter={myCharacter}             
-        partnerCharacter={partnerCharacter}  
         userQuests={filteredQuests}
         partnerQuests={filteredPartnerQuests}
         coupleQuests={filteredCoupleQuests}
@@ -387,7 +389,7 @@ export default function MainLayout() {
               {/* 내 캐릭터 */}
               <div className="flex flex-col items-center w-full sm:w-1/2 lg:w-[22%] bg-white rounded shadow p-4 h-[400px]">
                 <div>
-                  <img src={`/character/${myCharacter?.evolutionStage}/${myCharacter?.avatar}`} alt='myCharacter' className="w-24 h-24 rounded-full mb-2"/>
+                  <img src={`/character/${myCharacter?.evolutionStage}/${myCharacter?.avatar}`} className="w-24 h-24 rounded-full mb-2"/>
                 </div>
                 <div className="text-sm font-bold">{myCharacter?.name ?? "-"}</div>
                 <div className="text-xs">Lv. {myCharacter?.level ?? "-"}</div>
@@ -410,7 +412,7 @@ export default function MainLayout() {
               {/* 파트너 캐릭터 */}
               <div className="flex flex-col items-center w-full sm:w-1/2 lg:w-[22%] bg-white rounded shadow p-4 h-[400px]">
                 <div>
-                  <img src={`/character/${partnerCharacter?.evolutionStage}/${partnerCharacter?.avatar}`} alt='partnerCharacter' className="w-24 h-24 rounded-full mb-2" />
+                  <img src={`/character/${partnerCharacter?.evolutionStage}/${partnerCharacter?.avatar}`} className="w-24 h-24 rounded-full mb-2" />
                 </div>
                 <div className="text-sm font-bold">{partnerCharacter?.name ?? "No Partner"}</div>
                 <div className="text-xs">Lv. {partnerCharacter?.level ?? "-"}</div>
@@ -449,7 +451,7 @@ export default function MainLayout() {
                       {/* ===================== User Quest ===================== */}
                       <div className="bg-blue-50 rounded-xl p-4 h-[300px] sm:h-[360px] overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
-                          <h3 className="font-semibold">유저 퀘스트</h3>
+                          <h3 className="font-semibold">{user?.nickname}님의 퀘스트</h3>
                         </div>
                         <div className="flex gap-2 mb-2">
                           {QUEST_CATEGORIES.map((cat) => (
@@ -498,7 +500,7 @@ export default function MainLayout() {
                       {/* ===================== Partner Quest ===================== */}
                       <div className="bg-purple-100 rounded-xl p-4 h-[300px] sm:h-[360px] overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
-                          <h3 className="font-semibold">연인 퀘스트</h3>
+                          <h3 className="font-semibold">{partner?.nickname}님의 퀘스트</h3>
                         </div>
                         <div className="flex gap-2 mb-2">
                           {QUEST_CATEGORIES.map((cat) => (
