@@ -362,6 +362,8 @@ export default function MainLayout() {
         setActiveTab={setActiveTab}
         myEvents={myTodayEvents}
         partnerEvents={partnerTodayEvents}
+        myCharacter={myCharacter}             
+        partnerCharacter={partnerCharacter}  
         userQuests={filteredQuests}
         partnerQuests={filteredPartnerQuests}
         coupleQuests={filteredCoupleQuests}

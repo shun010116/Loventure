@@ -34,7 +34,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   // 모바일일 경우 모바일 전용 Layout으로 지정
   if ( isMobile ) {
-    return <MobileClientLayout />;
+    return <MobileClientLayout>{children}</MobileClientLayout>;
   }
 
   // Pc는 기존의 레이아웃 유지

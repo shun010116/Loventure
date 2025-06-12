@@ -28,7 +28,7 @@ export default function MobileNav({ activeTab, setActiveTab }: MobileNavProps) {
     { key: "quest", icon: <ListTodo size={24} /> },
     { key: "couple", icon: <Heart size={24} /> },
     { key: "calendar", icon: <Calendar size={24} /> },
-    { key: "diary", icon: <BookHeart size={24} />, route: "/diary" }, // 새로 추가
+    { key: "diary", icon: <BookHeart size={24} /> },
   ];
 
   return (
@@ -37,13 +37,21 @@ export default function MobileNav({ activeTab, setActiveTab }: MobileNavProps) {
         {items.map((item) => (
           <li key={item.key}>
             <button
-              onClick={() => setActiveTab(item.key as TabKey)}
+              onClick={() => {
+                // diary는 페이지 렌더(=children)로 전환
+                if (item.key === "diary") {
+                  setActiveTab(null);
+                } else {
+                  setActiveTab(item.key as TabKey);
+                }
+              }}
               className={`flex flex-col items-center justify-center w-16 h-full ${
                 activeTab === item.key ? "text-blue-600" : "text-gray-400"
               }`}
             >
               {item.icon}
             </button>
+
           </li>
         ))}
       </ul>

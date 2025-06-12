@@ -27,7 +27,7 @@ export async function getAuthenticatedUser(req: Request, requireCouple = false) 
 
     // Check if token exists
     if (!token) {
-        return { erorr: { message: "로그인이 필요합니다.", status: 401 } };
+        return { error: { message: "로그인이 필요합니다.", status: 401 } };
     }
 
     // Verify the token

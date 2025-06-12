@@ -1,6 +1,6 @@
 // src/types/Types.ts
 
-export type TabKey = "character" | "quest" | "couple" | "calendar" | "diary";
+export type TabKey = "character" | "quest" | "couple" | "calendar" | "diary" | null;
 
 export interface Schedule {
   _id: string;

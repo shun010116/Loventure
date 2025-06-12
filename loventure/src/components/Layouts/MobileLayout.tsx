@@ -6,11 +6,13 @@ import CoupleQuestSection from "@/components/Mobile/CoupleQuestSection";
 import CalendarSection from "@/components/Mobile/CalendarSection";
 import DiarySection from "@/components/Mobile/DiarySection";
 
-import { TabKey } from "../Types";
+import { TabKey, Character } from "../Types";
 
 interface MobileLayoutProps {
   activeTab: TabKey;
   setActiveTab: (tab: TabKey) => void;
+  myCharacter: Character | null;
+  partnerCharacter: Character | null;   
   myEvents: any;
   partnerEvents: any;
   userQuests: any;
@@ -24,6 +26,8 @@ interface MobileLayoutProps {
 export default function MobileLayout({
   activeTab,
   setActiveTab,
+  myCharacter, 
+  partnerCharacter, 
   myEvents,
   partnerEvents,
   userQuests,
@@ -35,7 +39,14 @@ export default function MobileLayout({
 }: MobileLayoutProps) {
   return (
     <div className="sm:hidden pb-20 px-4 pt-4">
-      {activeTab === "character" && <CharacterSection myEvents={myEvents} partnerEvents={partnerEvents} />}
+      {activeTab === "character" && (
+        <CharacterSection
+          myCharacter={myCharacter}
+          partnerCharacter={partnerCharacter}
+          myEvents={myEvents}
+          partnerEvents={partnerEvents}
+        />
+      )}
       {activeTab === "quest" && (
         <QuestSection
           userQuests={userQuests}

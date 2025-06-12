@@ -5,9 +5,9 @@ import { success, error } from "@/utils/response";
 export async function GET(req: Request) {
     const { user, error: authError } = await getAuthenticatedUser(req);
 
-    if (authError) {
-        return error(authError.message, authError.status);
-    }
+    if (authError || !user) {
+        return error(authError?.message || "인증되지 않았습니다.", authError?.status || 401);
+  }
 
     return success("로그인된 유저 정보입니다.", {
         user: {

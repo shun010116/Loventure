@@ -41,7 +41,7 @@ export function UserQuestModal({
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Quest</h3>
             <div className="flex gap-2">
-              <button onClick={onClose} className="text-red-500 hover:underline">Cancel</button>
+              <button onClick={onClose} className="text-red-500 hover:underline">취소</button>
               <button
                 onClick={() => {
                   const form = document.forms.namedItem("questForm") as HTMLFormElement;
@@ -53,7 +53,7 @@ export function UserQuestModal({
                 }}
                 className="text-blue-600 font-semibold hover:underline"
               >
-                Save
+                저장
               </button>
             </div>
           </div>
@@ -110,10 +110,10 @@ export function UserQuestModal({
                   onClick={completeQuest}
                   className="mt-4 text-sm text-green-500 hover:underline"
                 >
-                  Complete Quest
+                  완료
                 </button>
                 <button type="button" onClick={deleteQuest} className="mt-4 text-sm text-red-500 hover:underline">
-                  Delete this Quest
+                  삭제
                 </button>
               </>
             )}
@@ -191,7 +191,7 @@ export function CoupleQuestModal({
                 }}
                 className="text-orange-600 font-semibold hover:underline"
               >
-                Save
+                저장
               </button>
             </div>
           </div>
@@ -230,10 +230,10 @@ export function CoupleQuestModal({
                   onClick={completeCoupleQuest}
                   className="mt-4 text-sm text-green-500 hover:underline"
                 >
-                  Complete Quest
+                  완료
                 </button>
                 <button type="button" onClick={deleteCoupleQuest} className="mt-4 text-sm text-red-500 hover:underline">
-                  Delete this Couple Quest
+                  삭제
                 </button>
               </>              
             )}

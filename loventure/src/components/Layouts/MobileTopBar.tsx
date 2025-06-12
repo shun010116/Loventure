@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { Bell, UserCircle, Settings, LogOut } from "lucide-react";
+import { Bell, UserCircle, Settings, LogOut, LogIn } from "lucide-react";
 import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -14,7 +14,8 @@ export default function MobileTopBar() {
   const unreadCount = notificationData?.data?.unreadCount || 0;
 
   return (
-    <header className="sm:hidden bg-white px-4 py-3 shadow flex justify-end items-center gap-4">
+    <header className="md:hidden bg-white px-4 py-3 shadow flex justify-end items-center gap-4">
+      {/* 로그인 한 상태 */}
       {!loading && isLoggedIn && (
         <>
           <Link href="/notifications" className="relative text-gray-700">
@@ -28,14 +29,24 @@ export default function MobileTopBar() {
           <Link href="/myPage" className="text-gray-700">
             <UserCircle size={22} />
           </Link>
-          <Link href="/auth/login" className="text-gray-700">
+          <Link href="/settings" className="text-gray-700">
             <Settings size={22} />
           </Link>
           <button onClick={logout} className="text-red-500">
             <LogOut size={22} />
           </button>
-
         </>
+      )}
+
+      {/* 로그인 안 한 상태 */}
+      {!loading && !isLoggedIn && (
+        <Link
+        href="/login" 
+          className="flex items-center text-blue-600 hover:underline"
+        >
+          <LogIn size={22} />
+          <span className="ml-1 text-sm">로그인</span>
+        </Link>
       )}
     </header>
   );
