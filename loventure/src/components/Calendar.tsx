@@ -4,18 +4,7 @@ import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-
-interface Schedule {
-  _id: string;
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  repeat: string;
-  isCompleted: boolean;
-  createdBy: string;
-  participants: string[];
-}
+import { Schedule } from "./Types";
 
 interface UserInfo {
   _id: string;

@@ -73,3 +73,14 @@ export interface PartnerQuest {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Character {
+  _id: string;
+  name: string;
+  level: number;
+  exp: number;
+  evolutionStage: number;
+  coins: number;
+  avatar: string;
+  statusMessage: string;
+}

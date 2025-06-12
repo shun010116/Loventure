@@ -20,6 +20,7 @@ interface UserQuestModalProps {
   setSelectedDifficulty: Dispatch<SetStateAction<number | null>>;
   saveQuest: (quest: Partial<UserQuest>) => void;
   deleteQuest: () => void;
+  completeQuest: () => void;
 }
 
 export function UserQuestModal({
@@ -30,6 +31,7 @@ export function UserQuestModal({
   setSelectedDifficulty,
   saveQuest,
   deleteQuest,
+  completeQuest,
 }: UserQuestModalProps) {
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -102,9 +104,18 @@ export function UserQuestModal({
             </div>
 
             {editingQuest && (
-              <button type="button" onClick={deleteQuest} className="mt-4 text-sm text-red-500 hover:underline">
-                Delete this Quest
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={completeQuest}
+                  className="mt-4 text-sm text-green-500 hover:underline"
+                >
+                  Complete Quest
+                </button>
+                <button type="button" onClick={deleteQuest} className="mt-4 text-sm text-red-500 hover:underline">
+                  Delete this Quest
+                </button>
+              </>
             )}
           </form>
         </Dialog.Panel>
@@ -150,6 +161,7 @@ interface CoupleQuestModalProps {
   editingCoupleQuest: CoupleQuest | null;
   saveCoupleQuest: (quest: Partial<CoupleQuest>) => void;
   deleteCoupleQuest: () => void;
+  completeCoupleQuest: () => void;
 }
 
 export function CoupleQuestModal({
@@ -158,6 +170,7 @@ export function CoupleQuestModal({
   editingCoupleQuest,
   saveCoupleQuest,
   deleteCoupleQuest,
+  completeCoupleQuest,
 }: CoupleQuestModalProps) {
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -211,9 +224,18 @@ export function CoupleQuestModal({
             </div>
 
             {editingCoupleQuest && (
-              <button type="button" onClick={deleteCoupleQuest} className="mt-4 text-sm text-red-500 hover:underline">
-                Delete this Couple Quest
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={completeCoupleQuest}
+                  className="mt-4 text-sm text-green-500 hover:underline"
+                >
+                  Complete Quest
+                </button>
+                <button type="button" onClick={deleteCoupleQuest} className="mt-4 text-sm text-red-500 hover:underline">
+                  Delete this Couple Quest
+                </button>
+              </>              
             )}
           </form>
         </Dialog.Panel>

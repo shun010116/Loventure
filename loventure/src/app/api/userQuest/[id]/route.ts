@@ -14,7 +14,6 @@ export async function POST(req: Request, context: { params: { id: string } }) {
 
     // find quest by Id
     const questId = context.params.id;
-    // const { increment = 1 } = await req.json(); // 기본 +1 증가
 
     const quest = await UserQuest.findById(questId);
 
@@ -40,21 +39,17 @@ export async function POST(req: Request, context: { params: { id: string } }) {
         return error("캐릭터를 찾을 수 없습니다.", 404);
     }
 
-    const prevLevel = character.level;
-
     // Update character's exp and gold
     character.exp += quest.reward.exp;
     character.gold += quest.reward.coins;
 
     applyLevelUp(character);
-    const didLevelUp = character.level > prevLevel;
 
     await character.save();
 
     // Return userQuest
     return success("퀘스트가 업데이트 되었습니다.", {
         isCompleted: quest.isCompleted,
-        levelUp: didLevelUp,
     });
 }
 
