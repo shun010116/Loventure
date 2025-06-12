@@ -8,7 +8,12 @@ import dayjs from "dayjs";
 import MobileTopBar from "@/components/Layouts/MobileTopBar";
 import MobileNav from "@/components/MobileNav";
 import MobileLayout from "@/components/Layouts/MobileLayout";
+import MobileModal    from "@/components/Mobile/MobileModal";
 import { Character, TabKey, Schedule, UserQuest, CoupleQuest, PartnerQuest } from "../Types";
+
+
+/* 3-종 퀘스트 유니온 타입 */
+type AnyQuest = UserQuest | PartnerQuest | CoupleQuest;
 
 interface MobileClientLayoutProps {
   children: ReactNode;
@@ -18,15 +23,27 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
   const { user } = useAuth();
   const pathname = usePathname();   // 현재 경로 가져오기
   
-  const [myCharacter, setMyCharacter]       = useState<Character | null>(null);
-  const [partnerCharacter, setPartnerCharacter]  = useState<Character | null>(null);
+   /* ───────── 캐릭터 & 이벤트 ───────── */
+  const [myCharacter,      setMyCharacter]      = useState<Character | null>(null);
+  const [partnerCharacter, setPartnerCharacter] = useState<Character | null>(null);
+  const [schedule,         setSchedule]         = useState<Schedule[]>([]);
+  const [myTodayEvents,        setMyTodayEvents]        = useState<Schedule[]>([]);
+  const [partnerTodayEvents,   setPartnerTodayEvents]   = useState<Schedule[]>([]);
+
+  /* ───────── 퀘스트 데이터 ───────── */
+  const [userQuests,     setUserQuests]     = useState<UserQuest[]>([]);
+  const [partnerQuests,  setPartnerQuests]  = useState<PartnerQuest[]>([]);
+  const [coupleQuests,   setCoupleQuests]   = useState<CoupleQuest[]>([]);
+
+  /* ───────── 탭 제어 ───────── */
   const [activeTab, setActiveTab] = useState<TabKey>("character");
-  const [quests, setQuests] = useState<UserQuest[]>([]);
-  const [partnerQuests, setPartnerQuests] = useState<PartnerQuest[]>([]);
-  const [coupleQuests, setCoupleQuests] = useState<CoupleQuest[]>([]);
-  const [schedule, setSchedule] = useState<Schedule[]>([]);
-  const [myTodayEvents, setMyTodayEvents] = useState<Schedule[]>([]);
-  const [partnerTodayEvents, setPartnerTodayEvents] = useState<Schedule[]>([]);
+
+  /* ───────── 공통 모달 (MobileModal) ───────── */
+  const [modalType,      setModalType]      = useState<"user" | "partner" | "couple">("user");
+  const [isModalOpen,    setModalOpen]      = useState(false);
+  const [editingQuest,   setEditingQuest]   = useState<AnyQuest | null>(null);
+  const [selDiff,        setSelDiff]        = useState<number | null>(null);
+
 
   useEffect(() => {
     if (pathname === "/") {
@@ -38,93 +55,50 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
     }
   }, [pathname]);
 
-  // 1. 퀘스트 데이터 fetch
+  ///* ───────── 1. 퀘스트 fetch ─────── */
   useEffect(() => {
-    const fetchData = async () => {
-    try {
-      const res = await fetch("/api/allQuests", {
-        credentials: "include",     
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!res.ok) {
-        console.error("Failed to fetch quests:", res.status);
-        return;
-      }
-
-      const text = await res.text();
-      if (!text) {
-        console.warn("Empty response from /api/allQuests");
-        return;
-      }
-
-      const data = JSON.parse(text);
-
-      if (data?.data) {
-        setQuests(data.data.userQuests || []);
-        setCoupleQuests(data.data.coupleQuests || []);
-        setPartnerQuests(data.data.partnerQuests || []);
-      } else {
-        console.warn("No valid data in /api/allQuests response");
-      }
-    } catch (err) {
-      console.error("Error fetching quests:", err);
-    }
-  };
-  
-    fetchData();
+    (async () => {
+      const res = await fetch("/api/allQuests", { credentials: "include" });
+      if (!res.ok) return;
+      const { data } = await res.json();
+      setUserQuests(data.userQuests ?? []);
+      setPartnerQuests(data.partnerQuests ?? []);
+      setCoupleQuests(data.coupleQuests ?? []);
+    })();
   }, []);
 
 
-// 캐릭터 데이터 가져오기
-
-useEffect(() => {
-  // 로그인 된 경우만 호출
-  if (!user) return;
-
-  const fetchCharacter = async () => {
-    const res = await fetch("/api/character/me", { credentials: "include" });
-    if (!res.ok) return;
-    const { data } = await res.json();
-    setMyCharacter(data.myCharacter || null);
-    setPartnerCharacter(data.partnerCharacter || null);
-  };
-
-  fetchCharacter();
-}, [user]);
-
-  // 스케줄 데이터 fetch
+  /* ───────── 2. 캐릭터 fetch ─────── */
   useEffect(() => {
-    const fetchSchedule = async () => {
-    try {
-      const res = await fetch("/api/schedule", {
-        credentials: "include",
-      });
+    if (!user) return;
+    (async () => {
+      const res = await fetch("/api/character/me", { credentials: "include" });
+      if (!res.ok) return;
+      const { data } = await res.json();
+      setMyCharacter(data.myCharacter ?? null);
+      setPartnerCharacter(data.partnerCharacter ?? null);
+    })();
+  }, [user]);
 
-      // 응답이 실패했거나 내용이 없으면 예외 처리
-      if (!res.ok) {
-        console.error("Failed to fetch schedule: ", res.status);
-        return;
-      }
-
-      const text = await res.text(); // 먼저 텍스트로 받아서 검사
-      if (!text) {
-        console.warn("Empty response from /api/schedule");
-        return;
-      }
-
-      const data = JSON.parse(text); // 수동 파싱
-      if (data?.data?.schedules) {
-        setSchedule(data.data.schedules);
-      }
-    } catch (err) {
-      console.error("Error fetching schedule:", err);
-    }
-  };
-
-
-    fetchSchedule();
+  /* ───────── 3. 스케줄 fetch & 필터 ─────── */
+  useEffect(() => {
+    (async () => {
+      const res = await fetch("/api/schedule", { credentials: "include" });
+      if (!res.ok) return;
+      const { data } = await res.json();
+      setSchedule(data.schedules ?? []);
+    })();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const today = dayjs().format("YYYY-MM-DD");
+    const todayOnly = schedule.filter(
+      (e) => dayjs(e.startDate).format("YYYY-MM-DD") === today
+    );
+    setMyTodayEvents(todayOnly.filter((e) => e.participants.includes(user._id)));
+    setPartnerTodayEvents(todayOnly.filter((e) => !e.participants.includes(user._id)));
+  }, [schedule, user]);
 
   // 3. 오늘 일정 필터링
   useEffect(() => {
@@ -136,6 +110,38 @@ useEffect(() => {
     setMyTodayEvents(todayOnly.filter((e) => e.participants.includes(user._id)));
     setPartnerTodayEvents(todayOnly.filter((e) => !e.participants.includes(user._id)));
   }, [schedule, user]);
+
+
+
+  
+  /* ───────── 모달 열기 핸들러 ─────── */
+  const openNewQuest = (type: "user" | "partner" | "couple") => {
+    setModalType(type);
+    setEditingQuest(null);
+    setSelDiff(null);
+    setModalOpen(true);
+  };
+
+
+   const openEditQuest = (type: "user" | "partner" | "couple", q: AnyQuest) => {
+    setModalType(type);
+    setEditingQuest(q);
+    if ("difficulty" in q) setSelDiff(q.difficulty ?? null); // user quest
+    setModalOpen(true);
+  };
+
+
+  /* ───────── 저장/삭제 콜백 (예시) ─────── */
+  const saveQuest = async (partial: Partial<AnyQuest>) => {
+    // modalType을 보고 적절한 API 호출 …
+    setModalOpen(false);
+  };
+  const deleteQuest = async () => {
+    // …
+    setModalOpen(false);
+  };
+
+
 
   //  레이아웃 구성
   return (
@@ -154,12 +160,19 @@ useEffect(() => {
             partnerCharacter={partnerCharacter}    
             myEvents={myTodayEvents}
             partnerEvents={partnerTodayEvents}
-            userQuests={quests}
+            userQuests={userQuests}
             partnerQuests={partnerQuests}
             coupleQuests={coupleQuests}
-            onUserClick={() => {}}
-            onPartnerClick={() => {}}
-            onCoupleClick={() => {}}
+
+            /* 카드 클릭 → 수정 */
+            onUserClick={(q)      => openEditQuest("user", q)}
+            onPartnerClick={(q)   => openEditQuest("partner", q)}
+            onCoupleClick={(q)    => openEditQuest("couple", q)}
+
+  
+            /* + 버튼 → 새로 만들기 */
+            onAddUserQuest={()      => openNewQuest("user")}
+            onAddPartnerQuest={()   => openNewQuest("partner")}
           />
         ) : (
           // 실제 라우트 컴포넌트
@@ -169,6 +182,19 @@ useEffect(() => {
 
       {/* 하단 탭 바 */}
       <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {/* 공통 모달 */}
+      <MobileModal
+        type={modalType}
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        editingQuest={editingQuest}
+        saveQuest={saveQuest}
+        deleteQuest={deleteQuest}
+        selectedDifficulty={selDiff}
+        setSelectedDifficulty={setSelDiff}
+      />
+
     </div>
   );
 }

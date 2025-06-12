@@ -6,28 +6,36 @@ import CoupleQuestSection from "@/components/Mobile/CoupleQuestSection";
 import CalendarSection from "@/components/Mobile/CalendarSection";
 import DiarySection from "@/components/Mobile/DiarySection";
 
-import { TabKey, Character } from "../Types";
+import { TabKey, Character, UserQuest, PartnerQuest } from "../Types";
 
 interface MobileLayoutProps {
   activeTab: TabKey;
   setActiveTab: (tab: TabKey) => void;
+
+  /* 캐릭터 & 이벤트 */
   myCharacter: Character | null;
-  partnerCharacter: Character | null;   
+  partnerCharacter: Character | null;
   myEvents: any;
   partnerEvents: any;
-  userQuests: any;
-  partnerQuests: any;
+
+  /* 퀘스트 데이터 */
+  userQuests: UserQuest[];
+  partnerQuests: PartnerQuest[];
   coupleQuests: any;
-  onUserClick: (q: any) => void;
-  onPartnerClick: (q: any) => void;
-  onCoupleClick: (q: any) => void;
+
+  /* 콜백 */
+  onUserClick:      (q: UserQuest)      => void;
+  onPartnerClick:   (q: PartnerQuest)   => void;
+  onCoupleClick:    (q: any)            => void;
+  onAddUserQuest:   () => void;        
+  onAddPartnerQuest?: () => void;      
 }
 
 export default function MobileLayout({
   activeTab,
   setActiveTab,
-  myCharacter, 
-  partnerCharacter, 
+  myCharacter,
+  partnerCharacter,
   myEvents,
   partnerEvents,
   userQuests,
@@ -36,9 +44,13 @@ export default function MobileLayout({
   onUserClick,
   onPartnerClick,
   onCoupleClick,
+  onAddUserQuest,        /* ★ 추가 */
+  onAddPartnerQuest,     /* ★ 추가 */
 }: MobileLayoutProps) {
   return (
     <div className="sm:hidden pb-20 px-4 pt-4">
+
+      {/* 캐릭터 탭 */}
       {activeTab === "character" && (
         <CharacterSection
           myCharacter={myCharacter}
@@ -47,19 +59,23 @@ export default function MobileLayout({
           partnerEvents={partnerEvents}
         />
       )}
+
+      {/* 퀘스트 탭 */}
       {activeTab === "quest" && (
         <QuestSection
           userQuests={userQuests}
           partnerQuests={partnerQuests}
           onUserClick={onUserClick}
           onPartnerClick={onPartnerClick}
-          onAddUserQuest={() => setIsDialogOpen(true)}     
-          onAddPartnerQuest={() => setIsPartnerDialogOpen(true)} 
+          onAddUserQuest={onAddUserQuest}           /* ★ 전달 */
+          onAddPartnerQuest={onAddPartnerQuest}     /* ★ 전달 (선택) */
         />
       )}
-      {activeTab === "couple" && <CoupleQuestSection quests={coupleQuests} onClick={onCoupleClick} />}
+
+      {/* 커플·달력·다이어리 탭 */}
+      {activeTab === "couple"   && <CoupleQuestSection quests={coupleQuests} onClick={onCoupleClick} />}
       {activeTab === "calendar" && <CalendarSection />}
-      {activeTab === "diary" && <DiarySection />}
+      {activeTab === "diary"    && <DiarySection />}
     </div>
   );
 }

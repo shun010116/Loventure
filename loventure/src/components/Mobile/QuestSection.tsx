@@ -8,10 +8,10 @@ import { UserQuest, PartnerQuest } from "../Types";
 interface QuestSectionProps {
   userQuests: UserQuest[];
   partnerQuests: PartnerQuest[];
-  onUserClick:   (q: UserQuest)   => void;
-  onPartnerClick:(q: PartnerQuest)=> void;
-  // onAddUserQuest:     () => void;               
-  // onAddPartnerQuest?: () => void;               
+  onUserClick:      (q: UserQuest)    => void;
+  onPartnerClick:   (q: PartnerQuest) => void;
+  onAddUserQuest:   () => void;           
+  onAddPartnerQuest?: () => void;          
 }
 
 export default function QuestSection({
