@@ -24,7 +24,6 @@ import DesktopLayout from "@/components/Layouts/DesktopLayout";
 
 export default function MainLayout() {
   const { user, partner, loading, isLoggedIn } = useAuth();
-  console.log("partner: ", partner);
 
   // character
   const [myCharacter, setMyCharacter] = useState<Character | null>(null);
