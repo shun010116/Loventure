@@ -112,8 +112,6 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
   }, [schedule, user]);
 
 
-
-  
   /* ───────── 모달 열기 핸들러 ─────── */
   const openNewQuest = (type: "user" | "partner" | "couple") => {
     setModalType(type);
@@ -121,7 +119,6 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
     setSelDiff(null);
     setModalOpen(true);
   };
-
 
    const openEditQuest = (type: "user" | "partner" | "couple", q: AnyQuest) => {
     setModalType(type);

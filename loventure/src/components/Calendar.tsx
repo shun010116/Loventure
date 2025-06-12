@@ -1,10 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import dayjs from "dayjs";
+import clsx from "clsx";    
+
+import { Dialog, Transition } from "@headlessui/react";
+import { Schedule } from "./Types";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { Schedule } from "./Types";
+
+import { SquareChevronLeft, SquareChevronRight } from "lucide-react";
+
 
 interface UserInfo {
   _id: string;
@@ -33,6 +39,10 @@ export default function Calendar({ compact = false, editable = true }: CalendarP
 
   const [allMembers, setAllMembers] = useState<UserInfo[]>([]);
   const [participants, setParticipants] = useState<string[]>([]);
+
+  // 모바일 환경
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const [isSheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
@@ -165,116 +175,127 @@ export default function Calendar({ compact = false, editable = true }: CalendarP
   if (loading || !isLoggedIn || !user) return null;
 
   return (
-    <div className={`mx-auto p-4 ${compact ? "max-w-3xl" : "max-w-4xl"}`}>
+    <div
+      className={clsx(
+        "mx-auto p-4 bg-[#fdf6e3] rounded-2xl shadow",
+        compact ? "max-w-3xl" : "max-w-4xl"
+      )}
+    >
+
+
+      {/* 월 이동 */}
       <div className="flex justify-between items-center mb-4">
-        <button onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}>◀️</button>
+        <button onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}> <SquareChevronLeft size={24} /> </button>
         <h2 className="text-xl font-bold">{currentDate.format("MMMM YYYY")}</h2>
-        <button onClick={() => setCurrentDate(currentDate.add(1, "month"))}>▶️</button>
+        <button onClick={() => setCurrentDate(currentDate.add(1, "month"))}> <SquareChevronRight size={24}/> </button>
       </div>
 
-      {/* 달력 요일 header */}
+      {/* 요일 헤더 */}
       <div className="grid grid-cols-7 mb-2">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-          <div key={d} className="text-center font-semibold">{d}</div>
+          <div key={d} className="text-center font-semibold text-xs sm:text-sm">
+            {d}
+          </div>
         ))}
       </div>
 
-      {/* 달력 날짜 cell */}
+      {/* 날짜 셀 */}
       <div className="grid grid-cols-7 auto-rows-fr gap-2">
         {days.map((d) => {
-          const formatted = d.format("YYYY-MM-DD");
-          const isSelected = selectedDate === formatted;
-          const events = getEventsForDate(formatted);
+          const formatted   = d.format("YYYY-MM-DD");
+          const isSelected  = selectedDate === formatted;
+          const events      = getEventsForDate(formatted);
 
           return (
             <div
               key={formatted}
-              className={`aspect-square rounded-2xl border p-2 cursor-pointer overflow-auto flex flex-col items-start justify-start text-sm transition-all ${
-                isSelected ? "bg-blue-300" : "hover:bg-blue-100"
-              }`}
+              className={clsx(
+                "rounded-2xl border p-1 cursor-pointer transition",
+                isMobile
+                  ? "h-14 overflow-hidden text-[10px] bg-[#fdf6e3]"
+                  : "aspect-square p-2 overflow-auto bg-[#fdf6e3]",
+                isSelected ? "bg-blue-100" : "hover:bg-blue-100"
+              )}
               onClick={() => {
                 setSelectedDate(formatted);
                 setSelectedDaySchedules(events);
+                if (isMobile) setSheetOpen(true);       // 모바일 → 시트 ON
               }}
             >
-              <div className="font-bold text-sm mb-1">{d.date()}</div>
-              {events.map((e, idx) => (
-                <div key={idx} className="text-xs text-left w-full bg-gray-100 rounded px-1">
-                  <span>{e.title}</span>
-                  {editable && e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
-                </div>
-              ))}
+              <div className="font-bold text-[10px] sm:text-sm mb-1">{d.date()}</div>
+              {!isMobile &&
+                events.map((e, idx) => (
+                  <div
+                    key={idx}
+                    className="text-[10px] sm:text-xs w-full bg-gray-100 rounded px-1 truncate"
+                  >
+                    {e.title}
+                    {editable && e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
+                  </div>
+                ))}
             </div>
           );
         })}
       </div>
 
-      {editable && (
+      {/* ───────── PC 입력 폼 ───────── */}
+      {editable && !isMobile && (
         <div className="mt-4 border-t pt-4">
-          <h3 className="font-bold mb-2">{dayjs(selectedDate).format("YYYY-MM-DD")} 일정</h3>
+          <h3 className="font-bold mb-2">
+            {dayjs(selectedDate).format("YYYY-MM-DD")} 일정
+          </h3>
 
+          {/* (1) 당일 일정 리스트 */}
           <ul className="mb-4 space-y-2">
             {selectedDaySchedules.map((e) => (
               <li key={e._id} className="flex justify-between items-center text-sm">
                 <div>
-                  • {e.title} {e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
+                  • {e.title}
+                  {e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(e)}
-                    className="text-blue-500 hover:underline"
-                  >
-                    ✏️ 수정
-                  </button>
-                  <button
-                    onClick={() => handleDelete(e._id)}
-                    className="text-red-500 hover:underline"
-                  >
-                    🗑️ 삭제
-                  </button>
+                  <button onClick={() => handleEdit(e)}  className="text-blue-500 hover:underline">✏️ 수정</button>
+                  <button onClick={() => handleDelete(e._id)} className="text-red-500 hover:underline">🗑️ 삭제</button>
                 </div>
               </li>
             ))}
           </ul>
 
+          {/* (2) 입력 폼 (PC 레이아웃 유지) */}
+          {/* 참가자 체크박스 */}
           <div className="mb-2">
             <span className="text-sm font-semibold">참가자:</span>
             <div className="flex gap-2 mt-1 flex-wrap">
-              {allMembers.map((member) => (
-                <label key={member._id} className="flex items-center gap-1 text-sm">
+              {allMembers.map((m) => (
+                <label key={m._id} className="flex items-center gap-1 text-sm">
                   <input
                     type="checkbox"
-                    checked={participants.includes(member._id)}
-                    onChange={() => toggleParticipant(member._id)}
-                    disabled={member._id === user._id}
+                    checked={participants.includes(m._id)}
+                    onChange={() => toggleParticipant(m._id)}
+                    disabled={m._id === user._id}
                   />
-                  {member.nickname}
+                  {m.nickname}
                 </label>
               ))}
             </div>
           </div>
 
           <div className="flex gap-2 items-center mb-4">
-            <input
-              type="checkbox"
-              checked={!!isCompleted}
-              onChange={() => setIsCompleted(!isCompleted)}
-            />
+            <input type="checkbox" checked={isCompleted} onChange={() => setIsCompleted(!isCompleted)} />
             <span className="text-sm">완료</span>
           </div>
 
           <div className="flex gap-2">
             <input
-              type="text"
               value={newEvent}
               onChange={(e) => setNewEvent(e.target.value)}
+              placeholder="일정"
               className="border p-2 rounded w-1/3"
-              placeholder="일정을 입력하세요"
             />
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="상세 설명"
+              placeholder="설명"
               className="border p-2 rounded w-1/2"
             />
             <input
@@ -283,22 +304,114 @@ export default function Calendar({ compact = false, editable = true }: CalendarP
               onChange={(e) => setEndDate(e.target.value)}
               className="border p-2 rounded"
             />
-            <button
-              onClick={handleAddEvent}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-            >
+            <button onClick={handleAddEvent} className="bg-blue-500 text-white px-4 py-2 rounded">
               {editingId ? "수정 완료" : "일정 추가"}
             </button>
             {editingId && (
-              <button
-                onClick={resetForm}
-                className="bg-red-500 text-white px-4 py-2 rounded"
-              >
-                취소
-              </button>
+              <button onClick={resetForm} className="bg-red-500 text-white px-4 py-2 rounded">취소</button>
             )}
           </div>
         </div>
+      )}
+
+      {/* ───────── Mobile 하단 시트 ───────── */}
+      {editable && isMobile && (
+        <Transition appear show={isSheetOpen} as={Fragment}>
+          <Dialog as="div" onClose={() => { setSheetOpen(false); resetForm(); }} className="fixed inset-0 z-50">
+            {/* 배경 */}
+            <Transition.Child as={Fragment}
+              enter="duration-200 ease-out" enterFrom="opacity-0" enterTo="opacity-100"
+              leave="duration-150 ease-in"  leaveFrom="opacity-100" leaveTo="opacity-0">
+              <div className="fixed inset-0 bg-black/30" />
+            </Transition.Child>
+
+            {/* 시트 */}
+            <Transition.Child as={Fragment}
+              enter="duration-200 ease-out" enterFrom="translate-y-full" enterTo="translate-y-0"
+              leave="duration-150 ease-in"  leaveFrom="translate-y-0"  leaveTo="translate-y-full">
+              <Dialog.Panel className="fixed bottom-0 inset-x-0 bg-white rounded-t-2xl p-4 h-[80vh] overflow-y-auto">
+                {/* 타이틀 */}
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-semibold">
+                    {editingId ? "일정 수정" : "새 일정"}
+                  </h3>
+                  <button onClick={() => { setSheetOpen(false); resetForm(); }}>닫기</button>
+                </div>
+
+                {/* 일정 리스트 (선택된 날짜) */}
+                <ul className="mb-4 space-y-2">
+                  {selectedDaySchedules.map((e) => (
+                    <li key={e._id} className="flex justify-between items-center text-xs">
+                      <span>
+                        • {e.title}
+                        {e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
+                      </span>
+                      <div className="flex gap-1">
+                        <button onClick={() => handleEdit(e)}  className="text-blue-500">수정</button>
+                        <button onClick={() => handleDelete(e._id)} className="text-red-500">삭제</button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* 입력 폼 (모바일) */}
+                <input
+                  value={newEvent}
+                  onChange={(e) => setNewEvent(e.target.value)}
+                  placeholder="일정"
+                  className="border p-2 rounded w-full text-sm mb-2"
+                />
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="설명"
+                  rows={3}
+                  className="border p-2 rounded w-full text-sm mb-2"
+                />
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="border p-2 rounded w-full text-sm mb-2"
+                />
+
+                {/* 완료 체크 */}
+                <label className="flex items-center gap-2 text-sm mb-2">
+                  <input type="checkbox" checked={isCompleted} onChange={() => setIsCompleted(!isCompleted)} />
+                  완료
+                </label>
+
+                {/* 참가자 (토글) */}
+                <div className="mb-3">
+                  <span className="text-sm font-semibold">참가자:</span>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {allMembers.map((m) => (
+                      <label key={m._id} className="flex items-center gap-1 text-xs">
+                        <input
+                          type="checkbox"
+                          checked={participants.includes(m._id)}
+                          onChange={() => toggleParticipant(m._id)}
+                          disabled={m._id === user._id}
+                        />
+                        {m.nickname}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 버튼 */}
+                <div className="flex gap-2">
+                  <button onClick={handleAddEvent} className="flex-1 bg-blue-500 text-white py-2 rounded text-sm">
+                    {editingId ? "수정 완료" : "일정 추가"}
+                  </button>
+                  {editingId && (
+                    <button onClick={resetForm} className="flex-1 bg-gray-300 py-2 rounded text-sm">취소</button>
+                  )}
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </Dialog>
+        </Transition>
       )}
     </div>
   );
