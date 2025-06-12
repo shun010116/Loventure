@@ -16,8 +16,8 @@ export function calculateReward(
     if (resetType === "One-time") resetFactor = 2.0;
 
     // 최종 보상 계산
-    const rewardExp = Math.round(baseExp * difficultyFactor * resetFactor * targetFactor);
-    const rewardCoins = Math.round(baseCoin * difficultyFactor * resetFactor * targetFactor);
+    const rewardExp = Math.round(baseExp * difficultyFactor * resetFactor);
+    const rewardCoins = Math.round(baseCoin * difficultyFactor * resetFactor);
 
     return {
         rewardExp,

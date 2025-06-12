@@ -14,7 +14,8 @@ interface Character {
   name: string;
   level: number;
   exp: number;
-  gold: number;
+  evolutionStage: number;
+  coins: number;
   avatar: string;
   statusMessage: string;
 }
@@ -140,7 +141,7 @@ export default function MainLayout() {
     try {
       const res = await fetch("/api/character/me");
       const data = await res.json();
-      console.log("data: ", data);
+      //console.log("data: ", data);
       if (res.ok && data.data) {
         setMyCharacter(data.data.myCharacter || null);
         setPartnerCharacter(data.data.partnerCharacter || null);
@@ -194,7 +195,7 @@ export default function MainLayout() {
           title: quest.title,
           description: quest.description,
           goalType: quest.goalType,
-          targetValue: quest.targetValue || 1,
+          difficulty: quest.difficulty,
           assignedToId: user?._id,
           reward: {
             exp: quest.reward?.exp || 0,
@@ -222,6 +223,25 @@ export default function MainLayout() {
         alert(data?.message || "삭제 실패");
       }
       
+      setIsDialogOpen(false);
+    }
+  };
+
+  const completeQuest = async () => {
+    if (editingQuest) {
+      const res = await fetch(`/api/userQuest/${editingQuest._id}`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        alert(`퀘스트 완료! Exp: ${editingQuest.reward.exp}, Coins: ${editingQuest.reward.coins} 획득!`);
+        await fetchAllQuests();
+        await fetchCharacter();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "퀘스트 완료 실패");
+      }
+
       setIsDialogOpen(false);
     }
   };
@@ -324,10 +344,13 @@ export default function MainLayout() {
         <div className="flex gap-4">
           <div className="flex flex-col items-center w-[22%] bg-white rounded shadow p-4 h-[400px]">
             <div>
-              <img src={`/uploads/${myCharacter?.avatar}`} alt='myCharacter' className="w-24 h-24 rounded-full mb-2"/>
+              <img src={`/character/${myCharacter?.evolutionStage}/${myCharacter?.avatar}`} alt='myCharacter' className="w-24 h-24 rounded-full mb-2"/>
             </div>
             <div className="text-sm font-bold">{myCharacter?.name ?? "-"}</div>
             <div className="text-xs">Lv. {myCharacter?.level ?? "-"}</div>
+            <div className="text-xs">
+              EXP {myCharacter?.exp ?? 0} / Next: {myCharacter?.level ? 50 * myCharacter.level * myCharacter.level : 0}
+            </div>
             <div className="mt-4 text-xs w-full flex justify-center">
               {myTodayEvents.length > 0 ? (
                 <ul className="list-disc list-inside">
@@ -347,6 +370,9 @@ export default function MainLayout() {
             </div>
             <div className="text-sm font-bold">{partnerCharacter?.name ?? "No Partner"}</div>
             <div className="text-xs">Lv. {partnerCharacter?.level ?? "-"}</div>
+            <div className="text-xs">
+              EXP {partnerCharacter?.exp ?? 0} / Next: {partnerCharacter?.level ? 50 * partnerCharacter.level * partnerCharacter.level : 0}
+            </div>
             <div className="mt-4 text-xs w-full flex justify-center">
               {partnerTodayEvents.length > 0 ? (
                 <ul className="list-disc list-inside">
@@ -592,13 +618,26 @@ export default function MainLayout() {
                         </div>
 
                         {editingQuest && (
-                          <button
-                            type="button"
-                            onClick={deleteQuest}
-                            className="mt-4 text-sm text-red-500 hover:underline"
-                          >
-                            Delete this Quest
-                          </button>
+                          <>
+                            <div>
+                              <button
+                                type="button"
+                                onClick={completeQuest}
+                                className="mt-4 text-sm text-green-600 hover:underline"
+                              >
+                                Complete Quest
+                              </button>
+                            </div>
+                            <div>
+                              <button
+                                type="button"
+                                onClick={deleteQuest}
+                                className="mt-4 text-sm text-red-500 hover:underline"
+                              >
+                                Delete this Quest
+                              </button>
+                            </div>
+                          </>
                         )}
                       </form>
                     </Dialog.Panel>

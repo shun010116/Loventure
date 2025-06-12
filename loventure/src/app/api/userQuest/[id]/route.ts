@@ -1,9 +1,11 @@
 import UserQuest from "@/models/UserQuest";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
+import Character from "@/models/Character";
+import { applyLevelUp } from "@/utils/checkLevelUp";
 
-// PATCH /api/userQuest/:id : 퀘스트 진행/완료 처리
-export async function PATCH(req: Request, context: { params: { id: string } }) {
+// POST /api/userQuest/:id : 퀘스트 진행/완료 처리
+export async function POST(req: Request, context: { params: { id: string } }) {
     const { user, error: authError } = await getAuthenticatedUser(req);
 
     if (authError) {
@@ -12,7 +14,7 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
 
     // find quest by Id
     const questId = context.params.id;
-    const { increment = 1 } = await req.json(); // 기본 +1 증가
+    // const { increment = 1 } = await req.json(); // 기본 +1 증가
 
     const quest = await UserQuest.findById(questId);
 
@@ -26,24 +28,33 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
         return error("이미 완료된 퀘스트입니다.", 400);
     }
 
-    // Increse currentValue
-    quest.currentValue += increment;
-
-    // Check complete
-    if (quest.currentValue >= quest.targetValue) {
-        quest.isCompleted = true;
-        quest.completedAt = new Date();
-    }
+    quest.isCompleted = true;
+    quest.completedAt = new Date();
 
     // Update userQuest
     quest.updatedAt = new Date();
     await quest.save();
 
+    const character = await Character.findOne({ userId: user._id });
+    if (!character) {
+        return error("캐릭터를 찾을 수 없습니다.", 404);
+    }
+
+    const prevLevel = character.level;
+
+    // Update character's exp and gold
+    character.exp += quest.reward.exp;
+    character.gold += quest.reward.coins;
+
+    applyLevelUp(character);
+    const didLevelUp = character.level > prevLevel;
+
+    await character.save();
+
     // Return userQuest
     return success("퀘스트가 업데이트 되었습니다.", {
         isCompleted: quest.isCompleted,
-        currentValue: quest.currentValue,
-        targetValue: quest.targetValue,
+        levelUp: didLevelUp,
     });
 }
 

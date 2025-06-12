@@ -6,6 +6,7 @@ const characterSchema = new mongoose.Schema({
     species: { type: String },
     level: { type: Number, default: 1 },
     exp: { type: Number, default: 0 },
+    evolutionStage: { type: Number, default: 0 },
     gold: { type: Number, default: 0 },
     customization: {
         accessories: { type: [String], default: [] },

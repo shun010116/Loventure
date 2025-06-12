@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         return error("필수 항목이 누락되었습니다.", 400);
     }
 
-    const { rewardExp, rewardCoins } = calculateReward(difficulty, goalType, targetValue);
+    const { rewardExp, rewardCoins } = calculateReward(difficulty, goalType);
 
     // Check couple exists
     if (String(assignedToId) !== String(user._id) && !user.coupleId) {
