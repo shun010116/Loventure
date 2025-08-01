@@ -10,6 +10,9 @@ interface QuestSectionProps {
   partnerNickname: string;
   userQuests: UserQuest[];
   partnerQuests: PartnerQuest[];
+  saveQuest?: (q: Partial<UserQuest | PartnerQuest>) => void;
+  deleteQuest?: () => void;
+  completeQuest?: () => void;
   onUserClick:      (q: UserQuest)    => void;
   onPartnerClick:   (q: PartnerQuest) => void;
   onAddUserQuest:   () => void;           

@@ -40,6 +40,7 @@ export interface CoupleQuest {
   title: string;
   description?: string;
   goalType?: string;
+  difficulty?: number;
   isComple?: string;
   targetValue?: number;
   currentVted: boolean;

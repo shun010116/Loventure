@@ -18,6 +18,7 @@ interface Props {
   editingQuest: AnyQuest | null;
   saveQuest:   (q: Partial<AnyQuest>) => void;
   deleteQuest: () => void;
+  completeQuest: () => void;
 
   /* User 전용 필드 */
   selectedDifficulty?: number | null;
@@ -31,6 +32,7 @@ export default function MobileModal({
   editingQuest,
   saveQuest,
   deleteQuest,
+  completeQuest,
   selectedDifficulty,
   setSelectedDifficulty,
 }: Props) {
@@ -154,7 +156,15 @@ export default function MobileModal({
                 {/* 하단 버튼 */}
                 <div className="pt-4 flex justify-between">
                   {editingQuest ? (
-                    <button
+                    <>
+                      <button
+                        type="button"
+                        onClick={completeQuest}
+                        className="flex items-center gap-1 text-green-500"
+                      >
+                        완료
+                      </button>
+                      <button
                       type="button"
                       onClick={deleteQuest}
                       className="flex items-center gap-1 text-red-500"
@@ -162,6 +172,8 @@ export default function MobileModal({
                       <Trash2 size={18} />
                       삭제
                     </button>
+                    </>
+                    
                   ) : (
                     <span />
                   )}
