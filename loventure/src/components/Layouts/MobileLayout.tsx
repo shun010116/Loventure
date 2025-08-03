@@ -23,6 +23,10 @@ interface MobileLayoutProps {
   partnerQuests: PartnerQuest[];
   coupleQuests: any;
 
+  saveQuest?: (q: Partial<UserQuest | PartnerQuest>) => void;
+  deleteQuest?: () => void;
+  completeQuest?: () => void;
+
   userNickname: string;
   partnerNickname: string;
 
@@ -44,6 +48,9 @@ export default function MobileLayout({
   userQuests,
   partnerQuests,
   coupleQuests,
+  saveQuest,
+  deleteQuest,
+  completeQuest,
   userNickname,
   partnerNickname,
   onUserClick,
@@ -72,6 +79,9 @@ export default function MobileLayout({
           partnerNickname={partnerNickname}
           userQuests={userQuests}
           partnerQuests={partnerQuests}
+          saveQuest={saveQuest}
+          deleteQuest={deleteQuest}
+          completeQuest={completeQuest}
           onUserClick={onUserClick}
           onPartnerClick={onPartnerClick}
           onAddUserQuest={onAddUserQuest}           /* ★ 전달 */

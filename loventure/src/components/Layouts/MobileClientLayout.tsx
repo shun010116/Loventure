@@ -20,7 +20,7 @@ interface MobileClientLayoutProps {
 }
 
 export default function MobileClientLayout({ children }: MobileClientLayoutProps) {
-  const { user, partner } = useAuth();
+  const { user, partner, loading, isLoggedIn } = useAuth();
   const pathname = usePathname();   // 현재 경로 가져오기
   
   /* ───────── 유저 & 파트너 정보 ───────── */
@@ -50,14 +50,24 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
 
 
   useEffect(() => {
-    if (pathname === "/") {
+    if (pathname !== "/") {
       // 홈(“캐릭터” 탭)일 때만 탭 UI
-      setActiveTab("character");
+      setActiveTab(null);
     } else {
       // /login, /diary, /myPage 등일 땐 children 렌더
-      setActiveTab(null);
+      setActiveTab((prev) => prev ?? "character");
     }
   }, [pathname]);
+
+  // useEffect(() => {
+  //   if (pathname === "/") {
+      
+  //     setActiveTab("character");
+  //   } else {
+      
+  //     setActiveTab(null);
+  //   }
+  // }, [pathname]);
 
   useEffect(() => {
     if (!user) return;
@@ -68,17 +78,20 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
   }, [user, partner]);
 
   ///* ───────── 1. 퀘스트 fetch ─────── */
-  useEffect(() => {
-    (async () => {
-      const res = await fetch("/api/allQuests", { credentials: "include" });
-      if (!res.ok) return;
-      const { data } = await res.json();
-      setUserQuests(data.userQuests ?? []);
-      setPartnerQuests(data.partnerQuests ?? []);
-      setCoupleQuests(data.coupleQuests ?? []);
-    })();
-  }, []);
+  const fetchAllQuests = async () => {
+    const res = await fetch("/api/allQuests", { credentials: "include" });
+    if (!res.ok) return;
+    const { data } = await res.json();
+    setUserQuests(data.userQuests ?? []);
+    setPartnerQuests(data.partnerQuests ?? []);
+    setCoupleQuests(data.coupleQuests ?? []);
+  };
 
+  useEffect(() => {
+    if (!loading && isLoggedIn) {
+      fetchAllQuests();
+    }
+  }, [loading, isLoggedIn])
 
   /* ───────── 2. 캐릭터 fetch ─────── */
   useEffect(() => {
@@ -141,12 +154,71 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
 
 
   /* ───────── 저장/삭제 콜백 (예시) ─────── */
-  const saveQuest = async (partial: Partial<AnyQuest>) => {
+  const saveQuest = async (quest: Partial<AnyQuest>) => {
     // modalType을 보고 적절한 API 호출 …
+    if (modalType === "user") {
+      if (editingQuest) {
+        setUserQuests((prev) =>
+          prev.map((q) => (q._id === editingQuest._id ? { ...q, ...quest} as UserQuest : q))
+      )}
+      else {
+        const res = await fetch("/api/userQuest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: quest.title,
+            description: quest.description,
+            goalType: quest.goalType,
+            difficulty: quest.difficulty,
+            assignedToId: user?._id,
+            reward: {
+              exp: quest.reward?.exp ?? 0,
+              coins: quest.reward?.coins ?? 0,
+            },
+          }),
+        });
+        if (res.ok) {
+          await fetchAllQuests();
+        }
+      }
+    }
+    else if (modalType === "partner") {
+
+    }
+    else if (modalType === "couple") {
+
+    }
     setModalOpen(false);
   };
   const deleteQuest = async () => {
     // …
+    if (modalType === "user" && editingQuest) {
+      const res = await fetch(`/api/userQuest/${editingQuest._id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await fetchAllQuests();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "삭제 실패");
+      }
+    }
+    setModalOpen(false);
+  };
+  const completeQuest = async () => {
+    if (modalType === "user" && editingQuest) {
+      const res = await fetch(`/api/userQuest/${editingQuest._id}`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        await fetchAllQuests();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "완료 실패");
+      }
+    }
     setModalOpen(false);
   };
 
@@ -202,6 +274,7 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
         editingQuest={editingQuest}
         saveQuest={saveQuest}
         deleteQuest={deleteQuest}
+        completeQuest={completeQuest}
         selectedDifficulty={selDiff}
         setSelectedDifficulty={setSelDiff}
       />

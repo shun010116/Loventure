@@ -3,7 +3,7 @@
 
 import { useEffect } from "react";
 import { Home, ListTodo, Heart, Calendar, BookHeart } from "lucide-react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import Link from 'next/link';
 
 import { TabKey } from "./Types";
@@ -14,7 +14,7 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ activeTab, setActiveTab }: MobileNavProps) {
-  const router = useRouter();
+  // const router = useRouter();
 
   useEffect(() => {
     document.body.style.paddingBottom = "64px";
@@ -38,16 +38,14 @@ export default function MobileNav({ activeTab, setActiveTab }: MobileNavProps) {
           <li key={item.key}>
             <button
               onClick={() => {
-                // diary는 페이지 렌더(=children)로 전환
-                if (item.key === "diary") {
-                  setActiveTab(null);
-                } else {
-                  setActiveTab(item.key as TabKey);
-                }
+                /* --- 탭 방식 --- */
+                setActiveTab(item.key as TabKey);
+
+                /* --- 페이지 이동 방식 (원하면 주석 해제) ---
+                if (it.key === "diary") router.push("/diary");
+                --------------------------------------------*/
               }}
-              className={`flex flex-col items-center justify-center w-16 h-full ${
-                activeTab === item.key ? "text-blue-600" : "text-gray-400"
-              }`}
+              className={`flex flex-col items-center justify-center w-16 h-full ${activeTab === item.key ? "text-blue-600" : "text-gray-400"}`}
             >
               {item.icon}
             </button>

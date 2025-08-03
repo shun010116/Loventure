@@ -47,10 +47,6 @@ export default function Diary() {
 		"⛅": "cloudy",
 		"🌧️": "rainy",
 		"❄️": "snowy",
-		"🌩️": "stormy",
-		"🌬️": "windy",
-		"🌫️": "foggy",
-		"❓": "etc",
 	  };
 	const weatherCodeToEmoji = Object.fromEntries(
 		Object.entries(weatherEmojiMap).map(([emoji, code]) => [code, emoji])
