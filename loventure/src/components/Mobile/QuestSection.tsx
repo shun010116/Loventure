@@ -4,19 +4,16 @@
 import React from "react";
 import { Heart, Cross } from "lucide-react";
 import clsx from "clsx";
-import { UserQuest, PartnerQuest } from "../Types";
+import { UserQuest } from "../Types";
 
 interface QuestSectionProps {
   userNickname: string;
   partnerNickname: string;
   userQuests: UserQuest[];
-  partnerQuests: PartnerQuest[];
-  saveQuest?: (q: Partial<UserQuest | PartnerQuest>) => void;
-  deleteQuest?: () => void;
-  completeQuest?: () => void;
+  partnerQuests: UserQuest[];
   /* 콜백들 */
   onUserClick:      (q: UserQuest)    => void;
-  onPartnerClick:   (q: PartnerQuest) => void;
+  onPartnerClick:   (q: UserQuest) => void;
   onAddUserQuest:   () => void;
   onAddPartnerQuest?: () => void;
 }

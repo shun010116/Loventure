@@ -1,4 +1,5 @@
 import CoupleQuest from "@/models/CoupleQuest";
+import Character from "@/models/Character";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 import { getPartnerId } from "@/utils/getPartnerId";
@@ -13,48 +14,42 @@ export async function POST(req: Request) {
         return error(authError.message, authError.status);
     }
 
-    const {
-        title,
-        description,
-        goalType,
-        targetValue,
-        rewardExp = 0,
-        rewardCoins = 0,
-    } = await req.json();
-
-    // Check condition
-    if (!title) {
-        return error("필수 항목이 누락되었습니다.", 400);
-    }
-
     // Check couple exists
     if (!user.coupleId) {
         return error("커플이 아닙니다.", 403);
     }
 
+    const {
+        title,
+        description,
+        goalType = "shared-count",
+        targetValue = 1,
+        reward = { exp: 0, gold: 0 },
+    } = await req.json();
+
+    // Check condition
+    if (!title || !targetValue) {
+        return error("필수 항목이 누락되었습니다.", 400);
+    }
+
     const newQuest = await CoupleQuest.create({
         coupleId: user.coupleId,
+        createdBy: user._id,
         title,
         description,
         goalType,
         targetValue,
-        currentValue: 0,
-        isCompleted: false,
-        createdBy: user._id,
-        agreed: false,
-        reward: {
-            exp: rewardExp,
-            coins: rewardCoins,
-        },
+        reward,
+        progress: { [user._id]: 0 },
     });
 
     // send notification to partner
-    sendNotification({
-        userId: partnerId || "",
-        type: "quest",
-        content: `${user.nickname}님이 커플 퀘스트를 만들었어요!`,
-        link: "/coupleQuest"
-    });
+    // sendNotification({
+    //     userId: partnerId || "",
+    //     type: "quest",
+    //     content: `${user.nickname}님이 커플 퀘스트를 만들었어요!`,
+    //     link: "/coupleQuest"
+    // });
 
     return success("커플 퀘스트가 생성되었습니다.", {
         questId: newQuest._id
@@ -76,7 +71,6 @@ export async function GET(req: Request) {
     // Get couple quests
     const quests = await CoupleQuest.find({ coupleId: user.coupleId })
         .sort({ createdAt: -1 })
-        .populate("createdBy", "nickname");
 
     return success("커플 퀘트 목록을 불러왔습니다.", {
         quests,

@@ -6,7 +6,7 @@ import CoupleQuestSection from "@/components/Mobile/CoupleQuestSection";
 import CalendarSection from "@/components/Mobile/CalendarSection";
 import DiarySection from "@/components/Mobile/DiarySection";
 
-import { TabKey, Character, UserQuest, PartnerQuest } from "../Types";
+import { TabKey, Character, UserQuest, CoupleQuest } from "../Types";
 
 interface MobileLayoutProps {
   activeTab: TabKey;
@@ -20,22 +20,19 @@ interface MobileLayoutProps {
 
   /* 퀘스트 데이터 */
   userQuests: UserQuest[];
-  partnerQuests: PartnerQuest[];
-  coupleQuests: any;
-
-  saveQuest?: (q: Partial<UserQuest | PartnerQuest>) => void;
-  deleteQuest?: () => void;
-  completeQuest?: () => void;
+  partnerQuests: UserQuest[];
+  coupleQuests: CoupleQuest[];
 
   userNickname: string;
   partnerNickname: string;
 
   /* 콜백 */
-  onUserClick:      (q: UserQuest)      => void;
-  onPartnerClick:   (q: PartnerQuest)   => void;
-  onCoupleClick:    (q: any)            => void;
-  onAddUserQuest:   () => void;        
-  onAddPartnerQuest?: () => void;      
+  onUserClick:        (q: UserQuest)      => void;
+  onPartnerClick:     (q: UserQuest)      => void;
+  onCoupleClick:      (q: CoupleQuest)    => void;
+  onAddUserQuest:     () => void;        
+  onAddPartnerQuest?: () => void;
+  onAddCoupleQuest:   () => void;
 }
 
 export default function MobileLayout({
@@ -48,9 +45,6 @@ export default function MobileLayout({
   userQuests,
   partnerQuests,
   coupleQuests,
-  saveQuest,
-  deleteQuest,
-  completeQuest,
   userNickname,
   partnerNickname,
   onUserClick,
@@ -58,6 +52,7 @@ export default function MobileLayout({
   onCoupleClick,
   onAddUserQuest,        /* ★ 추가 */
   onAddPartnerQuest,     /* ★ 추가 */
+  onAddCoupleQuest,
 }: MobileLayoutProps) {
   return (
     <div className="sm:hidden pb-20 px-4 pt-4">
@@ -79,9 +74,6 @@ export default function MobileLayout({
           partnerNickname={partnerNickname}
           userQuests={userQuests}
           partnerQuests={partnerQuests}
-          saveQuest={saveQuest}
-          deleteQuest={deleteQuest}
-          completeQuest={completeQuest}
           onUserClick={onUserClick}
           onPartnerClick={onPartnerClick}
           onAddUserQuest={onAddUserQuest}           /* ★ 전달 */
@@ -89,8 +81,15 @@ export default function MobileLayout({
         />
       )}
 
-      {/* 커플·달력·다이어리 탭 */}
-      {activeTab === "couple"   && <CoupleQuestSection quests={coupleQuests} onClick={onCoupleClick} />}
+      {/* 커플 탭 */}
+      {activeTab === "couple" && (
+        <CoupleQuestSection
+          quests={coupleQuests}
+          onCoupleClick={onCoupleClick}
+          onAddCoupleQuest={onAddCoupleQuest}
+        />
+      )}
+      {/* 달력·다이어리 탭 */}
       {activeTab === "calendar" && <CalendarSection />}
       {activeTab === "diary"    && <DiarySection />}
     </div>

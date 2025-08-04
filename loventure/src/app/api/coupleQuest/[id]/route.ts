@@ -16,15 +16,20 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         return error("퀘스트를 찾을 수 없거나 접근 권한이 없습니다.", 404);
     }
 
-    const { title, description, goalType, targetValue, rewardExp, rewardCoins } = await req.json();
+    const {
+        title,
+        description,
+        goalType,
+        resetType,
+        targetValue,
+    } = await req.json();
 
     // 수정 가능한 필드만 업데이트
     if (title !== undefined) quest.title = title;
     if (description !== undefined) quest.description = description;
     if (goalType !== undefined) quest.goalType = goalType;
+    if (resetType !== undefined) quest.resetType = resetType;
     if (targetValue !== undefined) quest.targetValue = targetValue;
-    if (rewardExp !== undefined) quest.rewardExp = rewardExp;
-    if (rewardCoins !== undefined) quest.rewardCoins = rewardCoins;
 
     quest.updatedAt = new Date();
     await quest.save();

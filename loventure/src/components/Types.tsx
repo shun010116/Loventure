@@ -17,19 +17,22 @@ export interface Schedule {
 export interface UserQuest {
   _id: string;
   userId: string;
-  assignedBy: string;
+  createdBy: string;
   title: string;
   description?: string;
-  goalType?: string;
   difficulty?: number;
+  goalType?: string;
+  resetType?: "Daily" | "Weekly" | "One-time";
   targetValue?: number;
   currentValue?: number;
-  isCompleted: boolean;
   reward: {
     exp: number;
-    coins: number;
+    gold: number;
   };
+  needApproval: boolean;
+  status: "pending" | "accepted" | "rejected" | "completed" | "approved";
   completedAt?: string;
+  approvedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,39 +40,20 @@ export interface UserQuest {
 export interface CoupleQuest {
   _id: string;
   coupleId: string;
-  title: string;
-  description?: string;
-  goalType?: string;
-  difficulty?: number;
-  isComple?: string;
-  targetValue?: number;
-  currentVted: boolean;
-  reward: {
-    exp: number;
-    coins: number;
-  };
   createdBy: string;
-  agreed: boolean;
-  completedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface PartnerQuest {
-  _id: string;
-  userId: string;
-  assignedBy: string;
   title: string;
   description?: string;
   goalType?: string;
-  difficulty?: number;
+  resetType?: "Daily" | "Weekly" | "One-time";
   targetValue?: number;
-  currentValue?: number;
-  isCompleted: boolean;
+  progress: {
+    [userId: string]: number;
+  };
   reward: {
     exp: number;
-    coins: number;
+    gold: number;
   };
+  status: "active" | "completed";
   completedAt?: string;
   createdAt: string;
   updatedAt: string;

@@ -9,11 +9,11 @@ import MobileTopBar from "@/components/Layouts/MobileTopBar";
 import MobileNav from "@/components/MobileNav";
 import MobileLayout from "@/components/Layouts/MobileLayout";
 import MobileModal    from "@/components/Mobile/MobileModal";
-import { Character, TabKey, Schedule, UserQuest, CoupleQuest, PartnerQuest } from "../Types";
+import { Character, TabKey, Schedule, UserQuest, CoupleQuest } from "../Types";
 
 
-/* 3-종 퀘스트 유니온 타입 */
-type AnyQuest = UserQuest | PartnerQuest | CoupleQuest;
+/* 2-종 퀘스트 유니온 타입 */
+type AnyQuest = UserQuest | CoupleQuest;
 
 interface MobileClientLayoutProps {
   children: ReactNode;
@@ -36,7 +36,7 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
 
   /* ───────── 퀘스트 데이터 ───────── */
   const [userQuests,     setUserQuests]     = useState<UserQuest[]>([]);
-  const [partnerQuests,  setPartnerQuests]  = useState<PartnerQuest[]>([]);
+  const [partnerQuests,  setPartnerQuests]  = useState<UserQuest[]>([]);
   const [coupleQuests,   setCoupleQuests]   = useState<CoupleQuest[]>([]);
 
   /* ───────── 탭 제어 ───────── */
@@ -47,6 +47,9 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
   const [isModalOpen,    setModalOpen]      = useState(false);
   const [editingQuest,   setEditingQuest]   = useState<AnyQuest | null>(null);
   const [selDiff,        setSelDiff]        = useState<number | null>(null);
+  const [currentUserId,  setCurrentUserId]  = useState<string | null>(null);
+  const [selectedGoalType, setSelectedGoalType] = useState<string>(editingQuest?.goalType ?? "");
+  const [goalType, setGoalType] = useState<string>(selectedGoalType);
 
 
   useEffect(() => {
@@ -72,6 +75,7 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
   useEffect(() => {
     if (!user) return;
     setUserNickname(user.nickname);
+    setCurrentUserId(user._id);
     if (partner) {
       setPartnerNickname(partner.nickname);
     }
@@ -142,6 +146,11 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
     setModalType(type);
     setEditingQuest(null);
     setSelDiff(null);
+    if (type === "user" || type === "partner") {
+      setSelectedGoalType("check");
+    } else {
+      setSelectedGoalType("shared-count");
+    }
     setModalOpen(true);
   };
 
@@ -149,50 +158,88 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
     setModalType(type);
     setEditingQuest(q);
     if ("difficulty" in q) setSelDiff(q.difficulty ?? null); // user quest
+    setSelectedGoalType(q.goalType ?? "");
     setModalOpen(true);
   };
 
-
   /* ───────── 저장/삭제 콜백 (예시) ─────── */
   const saveQuest = async (quest: Partial<AnyQuest>) => {
+    const isEditing = !!editingQuest;
+    const baseUserQuestUrl = "/api/userQuest";
+    const baseCoupleQuestUrl = "/api/coupleQuest";
+
+    let userId: string | undefined;
+    let setQuestState: React.Dispatch<React.SetStateAction<any[]>> | undefined;
+    let apiUrl = "";
+    let method = "POST";
+    let requestBody: any = {
+      createdBy: user._id,
+      title: quest.title,
+      description: quest.description,
+      goalType: quest.goalType,
+      targetValue: quest.targetValue ?? 1,
+      resetType: quest.resetType,
+      reward: {
+        exp: quest.reward?.exp ?? 0,
+        gold: quest.reward?.gold ?? 0,
+      },
+      status: quest.status ?? "pending",
+    };
+
+    if (modalType === "user" || modalType === "partner") {
+      const q = quest as Partial<UserQuest>;
+      requestBody.difficulty = q.difficulty ?? 1;
+      requestBody.needApproval = q.needApproval ?? false;
+    }
+
     // modalType을 보고 적절한 API 호출 …
     if (modalType === "user") {
-      if (editingQuest) {
-        setUserQuests((prev) =>
-          prev.map((q) => (q._id === editingQuest._id ? { ...q, ...quest} as UserQuest : q))
-      )}
-      else {
-        const res = await fetch("/api/userQuest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: quest.title,
-            description: quest.description,
-            goalType: quest.goalType,
-            difficulty: quest.difficulty,
-            assignedToId: user?._id,
-            reward: {
-              exp: quest.reward?.exp ?? 0,
-              coins: quest.reward?.coins ?? 0,
-            },
-          }),
-        });
-        if (res.ok) {
-          await fetchAllQuests();
-        }
+      userId = user?._id;
+      setQuestState = setUserQuests;
+      apiUrl = isEditing ? `${baseUserQuestUrl}/${editingQuest._id}` : baseUserQuestUrl;
+      if (!isEditing) requestBody.userId = userId;
+    } else if (modalType === "partner") {
+      userId = partner?._id;
+      setQuestState = setPartnerQuests;
+      apiUrl = isEditing ? `${baseUserQuestUrl}/${editingQuest._id}` : baseUserQuestUrl;
+      if (!isEditing) requestBody.userId = userId;
+    } else if (modalType === "couple") {
+      apiUrl = isEditing ? `${baseCoupleQuestUrl}/${editingQuest._id}` : baseCoupleQuestUrl;
+    }
+
+    if (isEditing) {
+      method = "PATCH";
+      if (setQuestState) {
+        setQuestState((prev) =>
+          prev.map((q) => (q._id === editingQuest._id ? { ...q, ...quest } : q))
+        );
       }
     }
-    else if (modalType === "partner") {
 
-    }
-    else if (modalType === "couple") {
+    const res = await fetch(apiUrl, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
 
+    if (res.ok) {
+      await fetchAllQuests();
+    } else {
+      let data: { message?: string } = {};
+      try {
+        data = await res.json();
+      } catch (e) {
+        console.warn("Failed to parse error response", e);
+      }
+      alert(data?.message || "퀘스트 저장 실패");
     }
+
     setModalOpen(false);
   };
+
   const deleteQuest = async () => {
     // …
-    if (modalType === "user" && editingQuest) {
+    if (editingQuest) {
       const res = await fetch(`/api/userQuest/${editingQuest._id}`, {
         method: "DELETE",
       });
@@ -206,10 +253,11 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
     }
     setModalOpen(false);
   };
+  
   const completeQuest = async () => {
     if (modalType === "user" && editingQuest) {
-      const res = await fetch(`/api/userQuest/${editingQuest._id}`, {
-        method: "POST",
+      const res = await fetch(`/api/userQuest/${editingQuest._id}/complete`, {
+        method: "PATCH",
       });
 
       if (res.ok) {
@@ -222,7 +270,58 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
     setModalOpen(false);
   };
 
+  const acceptQuest = async () => {
+    if (modalType === "user" && editingQuest) {
+      const res = await fetch(`/api/userQuest/${editingQuest._id}/accept`, {
+        method: "PATCH",
+      });
 
+      if (res.ok) {
+        await fetchAllQuests();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "퀘스트 수락 실패");
+      }
+    }
+    setModalOpen(false);
+  }
+
+  const rejectQuest = async () => {
+    if (editingQuest) {
+      const res = await fetch(`/api/userQuest/${editingQuest._id}/reject`, {
+        method: "PATCH",
+      });
+
+      if (res.ok) {
+        await fetchAllQuests();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "퀘스트 거절 실패");
+      }
+    }
+    setModalOpen(false);
+  }
+
+  const approveQuest = async () => {
+    if (editingQuest) {
+      const res = await fetch(`/api/userQuest/${editingQuest._id}/approve`, {
+        method: "PATCH",
+      });
+
+      if (res.ok) {
+        await fetchAllQuests();
+      } else {
+        const data = await res.json();
+        alert(data?.message || "퀘스트 승인 실패");
+      }
+    }
+    setModalOpen(false);
+  }
+
+  const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedGoalType(value);
+  }
 
   //  레이아웃 구성
   return (
@@ -251,11 +350,11 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
             onUserClick={(q)      => openEditQuest("user", q)}
             onPartnerClick={(q)   => openEditQuest("partner", q)}
             onCoupleClick={(q)    => openEditQuest("couple", q)}
-
   
             /* + 버튼 → 새로 만들기 */
             onAddUserQuest={()      => openNewQuest("user")}
             onAddPartnerQuest={()   => openNewQuest("partner")}
+            onAddCoupleQuest={()    => openNewQuest("couple")}
           />
         ) : (
           // 실제 라우트 컴포넌트
@@ -270,13 +369,20 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
       <MobileModal
         type={modalType}
         isOpen={isModalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={()                 => setModalOpen(false)}
         editingQuest={editingQuest}
-        saveQuest={saveQuest}
-        deleteQuest={deleteQuest}
-        completeQuest={completeQuest}
+        currentUserId={currentUserId}
+        saveQuest={(q)              => saveQuest(q)}
+        deleteQuest={()             => deleteQuest()}
+        completeQuest={()           => completeQuest()}
+        acceptUserQuest={()         => acceptQuest()}
+        rejectUserQuest={()         => rejectQuest()}
+        approveUserQuest={()        => approveQuest()}
         selectedDifficulty={selDiff}
         setSelectedDifficulty={setSelDiff}
+        selectedGoalType={selectedGoalType}
+        setSelectedGoalType={setSelectedGoalType}
+        handleChange={(e)           => handleChange(e)}
       />
 
     </div>
