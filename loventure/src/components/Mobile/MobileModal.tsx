@@ -2,7 +2,7 @@
 
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { CirclePlus, Trash2 } from "lucide-react";
+import { CirclePlus, Trash2, CircleX, Save, SquareCheck} from "lucide-react";
 import { UserQuest, CoupleQuest } from "@/components/Types";
 
 /** 두 퀘스트 모두 허용하는 유니온 타입  */
@@ -59,12 +59,12 @@ export default function MobileModal({
 
   const goalTypeOptions = {
     user: [
-      { value: "check", label: "달성만 하면 완료" },
-      { value: "count", label: "횟수 채우기" },
+      { value: "check", label: "일회성" },
+      { value: "count", label: "목표 횟수" },
     ],
     partner: [
-      { value: "check", label: "체크만 하면 완료" },
-      { value: "count", label: "횟수 채우기" },
+      { value: "check", label: "일회성" },
+      { value: "count", label: "목표 횟수" },
     ],
     couple: [
       { value: "shared-count", label: "둘이서 함께" },
@@ -133,12 +133,12 @@ export default function MobileModal({
             leaveFrom="translate-y-0 sm:scale-100 opacity-100"
             leaveTo="translate-y-full sm:translate-y-0 sm:scale-95 opacity-0"
           >
-            <Dialog.Panel className="bg-white shadow p-6 overflow-y-auto fixed bottom-0 inset-x-0 h-[85vh] rounded-t-2xl sm:static sm:rounded-lg sm:max-w-md">
+            <Dialog.Panel className="bg-[#fdf6e3] shadow p-6 overflow-y-auto fixed bottom-0 inset-x-0 h-[85vh] rounded-t-2xl sm:static sm:rounded-lg sm:max-w-md">
               {/* 헤더 */}
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">{titleLabel}</h2>
                 <button onClick={onClose} className="text-sm text-gray-500">
-                  닫기
+                  <CircleX/>
                 </button>
               </div>
 
@@ -152,7 +152,7 @@ export default function MobileModal({
                   name="title"
                   defaultValue={editingQuest?.title ?? ""}
                   placeholder="제목"
-                  className="border rounded-lg px-3 py-2 text-base"
+                  className="bg-[#fdf6e3] border rounded-lg px-3 py-2 text-base"
                   required
                 />
 
@@ -161,7 +161,7 @@ export default function MobileModal({
                   rows={4}
                   defaultValue={editingQuest?.description ?? ""}
                   placeholder="설명"
-                  className="border rounded-lg px-3 py-2"
+                  className="bg-[#fdf6e3] border rounded-lg px-3 py-2"
                 />
 
                 {/* goalType 설정 */}
@@ -282,26 +282,28 @@ export default function MobileModal({
                   </div>
                 )}
 
-                {editingQuest?.status === "accepted" && isPerformer && (
-                  <button
-                    type="button"
-                    onClick={completeQuest}
-                    className="flex items-center gap-1 text-green-500"
-                  >
-                    완료
-                  </button>
-                )}
+                <div className="flex items-center justify-between px-3">
+                  {editingQuest?.status === "accepted" && isPerformer && (
+                    <button
+                      type="button"
+                      onClick={completeQuest}
+                      className="flex items-center gap-1 text-green-500"
+                    >
+                      <SquareCheck size={35} />
+                    </button>
+                  )}
 
-                {(editingQuest?.status === "pending" || editingQuest?.status === "accepted") && isCreator && (
-                  <button
-                    type="button"
-                    onClick={deleteQuest}
-                    className="flex items-center gap-1 text-red-500"
-                  >
-                    <Trash2 size={18} />
-                    삭제
-                  </button>
-                )}
+                  {(editingQuest?.status === "pending" || editingQuest?.status === "accepted") && isCreator && (
+                    <button
+                      type="button"
+                      onClick={deleteQuest}
+                      className="flex items-center gap-1 text-red-500"
+                    >
+                      <Trash2 size={32} />
+                    </button>
+                  )}
+                </div>
+                
 
                 {editingQuest?.status === "completed" && isPerformer && (
                   <span
@@ -339,17 +341,19 @@ export default function MobileModal({
                 )}
 
                 {/* 하단 버튼 */}
-                {(!editingQuest || isCreator) && (
-                  <div className="pt-4 flex justify-between">
-                    <button
-                      type="submit"
-                      className="flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-lg active:scale-95"
-                    >
-                      <CirclePlus size={18} />
-                      저장
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center justify-center">
+                  {(!editingQuest || isCreator) && (
+                    <div className="pt-4 flex justify-between">
+                      <button
+                        type="submit"
+                        className="flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-lg active:scale-95"
+                      >
+                        <Save size={25} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
               </form>
             </Dialog.Panel>
           </Transition.Child>
