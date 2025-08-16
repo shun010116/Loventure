@@ -26,11 +26,18 @@ function SpriteAnimator({
   idleFrameIndex = 1,       // idle로 쓸 프레임 인덱스
   fps = 12,
   durationMs,               // 생략 시 frameCount/fps로 계산
-  intervalAfterMs = 10_000, // 재생 끝나고 다음 재생까지 대기
+  intervalAfterMs = 30000, // 재생 끝나고 다음 재생까지 대기
   startDelayMs = 0,         // 인스턴스별 시작 오프셋
   containerHeightPx = 320,  // 표시 영역 높이
   safePadPx = 6,            // 잘림 방지용 패딩
   className = "",
+
+  // 배경 이미지 옵션
+  bgSrc,                    // "/backgrounds/room.jpg" 같은 경로
+  bgMode = "cover",         // "cover" | "contain"
+  bgPosition = "center",    // "center" | "top" | "bottom" ... 또는 "50% 50%"
+  bgOpacity = 1,            // 0~1 (배경 투명도)
+
 }: {
   sheetSrc: string;
   frameWidth: number;
@@ -45,6 +52,13 @@ function SpriteAnimator({
   containerHeightPx?: number;
   safePadPx?: number;
   className?: string;
+
+  // 배경용
+  bgSrc?: string;
+  bgMode?: "cover" | "contain";
+  bgPosition?: string;
+  bgOpacity?: number;
+
 }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [frame, setFrame] = useState(0);
@@ -118,13 +132,23 @@ useEffect(() => {
       const step = (t: number) => {
         if (canceled) return;
         const elapsed = t - start;
-        const f = Math.min(frameCount - 1, Math.floor((elapsed / 1000) * fps));
+
+         // duration 기준으로 프레임을 균등 분배
+        let f: number;
+        if (durationMs !== undefined) {
+          const ratio = Math.min(1, elapsed / totalMs);       // 0 → 1
+          f = Math.min(frameCount - 1, Math.floor(ratio * frameCount));
+        } else {
+          f = Math.min(frameCount - 1, Math.floor((elapsed / 1000) * fps));
+        }
+
         setFrame(f);
+
         if (elapsed < totalMs) {
           requestAnimationFrame(step);
         } else {
-          // 영상 종료 후 (깜빡임 방지)
           setIsPlaying(false);
+          // 다음 회차는 intervalAfterMs 후 시작
           timeoutRef.current = window.setTimeout(playOnce, intervalAfterMs);
         }
       };
@@ -162,6 +186,17 @@ useEffect(() => {
         overflow: "hidden",
         padding: safePadPx,         // 귀 잘림 방지 패딩
         boxSizing: "border-box",
+
+        // 배경(카드 내부 전체 영역)
+        ...(bgSrc
+          ? {
+              backgroundImage: `url(${bgSrc})`,
+              backgroundSize: bgMode,
+              backgroundPosition: bgPosition,
+              backgroundRepeat: "no-repeat",
+              // 배경 투명도 주고 싶으면 오버레이로 처리 (아래 ::after 방식 권장)
+            }
+          : {}),
       }}
     >
       <div
@@ -221,22 +256,37 @@ export default function CharacterSection({
       startDelayMs?: number;   // 카드별 시작 오프셋
       idleFrameIndex?: number; // idle로 쓸 프레임 지정(기본 0)
       title?: string;
+
+      sheetSrc?: string;
+      frameWidth?: number;
+      frameHeight?: number;
+      frameCount?: number;
+      fps?: number;
+      durationMs?: number;
+      intervalAfterMs?: number;
     }
   ) => (
     <div className="bg-white rounded-xl shadow p-6 sm:p-8 flex flex-col items-center w-full">
       <SpriteAnimator
-        sheetSrc="/character/sprites/cat_yawning.png"
-        frameWidth={240}
-        frameHeight={240}
-        frameCount={60}          // 12fps × 5s
+        sheetSrc={options?.sheetSrc ?? "/character/sprites/cat_yawning.png"}
+        frameWidth={options?.frameWidth ?? 240}
+        frameHeight={options?.frameHeight ?? 240}
+        frameCount={options?.frameCount ?? 45}
         // columns 생략 → 자동 계산
-        fps={12}
-        durationMs={5000}        // 하품 5초 재생
-        intervalAfterMs={10000}  // 끝나고 10초 대기
+        fps={options?.fps ?? 12}
+        durationMs={options?.durationMs ?? 2000}        // 영상 2초 재생
+        intervalAfterMs={options?.intervalAfterMs ?? 4000}  // 끝나고 4초 대기
+
         startDelayMs={options?.startDelayMs ?? 0}
-        idleFrameIndex={options?.idleFrameIndex ?? 0}
+        idleFrameIndex={options?.idleFrameIndex ?? 1}
         containerHeightPx={340}  // 표시 영역 조금 넉넉히
         safePadPx={6}
+
+        // 배경
+        bgSrc="/backgrounds/background.jpg"
+        bgMode="cover"
+        bgPosition="center"
+        bgOpacity={1}
       />
 
       <div className="text-lg font-bold mt-2">
@@ -262,6 +312,15 @@ export default function CharacterSection({
         startDelayMs: 0,
         idleFrameIndex: 1, // 필요하면 다른 프레임으로 교체 가능
         title: myCharacter?.name ?? "My Character",
+        sheetSrc: "/character/sprites/sheep0.png",
+
+        frameWidth: 240,
+        frameHeight: 240,
+        frameCount: 30,
+        fps: 12,
+        durationMs: 1500,
+        intervalAfterMs: 2000,
+
       })}
 
       {/* 파트너 캐릭터: 5초 뒤 시작 */}
@@ -269,6 +328,14 @@ export default function CharacterSection({
         startDelayMs: 5000,
         idleFrameIndex: 1,
         title: partnerCharacter?.name ?? "Partner",
+        sheetSrc: "/character/sprites/cat0.png",
+
+        frameWidth: 240,
+        frameHeight: 240,
+        frameCount: 45,
+        fps: 12,
+        durationMs: 3000,
+        intervalAfterMs: 2000,
       })}
     </div>
   );
