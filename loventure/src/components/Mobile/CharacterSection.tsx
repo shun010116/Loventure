@@ -95,7 +95,7 @@ useEffect(() => {
 
   
 
-    // 컨테이너 → 스케일 계산(패딩 고려, 픽셀아트 스냅)
+  // 컨테이너 → 스케일 계산(패딩 고려, 픽셀아트 스냅)
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
@@ -235,18 +235,66 @@ useEffect(() => {
 /* ==================================================================================== */
 
 interface CharacterSectionProps {
-  myCharacter: Character | null;
-  partnerCharacter: Character | null;
-  myEvents: { _id: string; title: string }[];
-  partnerEvents: { _id: string; title: string }[];
+  myNickname: string;                               // 상단 닉네임 표시용
+  partnerNickname: string;                          // 상단 닉네임 표시용
+  userNickname?: string;                            // 닉네임 연동
+
+  myCharacter: Character | null;                    // 캐릭터 표시용
+  partnerCharacter: Character | null;               // 캐릭터 표시용
+  myEvents: { _id: string; title: string }[];       // 일정 표시용
+  partnerEvents: { _id: string; title: string }[];  // 일정 표시용
 }
 
+
+/* 경험치 Bar */
+function LineExpBar({ percent }: { percent: number }) {
+  const p = Math.max(0, Math.min(100, percent ?? 0));
+  return (
+    <div className="flex items-center gap-3 w-full">
+      <div className="relative h-3 w-full rounded-full border-2 border-stone-800">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full bg-stone-800"
+          style={{ width: `${p}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+
 export default function CharacterSection({
+  myNickname,
+  partnerNickname,
+  userNickname,
   myCharacter,
   partnerCharacter,
   myEvents,
   partnerEvents,
 }: CharacterSectionProps) {
+
+
+  // ======================================================
+  // 닉네임 연동
+  const pickName = (...vals: Array<string | undefined | null>) => {
+    for (const v of vals) {
+      if (typeof v === "string" && v.trim().length > 0) return v.trim();
+    }
+    return "";
+  };
+
+  const displayMyNickname = pickName(
+    myNickname,
+    userNickname,
+    myCharacter?.name,
+    "My Character"
+  );
+  const displayPartnerNickname = pickName(
+    partnerNickname,
+    partnerCharacter?.name,
+    "Partner"
+  );
+  // =================================================================
+
   /* 공통 카드 렌더 (세로 배치) */
   const renderCard = (
     char: Character | null,
@@ -264,54 +312,83 @@ export default function CharacterSection({
       fps?: number;
       durationMs?: number;
       intervalAfterMs?: number;
+
+      bgSrc?: string;
+      bgMode?: "cover" | "contain";
+      bgPosition?: string;
+      bgOpacity?: number;
+
     }
-  ) => (
-    <div className="bg-white rounded-xl shadow p-6 sm:p-8 flex flex-col items-center w-full">
-      <SpriteAnimator
-        sheetSrc={options?.sheetSrc ?? "/character/sprites/cat_yawning.png"}
-        frameWidth={options?.frameWidth ?? 240}
-        frameHeight={options?.frameHeight ?? 240}
-        frameCount={options?.frameCount ?? 45}
-        // columns 생략 → 자동 계산
-        fps={options?.fps ?? 12}
-        durationMs={options?.durationMs ?? 2000}        // 영상 2초 재생
-        intervalAfterMs={options?.intervalAfterMs ?? 4000}  // 끝나고 4초 대기
+  ) => {
+    const titleToShow = pickName(options?.title, char?.name, fallback);
+    const expPercent = Math.max(0, Math.min(100, Number(char?.exp ?? 0)));
 
-        startDelayMs={options?.startDelayMs ?? 0}
-        idleFrameIndex={options?.idleFrameIndex ?? 1}
-        containerHeightPx={340}  // 표시 영역 조금 넉넉히
-        safePadPx={6}
+    return (
+      <div className="bg-[#f6fde7] rounded-xl shadow p-6 sm:p-8 flex flex-col items-center w-full">
+        {/* 캐릭터 스프라이트 */}
+        <SpriteAnimator
+          sheetSrc={options?.sheetSrc ?? "/character/sprites/cat_yawning.png"}
+          frameWidth={options?.frameWidth ?? 240}
+          frameHeight={options?.frameHeight ?? 240}
+          frameCount={options?.frameCount ?? 45}
+          // columns 생략 → 자동 계산
+          fps={options?.fps ?? 12}
+          durationMs={options?.durationMs ?? 2000}        // 영상 2초 재생
+          intervalAfterMs={options?.intervalAfterMs ?? 4000}  // 끝나고 4초 대기
 
-        // 배경
-        bgSrc="/backgrounds/background.jpg"
-        bgMode="cover"
-        bgPosition="center"
-        bgOpacity={1}
-      />
+          startDelayMs={options?.startDelayMs ?? 0}
+          idleFrameIndex={options?.idleFrameIndex ?? 1}
+          containerHeightPx={340}  // 표시 영역 조금 넉넉히
+          safePadPx={6}
 
-      <div className="text-lg font-bold mt-2">
-        {options?.title ?? (char?.name ?? fallback)}
+          // 배경
+          bgSrc="/backgrounds/background.jpg"
+          bgMode="cover"
+          bgPosition="center"
+          bgOpacity={1}
+        />
+
+        {/* 닉네임 */}
+        <div className="text-center mt-3">
+          <div className="text-2xl font-semibold tracking-wide">
+            {titleToShow}
+          </div>
+        </div>
+
+        {/* LV + 라인형 EXP Bar */}
+        <div className="w-full mt-3 flex items-center gap-3">
+          <span className="font-semibold whitespace-nowrap">LV.{char?.level ?? "-"}</span>
+            <div className="relative h-3 flex-1">
+              <LineExpBar percent={Number(char?.exp ?? 0)} />
+            </div>
+        </div>
+
+        {/* Today’s Schedule */}
+        <div className="mt-5 w-full">
+          <div className="font-semibold mb-2">TODAY&apos;S SCHEDULE</div>
+          {events.length ? (
+            <ul className="list-disc pl-5 space-y-1 text-sm">
+              {events.map((e) => (
+                <li key={e._id}>{e.title}</li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-sm text-stone-500">No Events</div>
+          )}
+        </div>
       </div>
-      <div className="text-xs mb-3">
-        Lv.&nbsp;{char?.level ?? "-"} / EXP&nbsp;{char?.exp ?? 0}
-      </div>
-
-      <ul className="text-xs text-center break-keep">
-        {events.length
-          ? events.map((e) => <li key={e._id}>{e.title}</li>)
-          : "No Events"}
-      </ul>
-    </div>
-  );
+    );
+  };
 
   return (
     // 세로 스택 + 카드 영역 확장 (좌우는 페이지 끝에 살짝 안 닿게)
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 md:px-8 space-y-6">
       {/* 내 캐릭터: 즉시 시작 */}
       {renderCard(myCharacter, "My Character", myEvents, {
+        title: displayMyNickname, 
+
         startDelayMs: 0,
         idleFrameIndex: 1, // 필요하면 다른 프레임으로 교체 가능
-        title: myCharacter?.name ?? "My Character",
         sheetSrc: "/character/sprites/sheep0.png",
 
         frameWidth: 240,
@@ -325,11 +402,11 @@ export default function CharacterSection({
 
       {/* 파트너 캐릭터: 5초 뒤 시작 */}
       {renderCard(partnerCharacter, "Partner", partnerEvents, {
+        title: displayPartnerNickname,
+
         startDelayMs: 5000,
         idleFrameIndex: 1,
-        title: partnerCharacter?.name ?? "Partner",
         sheetSrc: "/character/sprites/cat0.png",
-
         frameWidth: 240,
         frameHeight: 240,
         frameCount: 45,
