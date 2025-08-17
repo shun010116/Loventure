@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import ClientLayout from "@/app/ClientLayout";
 
 export default function MyPage() {
   const router = useRouter();
@@ -45,6 +44,7 @@ export default function MyPage() {
     }
   };
 
+  // 로그인 안 되어 있으면 로그인 페이지로
   useEffect(() => {
     if (!loading && !isLoggedIn) {
       router.push('/login');
@@ -75,21 +75,20 @@ export default function MyPage() {
         나의 커플 초대 코드: <strong>{user.sharedCode}</strong>
       </p>
 
-        <div className='flex items-center gap-2'> 
+        <div className='flex flex-col items-center gap-3 w-full max-w-sm'> 
           <input
             type="text"
-            className="text-register"
-            placeholder='커플 공유코드를 입력해주세요'
+            className="text-register w-full"
+            placeholder='상대방의 커플 초대 코드를 입력해주세요'
             value={sharedCode}
             onChange={(e) => setSharedCode(e.target.value)}
           />
 
           <button
-            className="btn-register"
-            //disabled={loading}
+            className="btn-register mx-auto"  /* 또는 self-center */
             onClick={handleJoinCouple}
-          > 
-            제출하기
+          >
+            연결하기
           </button>
         </div>
       </div>
