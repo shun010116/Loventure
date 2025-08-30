@@ -5,14 +5,26 @@
 /* 수정 필요한 사항 */
 /* Line 247 부근 교환일기 구문 변경 */
 
-
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
-import { SquareChevronLeft, SquareChevronRight, CalendarHeart, Sun, Cloudy, CloudRain, Snowflake, Pencil, BookX } from "lucide-react";
+import {
+  SquareChevronLeft,
+  SquareChevronRight,
+  CalendarHeart,
+  Sun,
+  Cloudy,
+  CloudRain,
+  Snowflake,
+  Pencil,
+  BookX,
+  BookCheck,
+  SquareX,
+} from "lucide-react";
+
 /* ------------------------------------------------------------------ */
 /* 타입 정의                                                            */
 /* ------------------------------------------------------------------ */
@@ -22,7 +34,7 @@ interface Journal {
   title: string;
   content: string;
   mood?: string;
-  weather?: string;
+  weather?: string; // "sunny" | "cloudy" | "rainy" | "snowy" | "etc"
   createdAt: string;
   senderId: {
     _id: string;
@@ -49,20 +61,24 @@ export default function DiarySection() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [mood, setMood] = useState("");
+  // 이모지 대신 lucide-icons와 string 매핑: "sunny" | "cloudy" | "rainy" | "snowy"
   const [selectedWeather, setSelectedWeather] = useState<string | null>(null);
   const [partnerId, setPartnerId] = useState<string | null>(null);
 
-  /* ----------날씨 이모지 매핑---------- */
-  const weatherEmojiMap: { [emoji: string]: string } = {
-    
-    "☀️": "sunny",
-    "⛅": "cloudy",
-    "🌧️": "rainy",
-    "❄️": "snowy",
-  };
-  const weatherCodeToEmoji = Object.fromEntries(
-    Object.entries(weatherEmojiMap).map(([emoji, code]) => [code, emoji])
-  );
+  /* ----------날씨 아이콘/매핑 (lucide)---------- */
+  const weatherIconMap = {
+    sunny: Sun,
+    cloudy: Cloudy,
+    rainy: CloudRain,
+    snowy: Snowflake,
+  } as const;
+
+  const weatherOptions = [
+    { code: "sunny", Icon: Sun },
+    { code: "cloudy", Icon: Cloudy },
+    { code: "rainy", Icon: CloudRain },
+    { code: "snowy", Icon: Snowflake },
+  ] as const;
 
   /* ------------------------------------------------------------------ */
   /* API 통신                                                            */
@@ -113,7 +129,8 @@ export default function DiarySection() {
           title,
           content,
           mood,
-          weather: weatherEmojiMap[selectedWeather || ""] || "etc",
+          // lucide 아이콘 선택 결과를 문자열 코드로 그대로 저장
+          weather: selectedWeather || "etc",
         }),
       });
 
@@ -161,9 +178,8 @@ export default function DiarySection() {
       setTitle(journalForDate.title || "");
       setContent(journalForDate.content || "");
       setMood(journalForDate.mood || "");
-      setSelectedWeather(
-        journalForDate.weather ? weatherCodeToEmoji[journalForDate.weather] : ""
-      );
+      // ✅ 서버에 저장된 문자열 코드를 그대로 상태로
+      setSelectedWeather(journalForDate.weather || null);
     } else {
       setTitle("");
       setContent("");
@@ -200,8 +216,7 @@ export default function DiarySection() {
   /* ------------------------------------------------------------------ */
   /* 로딩 처리                                                           */
   /* ------------------------------------------------------------------ */
-
-const isMobile =
+  const isMobile =
     typeof window !== "undefined" && window.innerWidth < 640; // calendar.tsx 방식
 
   if (loading || !isLoggedIn || !user) return null;
@@ -216,7 +231,7 @@ const isMobile =
           <div className="mb-4 text-center">
             <h2 className="text-lg sm:text:xl font-bold">
               {/* 지금 교환 일기라 되어 있는 부분 OO❤OO의 교환일기 이렇게 유저 이름으로 넣어주셈 */}
-              교환 일기 
+              교환 일기
             </h2>
           </div>
 
@@ -280,7 +295,9 @@ const isMobile =
               className="text-xl text-gray-700 hover:underline flex items-center gap-2 px-4 py-2 -ml-4"
               onClick={() => setSelectedDate(null)}
             >
-              <span><CalendarHeart /></span>
+              <span>
+                <CalendarHeart />
+              </span>
             </button>
           </div>
 
@@ -296,18 +313,38 @@ const isMobile =
                 작성자: {filteredJournal.senderId.nickname}
               </p>
               {filteredJournal.mood && <p>기분: {filteredJournal.mood}</p>}
-              {filteredJournal.weather && (
-                <p>날씨: {weatherCodeToEmoji[filteredJournal.weather]}</p>
-              )}
+
+              {/* 날씨 아이콘 표시 (lucide) */}
+              {filteredJournal.weather && (() => {
+                const Icon =
+                  weatherIconMap[
+                    filteredJournal.weather as keyof typeof weatherIconMap
+                  ];
+                return Icon ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-sm text-gray-600">
+                      날씨 : 
+                    </span>
+                    <Icon size={20} />                    
+                  </div>
+                ) : null;
+              })()}
+
               <p className="mt-2 whitespace-pre-wrap">{filteredJournal.content}</p>
 
               {/* 읽음 여부(내가 작성한 경우만 표시) */}
               {user && filteredJournal.senderId._id === user._id && (
-                <p className="text-xs mt-2">
-                  {filteredJournal.isReadBy?.includes(partnerId || "")
-                    ? "✅ 상대방 읽음"
-                    : "📖 상대방 읽지 않음"}
-                </p>
+                filteredJournal.isReadBy?.includes(partnerId || "") ? (
+                  <p className="text-xs mt-2 flex items-center gap-1 text-green-600">
+                    <BookCheck size={14} />
+                    <span>상대방 읽음</span>
+                  </p>
+                ) : (
+                  <p className="text-xs mt-2 flex items-center gap-1 text-red-500">
+                    <SquareX size={14} />
+                    <span>상대방 읽지 않음</span>
+                  </p>
+                )
               )}
 
               {/* 수정, 삭제 버튼 */}
@@ -320,7 +357,6 @@ const isMobile =
                   <BookX size={24} />
                 </button>
               </div>
-            
             </div>
           ) : (
             /* 작성 폼 */
@@ -333,22 +369,22 @@ const isMobile =
                 onChange={(e) => setTitle(e.target.value)}
               />
 
-              {/* 날씨 선택 */}
+              {/* 날씨 선택 (lucide 아이콘) */}
               <div className="flex items-center gap-4">
-                {/*<label className="text-sm font-medium whitespace-nowrap">날씨</label>*/}
                 <div className="flex gap-2">
-                  {Object.entries(weatherEmojiMap).map(([emoji, code]) => (
+                  {weatherOptions.map(({ code, Icon }) => (
                     <button
                       key={code}
-                      onClick={() => setSelectedWeather(emoji)}
-                      className={`text-2xl p-2 rounded-full transition
-                        ${
-                          selectedWeather === emoji
-                            ? "bg-blue-100 ring-1 ring-blue-400"
-                            : "hover:bg-gray-100"
-                        }`}
+                      onClick={() => setSelectedWeather(code)}
+                      className={`p-2 rounded-full transition ${
+                        selectedWeather === code
+                          ? "bg-blue-100 ring-1 ring-blue-400"
+                          : "hover:bg-gray-100"
+                      }`}
+                      aria-label={code}
+                      type="button"
                     >
-                      {emoji}
+                      <Icon size={24} />
                     </button>
                   ))}
                 </div>
