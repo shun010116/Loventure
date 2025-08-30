@@ -26,7 +26,7 @@ export async function GET(req: Request) {
     // console.log("userQuests: ", userQuests);
 
     // 커플 퀘스트 가져오기
-    const coupleQuests = await CoupleQuest.find({ coupleId: user.coupleId, statuss: { $ne: "approved" } })
+    const coupleQuests = await CoupleQuest.find({ coupleId: user.coupleId, status: { $ne: "completed" } })
         .sort({ createdAt: -1 });
     // console.log("coupleQuests: ", coupleQuests);
 

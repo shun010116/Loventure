@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog } from "@headlessui/react"
-import { UserQuest, CoupleQuest, PartnerQuest } from "./Types";
+import { UserQuest, CoupleQuest } from "./Types";
 
 import React, { Dispatch, SetStateAction } from "react";
 
@@ -128,7 +128,7 @@ export function UserQuestModal({
 
 {/* ------------------- View Partner Quest Modal ------------------- */}
 interface PartnerQuestModalProps {
-  viewingPartnerQuest: PartnerQuest | null;
+  viewingPartnerQuest: UserQuest | null;
   onClose: () => void;
 }
 

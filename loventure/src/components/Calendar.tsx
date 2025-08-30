@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, Fragment } from "react";
 import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 import clsx from "clsx";    
 
 import { Dialog, Transition } from "@headlessui/react";
@@ -24,6 +25,8 @@ interface CalendarProps {
   compact?: boolean;
   editable?: boolean;
 }
+
+dayjs.extend(isBetween);
 
 export default function Calendar({ compact = false, editable = true }: CalendarProps) {
   const router = useRouter();
@@ -63,6 +66,7 @@ const stickerOptions = [
   // 모바일 환경
   const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
   const [isSheetOpen, setSheetOpen] = useState(false);
+  const [mode, setMode] = useState<"view" | "add" | "edit">("view");
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
@@ -119,6 +123,7 @@ const stickerOptions = [
       repeat: "none",
       isCompleted,
       participants,
+      sticker: selectedSticker,
     };
 
     let res;
@@ -157,6 +162,9 @@ const stickerOptions = [
     setEditingId(item._id);
     setParticipants(item.participants);
     setIsCompleted(item.isCompleted);
+    setSelectedSticker(item.sticker ?? null);
+    setMode("edit");
+    setSheetOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -176,11 +184,24 @@ const stickerOptions = [
     setEditingId(null);
     setIsCompleted(false);
     setParticipants(user ? [user._id] : []);
-    setSelectedDaySchedules([]);
+    setSelectedDaySchedules(getEventsForDate(selectedDate));
+    setSelectedSticker(null);
+    setMode("view");
   };
 
-  const getEventsForDate = (date: string) =>
-    (schedule ?? []).filter((e) => dayjs(e.startDate).format("YYYY-MM-DD") === date);
+  useEffect(() => {
+    const events = getEventsForDate(selectedDate);
+    setSelectedDaySchedules(events);
+  }, [selectedDate, schedule]);
+
+  const getEventsForDate = (date: string) => {
+    return schedule.filter((e) => {
+      const target = dayjs(date);
+      const start = dayjs(e.startDate).startOf("day");
+      const end = dayjs(e.endDate).endOf("day");
+      return target.isBetween(start, end, null, "[]");
+    });
+  };
 
   const startOfMonth = currentDate.startOf("month").startOf("week");
   const endOfMonth = currentDate.endOf("month").endOf("week");
@@ -239,6 +260,7 @@ const stickerOptions = [
               onClick={() => {
                 setSelectedDate(formatted);
                 setSelectedDaySchedules(events);
+                setEndDate(formatted);
                 if (isMobile) setSheetOpen(true);       // 모바일 → 시트 ON
               }}
             >
@@ -252,6 +274,16 @@ const stickerOptions = [
                     {e.title}
                     {editable && e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
                   </div>
+                ))}
+                {isMobile &&
+                  events.map((e, idx) => (
+                    <div key={idx} className="text-[10px] sm:text-xs w-full rounded px-1 truncate flex items-center gap-1">
+                      {e.sticker && (
+                        <span>
+                          {stickerOptions.find(opt => opt.value === e.sticker)?.icon}
+                        </span>
+                      )}
+                    </div>
                 ))}
             </div>
           );
@@ -335,7 +367,50 @@ const stickerOptions = [
       )}
 
       {/* ───────── Mobile 하단 시트 ───────── */}
-      {editable && isMobile && (
+      {editable && isMobile && mode === "view" && (
+        <div className="mt-4 border-t pt-4">
+          <h3 className="font-bold mb-2">
+            {dayjs(selectedDate).format("YYYY-MM-DD")} 일정
+          </h3>
+
+          {/* (1) 당일 일정 리스트 */}
+          <ul className="mb-4 space-y-2">
+            {selectedDaySchedules.length === 0 && (
+              <li className="text-sm text-gray-500">일정이 없습니다.</li>
+            )}
+            {selectedDaySchedules.map((e) => (
+              <li key={e._id} className="flex justify-between items-center text-sm">
+                <div>
+                  • {e.title}
+                  {e.isCompleted && <span className="ml-1 text-green-600">✔️</span>}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => handleEdit(e)}  className="text-blue-500 hover:underline">✏️ 수정</button>
+                  <button onClick={() => handleDelete(e._id)} className="text-red-500 hover:underline">🗑️ 삭제</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* (2) 안내 문구 */}
+          <div className="text-sm text-gray-500">
+            일정을 추가하거나 수정하려면 아래 버튼을 눌러주세요.
+          </div>
+
+          {/* (3) 일정 추가 버튼 */}
+          <button
+            onClick={() => {
+              resetForm();
+              setMode("add");
+              setSheetOpen(true);
+            }}
+            className="mt-4 w-full bg-blue-500 text-white py-2 rounded text-sm"
+          >
+            일정 추가
+          </button>
+        </div>
+      )}
+      {editable && isMobile && (mode === "add" || mode === "edit") && (
       <Transition appear show={isSheetOpen} as={Fragment}>
         <Dialog
           as="div"
@@ -403,15 +478,44 @@ const stickerOptions = [
                   ))}
                 </div>
               </div>
+              
+              <div>
+                {/* ───── 일정명 입력칸 ───── */}
+                <input
+                  value={newEvent}
+                  onChange={(e) => setNewEvent(e.target.value)}
+                  placeholder="Title"
+                  className="border rounded-lg w-full p-3 text-sm mb-4"
+                />
 
-              {/* ───── 설명 입력칸 ───── */}
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="내용을 입력해 주세요"
-                rows={3}
-                className="border rounded-lg w-full p-3 text-sm mb-6"
-              />
+                {/* ───── 설명 입력칸 ───── */}
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="내용을 입력해 주세요"
+                  rows={3}
+                  className="border rounded-lg w-full p-3 text-sm mb-6"
+                />
+              </div>
+
+              <div>
+                {/* ───── 시작 날짜 ───── */}
+                <label className="block text-sm font-semibold mb-1">시작날짜</label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="border rounded-lg w-full p-3 text-sm mb-4"
+                />
+                {/* ───── 종료 날짜 ───── */}
+                <label className="block text-sm font-semibold mb-1">종료날짜</label>
+                <input
+                  type="date"                  
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="border rounded-lg w-full p-3 text-sm mb-4"
+                />
+              </div>
 
               {/* ───── 참가자 선택 ───── */}
               <div className="mb-6 border rounded-lg p-3">
@@ -437,7 +541,10 @@ const stickerOptions = [
               {/* ───── 액션 버튼 ───── */}
               <div className="flex gap-2">
                 <button
-                  onClick={handleAddEvent}
+                  onClick={() => {
+                    setSheetOpen(false);
+                    handleAddEvent();
+                  }}
                   className="flex-1 bg-blue-500 text-white py-2 rounded text-sm"
                 >
                   {editingId ? "수정 완료" : "저장"}

@@ -1,3 +1,5 @@
+"use client";
+
 // components/CalendarSection.tsx
 import Calendar from "@/components/Calendar";
 

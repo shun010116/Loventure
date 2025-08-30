@@ -14,7 +14,7 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
     const journal = await ExchangeJournal.findById(journalId);
 
     // Check journal exists
-    if (!journal || String(journal.coupleId) !== String(user._id)) {
+    if (!journal || String(journal.coupleId) !== String(user.coupleId)) {
         return error("일기를 찾을 수 없습니다.", 404);
     }
 
@@ -37,7 +37,7 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
     if (content !== undefined) journal.content = content;
     if (images !== undefined) journal.images = images;
     if (mood !== undefined) journal.mood = mood;
-    if (weather !== undefined) journal.weatehr = weather;
+    if (weather !== undefined) journal.weather = weather;
 
     await journal.save()
 

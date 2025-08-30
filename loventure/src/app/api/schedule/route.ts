@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     }
 
     // Create schedule
-    const { title, description, startDate, endDate, repeat, participants } = await req.json();
+    const { title, description, startDate, endDate, repeat, participants, sticker } = await req.json();
 
     if (!title || !startDate || !endDate || !participants || !Array.isArray(participants)) {
         return error("필수 항목이 누락되었습니다.", 400);
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
         isCompleted: false,
         createdBy: user._id,
         participants,
+        sticker,
     });
 
     // Return schedule info

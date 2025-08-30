@@ -12,6 +12,7 @@ export interface Schedule {
   isCompleted: boolean;
   createdBy: string;
   participants: string[];
+  sticker: string;
 }
 
 export interface UserQuest {

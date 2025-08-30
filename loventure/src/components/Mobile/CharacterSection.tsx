@@ -285,12 +285,10 @@ export default function CharacterSection({
   const displayMyNickname = pickName(
     myNickname,
     userNickname,
-    myCharacter?.name,
     "My Character"
   );
   const displayPartnerNickname = pickName(
     partnerNickname,
-    partnerCharacter?.name,
     "Partner"
   );
   // =================================================================
@@ -327,7 +325,11 @@ export default function CharacterSection({
       <div className="bg-[#f6fde7] rounded-xl shadow p-6 sm:p-8 flex flex-col items-center w-full">
         {/* 캐릭터 스프라이트 */}
         <SpriteAnimator
-          sheetSrc={options?.sheetSrc ?? "/character/sprites/cat_yawning.png"}
+          sheetSrc={
+            char?.evolutionStage && char?.avatar
+              ? `/character/sprites/${char.evolutionStage}/${char.avatar}`
+              : options?.sheetSrc ?? "/character/sprites/0/cat.png"
+          }
           frameWidth={options?.frameWidth ?? 240}
           frameHeight={options?.frameHeight ?? 240}
           frameCount={options?.frameCount ?? 45}
@@ -389,7 +391,6 @@ export default function CharacterSection({
 
         startDelayMs: 0,
         idleFrameIndex: 1, // 필요하면 다른 프레임으로 교체 가능
-        sheetSrc: "/character/sprites/sheep0.png",
 
         frameWidth: 240,
         frameHeight: 240,
@@ -406,7 +407,7 @@ export default function CharacterSection({
 
         startDelayMs: 5000,
         idleFrameIndex: 1,
-        sheetSrc: "/character/sprites/cat0.png",
+        
         frameWidth: 240,
         frameHeight: 240,
         frameCount: 45,

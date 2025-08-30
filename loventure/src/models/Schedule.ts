@@ -10,6 +10,11 @@ const scheduleSchema = new mongoose.Schema({
     isCompleted: { type: Boolean, default: false },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    sticker: { type: String, enum: [
+        "pizza", "cake", "clapperboard", "gamepad", "gem",
+        "book", "car", "beer", "handheart", "treepalm",
+        "croissant", "tent"
+    ] },
 }, { timestamps: true });
 
 export default mongoose.models.Schedule || mongoose.model("Schedule", scheduleSchema);

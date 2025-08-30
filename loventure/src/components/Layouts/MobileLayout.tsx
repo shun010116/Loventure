@@ -60,6 +60,8 @@ export default function MobileLayout({
       {/* 캐릭터 탭 */}
       {activeTab === "character" && (
         <CharacterSection
+          myNickname={userNickname}
+          partnerNickname={partnerNickname}
           myCharacter={myCharacter}
           partnerCharacter={partnerCharacter}
           myEvents={myEvents}

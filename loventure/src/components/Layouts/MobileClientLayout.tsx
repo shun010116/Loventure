@@ -238,35 +238,60 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
   };
 
   const deleteQuest = async () => {
-    // …
-    if (editingQuest) {
-      const res = await fetch(`/api/userQuest/${editingQuest._id}`, {
-        method: "DELETE",
-      });
+    if (!editingQuest) return;
 
-      if (res.ok) {
-        await fetchAllQuests();
-      } else {
-        const data = await res.json();
-        alert(data?.message || "삭제 실패");
-      }
+    let apiUrl = "";
+    if (modalType === "user" || modalType === "partner") {
+      apiUrl = `/api/userQuest/${editingQuest._id}`;
+    } else if (modalType === "couple") {
+      apiUrl = `/api/coupleQuest/${editingQuest._id}`;
     }
+
+    const res = await fetch(apiUrl, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      await fetchAllQuests();
+    } else {
+      let data: { message?: string } = {};
+      try {
+        data = await res.json();
+      } catch (e) {
+        console.warn("Failed to parse error response", e);
+      }
+      alert(data?.message || "삭제 실패");
+    }
+
     setModalOpen(false);
   };
   
   const completeQuest = async () => {
-    if (modalType === "user" && editingQuest) {
-      const res = await fetch(`/api/userQuest/${editingQuest._id}/complete`, {
-        method: "PATCH",
-      });
+    if (!editingQuest) return;
 
-      if (res.ok) {
-        await fetchAllQuests();
-      } else {
-        const data = await res.json();
-        alert(data?.message || "완료 실패");
-      }
+    let apiUrl = "";
+    if (modalType === "user" || modalType === "partner") {
+      apiUrl = `/api/userQuest/${editingQuest._id}/complete`;  
+    } else if (modalType === "couple") {
+      apiUrl = `/api/coupleQuest/${editingQuest._id}/complete`;
     }
+
+    const res = await fetch(apiUrl, {
+      method: "PATCH",
+    });
+
+    if (res.ok) {
+      await fetchAllQuests();
+    } else {
+      let data: { message?: string } = {};
+      try {
+        data = await res.json();
+      } catch (e) {
+        console.warn("Failed to parse error response", e);
+      }
+      alert(data?.message || "완료 실패");
+    }
+
     setModalOpen(false);
   };
 

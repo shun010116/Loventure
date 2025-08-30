@@ -10,7 +10,7 @@ import { CoupleQuest } from "../Types";
 type MinimalCouple = {
   _id: string;
   title: string;
-  status: string; // pending / accepted / completed / ...
+  status: string; // active / completed 
 };
 
 /* 아이템 */
@@ -24,7 +24,7 @@ function CoupleItem<T extends MinimalCouple>({
   onClick,
 }: CoupleItemProps<T>) {
   const active =
-    quest.status !== "pending" && quest.status !== "rejected";
+    quest.status !== "completed";
 
   return (
     <li

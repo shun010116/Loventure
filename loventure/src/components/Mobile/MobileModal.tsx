@@ -283,7 +283,7 @@ export default function MobileModal({
                 )}
 
                 <div className="flex items-center justify-between px-3">
-                  {editingQuest?.status === "accepted" && isPerformer && (
+                  {((editingQuest?.status === "accepted" && isPerformer) || editingQuest?.status === "active") && (
                     <button
                       type="button"
                       onClick={completeQuest}
@@ -293,7 +293,7 @@ export default function MobileModal({
                     </button>
                   )}
 
-                  {(editingQuest?.status === "pending" || editingQuest?.status === "accepted") && isCreator && (
+                  {(((editingQuest?.status === "pending" || editingQuest?.status === "accepted") && isCreator) || editingQuest?.status === "active") && (
                     <button
                       type="button"
                       onClick={deleteQuest}

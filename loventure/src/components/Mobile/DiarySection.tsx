@@ -50,7 +50,7 @@ interface Journal {
 export default function DiarySection() {
   /* ----------공통 상태---------- */
   const router = useRouter();
-  const { isLoggedIn, loading, user } = useAuth();
+  const { isLoggedIn, loading, user, partner } = useAuth();
 
   /* ----------캘린더/폼 상태---------- */
   const [currentDate, setCurrentDate] = useState(dayjs());
@@ -64,6 +64,8 @@ export default function DiarySection() {
   // 이모지 대신 lucide-icons와 string 매핑: "sunny" | "cloudy" | "rainy" | "snowy"
   const [selectedWeather, setSelectedWeather] = useState<string | null>(null);
   const [partnerId, setPartnerId] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   /* ----------날씨 아이콘/매핑 (lucide)---------- */
   const weatherIconMap = {
@@ -201,6 +203,65 @@ export default function DiarySection() {
     if (!isMine && !alreadyRead) markAsRead(filteredJournal._id);
   }, [filteredJournal, user]);
 
+  // 수정 버튼 클릭 핸들러
+  const handleEdit = async () => {
+    if (!filteredJournal) return;
+    setEditing(true);
+    setEditingId(filteredJournal._id);
+    setTitle(filteredJournal.title);
+    setContent(filteredJournal.content);
+    setMood(filteredJournal.mood || "");
+    setSelectedWeather(filteredJournal.weather || null);
+  };
+
+  // 교환일기 수정
+  const handleUpdate = async () => {
+    if (!filteredJournal) return;
+    try {
+      const res = await fetch(`/api/journal/${editingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content,
+          mood,
+          weather: selectedWeather || "etc",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data?.data?.journal) {
+        await fetchJournals();
+        setEditing(false);
+      } else {
+        alert(data?.message || "수정 실패");
+      }
+    } catch (err) {
+      console.error("Error updating journal:", err);
+    }
+  }
+
+  // 교환일기 삭제
+  const handleDelete = async () => {
+    if (!filteredJournal) return;
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      const res = await fetch(`/api/journal/${filteredJournal._id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        await fetchJournals();
+        setSelectedDate(null);
+        setEditing(false);
+        setEditingId(null);
+      } else {
+        alert("삭제 실패");
+      }
+    } catch (err) {
+      console.error("Error deleting journal:", err);
+    }
+  }
+
   /* ------------------------------------------------------------------ */
   /* 렌더링 준비: 달력 날짜 배열                                          */
   /* ------------------------------------------------------------------ */
@@ -230,8 +291,7 @@ export default function DiarySection() {
           {/* 월 이동 헤더 (calendar.tsx 디자인) */}
           <div className="mb-4 text-center">
             <h2 className="text-lg sm:text:xl font-bold">
-              {/* 지금 교환 일기라 되어 있는 부분 OO❤OO의 교환일기 이렇게 유저 이름으로 넣어주셈 */}
-              교환 일기
+              {user?.nickname || "나"} ❤ {partner?.nickname || "파트너"}의 교환 일기 
             </h2>
           </div>
 
@@ -293,7 +353,11 @@ export default function DiarySection() {
           <div className="flex items-center justify-between">
             <button
               className="text-xl text-gray-700 hover:underline flex items-center gap-2 px-4 py-2 -ml-4"
-              onClick={() => setSelectedDate(null)}
+              onClick={() => {
+                setSelectedDate(null);
+                setEditing(false);
+                setEditingId(null);
+              }}
             >
               <span>
                 <CalendarHeart />
@@ -306,7 +370,7 @@ export default function DiarySection() {
           </h2>
 
           {/* 이미 작성된 일기가 있는 경우 → 읽기 모드 */}
-          {filteredJournal ? (
+          {filteredJournal && !editing ? (
             <div className="border:none outline:none p-4 rounded border">
               <p className="text-lg font-bold">제목: {filteredJournal.title}</p>
               <p className="text-sm text-gray-500">
@@ -349,11 +413,15 @@ export default function DiarySection() {
 
               {/* 수정, 삭제 버튼 */}
               <div className="mt-10 flex justify-between">
-                <button className="flex items-center gap-1 text-gray-600 hover:text-indigo-600">
+                <button
+                  className="flex items-center gap-1 text-gray-600 hover:text-indigo-600"
+                  onClick={handleEdit}>
                   <Pencil size={24} />
                 </button>
 
-                <button className="flex items-center gap-1 text-red-500 hover:text-red-600">
+                <button
+                  className="flex items-center gap-1 text-red-500 hover:text-red-600"
+                  onClick={handleDelete}>
                   <BookX size={24} />
                 </button>
               </div>
@@ -410,10 +478,10 @@ export default function DiarySection() {
               <div className="flex justify-end">
                 <button
                   className="bg-blue-300 text-white px-4 py-2 rounded hover:bg-blue-300 disabled:bg-red-400"
-                  onClick={handleSubmit}
+                  onClick={editing ? handleUpdate : handleSubmit}
                   disabled={!title.trim() || !content.trim()}
                 >
-                  작성완료
+                  {editing ? "수정완료" : "작성완료"}
                 </button>
               </div>
             </>
