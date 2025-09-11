@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 
 // Type improt 
-import { TabKey, Schedule, UserQuest, CoupleQuest, PartnerQuest, Character } from "./Types";
+import { TabKey, Schedule, UserQuest, CoupleQuest, Character } from "./Types";
 import { UserQuestModal, PartnerQuestModal, CoupleQuestModal } from "./Modal";
 
 
@@ -53,11 +53,11 @@ export default function MainLayout() {
   const [editingQuest, setEditingQuest] = useState<UserQuest | null>(null);
 
   // 연인 퀘스트
-  const [partnerQuests, setPartnerQuests] = useState<PartnerQuest[]>([]);
+  const [partnerQuests, setPartnerQuests] = useState<UserQuest[]>([]);
   const [selectedPartnerCategory, setSelectedPartnerCategory] = useState("All");
   const [isPartnereDialogOpen, setIsPartnerDialogOpen] = useState(false);
-  const [viewingPartnerQuest, setViewingPartnerQuest] = useState<PartnerQuest | null>(null);
-  const [editingPartnerQuest, setEditingPartnerQuest] = useState<PartnerQuest | null>(null);
+  const [viewingPartnerQuest, setViewingPartnerQuest] = useState<UserQuest | null>(null);
+  const [editingPartnerQuest, setEditingPartnerQuest] = useState<UserQuest | null>(null);
 
 
   // 커플 퀘스트
@@ -147,7 +147,7 @@ export default function MainLayout() {
           assignedToId: user?._id,
           reward: {
             exp: quest.reward?.exp || 0,
-            coins: quest.reward?.coins || 0,
+            gold: quest.reward?.gold || 0,
           }
         }),
       });
@@ -184,7 +184,7 @@ export default function MainLayout() {
       });
 
       if (res.ok) {
-        alert(`퀘스트 완료! Exp: ${editingQuest.reward.exp}, Coins: ${editingQuest.reward.coins} 획득!`);
+        alert(`퀘스트 완료! Exp: ${editingQuest.reward.exp}, Coins: ${editingQuest.reward.gold} 획득!`);
         await fetchAllQuests();
         await fetchCharacter();
       } else {
@@ -217,17 +217,17 @@ export default function MainLayout() {
 
     {/* =================================연인(Partner) Quest 구간============================= */}
     // 파트너 퀘스트 클릭 시 정보 보기
-    const openViewPartnerQuestDialog = (quest: PartnerQuest) => {
+    const openViewPartnerQuestDialog = (quest: UserQuest) => {
       setViewingPartnerQuest(quest);
     };
 
     // 파트너 퀘스트 수정 혹은 저장
-    const savePartnerQuest = async (quest: Partial<PartnerQuest>) => {
+    const savePartnerQuest = async (quest: Partial<UserQuest>) => {
       if (editingPartnerQuest) {
         // 수정
         setPartnerQuests((prev) =>
           prev.map((q) =>
-            q._id === editingPartnerQuest._id ? { ...q, ...quest } as PartnerQuest : q
+            q._id === editingPartnerQuest._id ? { ...q, ...quest } as UserQuest : q
           )
         );
       } else {
@@ -336,7 +336,7 @@ export default function MainLayout() {
       });
 
       if (res.ok) {
-        alert(`커플 퀘스트 완료! Exp: ${editingCoupleQuest.reward.exp}, Coins: ${editingCoupleQuest.reward.coins} 획득!`);
+        alert(`커플 퀘스트 완료! Exp: ${editingCoupleQuest.reward.exp}, Coins: ${editingCoupleQuest.reward.gold} 획득!`);
         await fetchAllQuests();
         await fetchCharacter();
       } else {
@@ -364,14 +364,24 @@ export default function MainLayout() {
       <MobileLayout
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+
+	myCharacter={myCharacter}
+	partnerCharacter={partnerCharacter}
         myEvents={myTodayEvents}
         partnerEvents={partnerTodayEvents}
+	
         userQuests={filteredQuests}
         partnerQuests={filteredPartnerQuests}
         coupleQuests={filteredCoupleQuests}
+
+	userNickname={user?.nickname ?? user?.name ?? "Me"}
+	partnerNickname={partner?.nickname ?? "Partner"}
+
         onUserClick={openEditQuestDialog}
-        onPartnerClick={(q: PartnerQuest) => setViewingPartnerQuest(q)}
+        onPartnerClick={(q: UserQuest) => setViewingPartnerQuest(q)}
         onCoupleClick={openEditCoupleQuestDialog}
+	onAddUserQuest={() => setIsDialogOpen(true)}
+	onAddCoupleQuest={() => setIsCoupleDialogOpen(true)}
       />
         
       {/* PC 전용 */}

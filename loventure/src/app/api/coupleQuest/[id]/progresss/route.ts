@@ -5,14 +5,15 @@ import { success, error } from "@/utils/response";
 import { applyLevelUp } from "@/utils/checkLevelUp";
 
 // PATCH /api/coupleQuest/:id/progress : 커플 퀘스트 진행도 업데이트
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { user, error: authError } = await getAuthenticatedUser(req);
+    const { id } = await params;
 
     if (authError) {
         return error(authError.message, authError.status);
     }
 
-    const quest = await CoupleQuest.findById(params.id);
+    const quest = await CoupleQuest.findById(id);
 
     if (!quest) return error("퀘스트를 찾을 수 없거나 접근 권한이 없습니다.", 404);
     if (quest.status !== "active") return error("이미 완료된 퀘스트입니다.", 400);

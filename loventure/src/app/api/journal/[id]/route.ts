@@ -3,14 +3,15 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 
 // PATCH /api/journal/:id : 교환일기 수정
-export async function PATCH(req: Request, context: { params: { id: string } }) {
+export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const { id } = await context.params;
 
     if (authError) {
         return error(authError.message, authError.status);
     }
 
-    const journalId = context.params.id;
+    const journalId = id;
     const journal = await ExchangeJournal.findById(journalId);
 
     // Check journal exists
@@ -48,14 +49,15 @@ export async function PATCH(req: Request, context: { params: { id: string } }) {
 }
 
 // DELETE /api/journal/:id : 교환일기 삭제
-export async function DELETE(req: Request, context: { params: { id: string } }) {
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const { id } = await context.params;
 
     if (authError) {
         return error(authError.message, authError.status);
     }
 
-    const journalId = context.params.id;
+    const journalId = id;
     const journal = await ExchangeJournal.findById(journalId);
 
     // Check journal exists

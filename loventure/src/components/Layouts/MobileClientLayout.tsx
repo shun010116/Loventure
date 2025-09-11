@@ -172,7 +172,7 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
     let setQuestState: React.Dispatch<React.SetStateAction<any[]>> | undefined;
     let apiUrl = "";
     let method = "POST";
-    let requestBody: any = {
+    const requestBody: any = {
       createdBy: user._id,
       title: quest.title,
       description: quest.description,

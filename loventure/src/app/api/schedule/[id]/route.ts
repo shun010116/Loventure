@@ -3,14 +3,15 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 
 // PUT /api/schedule/:id : 일정 수정
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const { id } = await context.params;
 
     if (authError) {
         return error(authError.message, authError.status);
     }
 
-    const scheduleId = context.params.id;
+    const scheduleId = id;
     const schedule = await Schedule.findById(scheduleId);
 
     // Check schedule exists
@@ -53,14 +54,15 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
 }
 
 // DELETE /api/schedule/:id : 일정 삭제
-export async function DELETE(req: Request, context: { params: { id: string } }) {
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const { id } = await context.params;
 
     if (authError) {
         return error(authError.message, authError.status);
     }
 
-    const scheduleId = context.params.id;
+    const scheduleId = id;
     const schedule = await Schedule.findById(scheduleId);
 
     // Check schedule exists

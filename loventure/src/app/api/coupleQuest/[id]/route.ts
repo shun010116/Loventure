@@ -3,14 +3,15 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 
 // PATCH /api/coupleQuest/:id : 커플 퀘스트 수정
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const { id } = await params;
 
     if (authError) {
         return error(authError.message, authError.status);
     }
 
-    const quest = await CoupleQuest.findById(params.id);
+    const quest = await CoupleQuest.findById(id);
 
     if(!quest || String(quest.coupleId) !== String(user.coupleId)) {
         return error("퀘스트를 찾을 수 없거나 접근 권한이 없습니다.", 404);
@@ -40,14 +41,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 // DELETE /api/coupleQuest/:id : 커플 퀘스트 삭제
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const { id } = await params;
 
     if (authError) {
         return error(authError.message, authError.status);
     }
     
-    const quest = await CoupleQuest.findById(params.id);
+    const quest = await CoupleQuest.findById(id);
 
     if (!quest || String(quest.coupleId) !== String(user.coupleId)) {
         return error("퀘스트를 찾을 수 없거나 접근 권한이 없습니다.", 404);

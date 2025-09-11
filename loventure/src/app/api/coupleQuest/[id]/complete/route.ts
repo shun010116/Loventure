@@ -5,14 +5,15 @@ import { success, error } from "@/utils/response";
 import { applyLevelUp } from "@/utils/checkLevelUp";
 
 // PATCH /api/coupleQuest/:id/complete : 커플 퀘스트 완료 요청
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const { id } = await params;
 
     if (authError) {
         return error(authError.message, authError.status);
     }
 
-    const quest = await CoupleQuest.findById(params.id);
+    const quest = await CoupleQuest.findById(id);
     if (!quest || quest.status !== "active") {
         return error("진행 중인 커플 퀘스트가 아닙니다.", 400);
     }

@@ -5,14 +5,15 @@ import { success, error } from "@/utils/response";
 import { applyLevelUp } from "@/utils/checkLevelUp";
 
 // PATCH /api/userQuest/:id/approve : 퀘스트 완료 승인 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { user, error: authError } = await getAuthenticatedUser(req, true);
+    const { id } = await params;
 
     if (authError) {
         return error(authError.message, authError.status);
     }
 
-    const quest = await UserQuest.findById(params.id);
+    const quest = await UserQuest.findById(id);
     if (!quest || quest.status !== "completed") {
         return error("승인할 수 없는 퀘스트입니다.", 400);
     }
