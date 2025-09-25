@@ -25,6 +25,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
+      <head>
+        {/* 브라우저/모바일 폼·스크롤 등 라이트모드로 고정 */}
+        <meta name="color-scheme" content="light" />
+        {/* 모바일 주소창/상태바 톤 고정(라이트모드) */}
+        <meta name="theme-color" content="#fdf6e3" />
+
+        {/* 시스템 다크모드 무시하고 강제로 라이트모드 설정 */}
+        <meta name="color-scheme" content="light" />
+      </head>
       <body>
         {/* 여기서 단 한 번만 ClientLayout으로 감쌉니다 */}
         <ClientLayout>{children}</ClientLayout>

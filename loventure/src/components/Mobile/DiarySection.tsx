@@ -348,7 +348,7 @@ export default function DiarySection() {
       {/* 작성·열람 화면                                                 */}
       {/* -------------------------------------------------------------- */}
       {selectedDate && (
-        <div className="w-full max-w-4xl bg-[#f6fde7] rounded-xl shadow-lg p-6 flex flex-col gap-4">
+        <div className="w-full max-w-4xl bg-[#f6fde7] dark:bg-[#f6fde7] dark:text-black rounded-xl shadow-lg p-6 flex flex-col gap-4">
           {/* 뒤로가기(날짜 재선택) */}
           <div className="flex items-center justify-between">
             <button

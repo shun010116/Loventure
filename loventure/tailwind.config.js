@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class",
   content: [
 
     // tailwind 적용 경로
@@ -14,5 +15,6 @@ module.exports = {
     extend: {},
   },
   plugins: [],
-}
+  
+};
 

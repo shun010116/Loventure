@@ -350,7 +350,7 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
 
   //  레이아웃 구성
   return (
-    <div className="md:hidden bg-[#fdf6e3] min-h-screen pb-16">
+    <div className="md:hidden bg-[#fdf6e3] dark:bg-[#fdf6e3] dark:text-black min-h-screen pb-16">
       {/* 상단 바 */}
       <MobileTopBar />
 

@@ -32,12 +32,15 @@ function SpriteAnimator({
   safePadPx = 6,            // 잘림 방지용 패딩
   className = "",
 
+  scaleMultiplier = 1.3,    // 캐릭터 스케일 (1 = 100%)
+  offsetYPx = 12,            // 캐릭터 세로 위치 보정(px, +이면 아래로)
+
   // 배경 이미지 옵션
   bgSrc,                    // "/backgrounds/room.jpg" 같은 경로
   bgMode = "cover",         // "cover" | "contain"
   bgPosition = "center",    // "center" | "top" | "bottom" ... 또는 "50% 50%"
   bgOpacity = 1,            // 0~1 (배경 투명도)
-
+  bgScale = 1,              // 배경 스케일 (1 = 100%)
 }: {
   sheetSrc: string;
   frameWidth: number;
@@ -53,11 +56,15 @@ function SpriteAnimator({
   safePadPx?: number;
   className?: string;
 
+  scaleMultiplier?: number;
+  offsetYPx?: number;
+
   // 배경용
   bgSrc?: string;
   bgMode?: "cover" | "contain";
   bgPosition?: string;
   bgOpacity?: number;
+  bgScale ?: number;  // 배경 스케일 
 
 }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -103,9 +110,10 @@ useEffect(() => {
       const { width, height } = entry.contentRect;
       const availW = Math.max(0, width - safePadPx * 2);
       const availH = Math.max(0, height - safePadPx * 2);
-      const s = Math.min(availW / frameWidth, availH / frameHeight);
-      const snapped = Math.max(1, Math.floor(s * 10) / 10);
-      setScale(snapped || 1);
+      const sRaw = Math.min(availW / frameWidth, availH / frameHeight);
+      // 0.05 단위로 반올림
+      const snapped = Math.max(0.1, Math.round(sRaw * 20) / 20);
+      setScale(snapped);
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -191,7 +199,7 @@ useEffect(() => {
         ...(bgSrc
           ? {
               backgroundImage: `url(${bgSrc})`,
-              backgroundSize: bgMode,
+              backgroundSize: bgScale !== 1 ? `${bgScale * 100}% auto` : bgMode,
               backgroundPosition: bgPosition,
               backgroundRepeat: "no-repeat",
               // 배경 투명도 주고 싶으면 오버레이로 처리 (아래 ::after 방식 권장)
@@ -204,8 +212,9 @@ useEffect(() => {
         style={{
           width: frameWidth,
           height: frameHeight,
-          transform: `scale(${scale})`,
-          transformOrigin: "center",
+          transform: `scale(${scale * scaleMultiplier})`,
+          transformOrigin: "bottom center",
+          marginTop: offsetYPx,
           imageRendering: "pixelated" as any,
           willChange: "transform, background-position",
         }}
@@ -303,6 +312,8 @@ export default function CharacterSection({
       idleFrameIndex?: number; // idle로 쓸 프레임 지정(기본 0)
       title?: string;
 
+      characterScale?: number;
+
       sheetSrc?: string;
       frameWidth?: number;
       frameHeight?: number;
@@ -315,7 +326,8 @@ export default function CharacterSection({
       bgMode?: "cover" | "contain";
       bgPosition?: string;
       bgOpacity?: number;
-
+      bgScale?: number;
+      
     }
   ) => {
     const titleToShow = pickName(options?.title, char?.name, fallback);
@@ -340,14 +352,17 @@ export default function CharacterSection({
 
           startDelayMs={options?.startDelayMs ?? 0}
           idleFrameIndex={options?.idleFrameIndex ?? 1}
-          containerHeightPx={340}  // 표시 영역 조금 넉넉히
+          containerHeightPx={250}  // 표시 영역 조금 넉넉히
           safePadPx={6}
+          scaleMultiplier={1.4}    // 캐릭터 스케일
+          offsetYPx={30}           // 캐릭터 세로 위치 보정(px, +이면 아래로)
 
           // 배경
           bgSrc="/backgrounds/background.jpg"
           bgMode="cover"
           bgPosition="center"
           bgOpacity={1}
+
         />
 
         {/* 닉네임 */}
@@ -396,9 +411,11 @@ export default function CharacterSection({
         frameHeight: 240,
         frameCount: 30,
         fps: 12,
-        durationMs: 1500,
+        durationMs: 5000,
         intervalAfterMs: 2000,
-
+        
+        characterScale: 1.5,
+        bgScale: 0.5,
       })}
 
       {/* 파트너 캐릭터: 5초 뒤 시작 */}
@@ -412,8 +429,11 @@ export default function CharacterSection({
         frameHeight: 240,
         frameCount: 45,
         fps: 12,
-        durationMs: 3000,
+        durationMs: 5000,
         intervalAfterMs: 2000,
+
+        characterScale: 1.5,
+        bgScale: 0.5,
       })}
     </div>
   );

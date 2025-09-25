@@ -100,8 +100,8 @@ export default function QuestSection({
   onAddUserQuest,
   onAddPartnerQuest,
 }: QuestSectionProps) {
-  return (
-    <div className="flex flex-col gap-8 sm:hidden px-4 pt-4">
+  return ( /* 여기는 임시로 다크모드  */
+    <div className="flex flex-col dark:bg-[#fdf6e3] dark:text-black gap-8 sm:hidden px-4 pt-4">
       <h2 className="text-center font-serif text-5xl sm:text-4xl mb-4">
         Quest
       </h2>

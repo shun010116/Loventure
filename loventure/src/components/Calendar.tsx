@@ -248,7 +248,7 @@ const stickerOptions: ReadonlyArray<{ value: string; Icon: LucideIcon }> = [
   return (
     <div
       className={clsx(
-        "mx-auto p-4 bg-[#fdf6e3] rounded-2xl shadow",
+        "mx-auto p-4 bg-[#fdf6e3] dark:bg-[#fdf6e3] dark:text-black rounded-2xl shadow",
         compact ? "max-w-3xl" : "max-w-4xl"
       )}
     >
@@ -293,10 +293,11 @@ const stickerOptions: ReadonlyArray<{ value: string; Icon: LucideIcon }> = [
               key={formatted}
               className={clsx(
                 "relative rounded-2xl border p-1 cursor-pointer transition", // relative 추가
+                "dark:border-black/10",
                 isMobile
                   ? "h-14 overflow-hidden text-[10px] bg-[#fdf6e3]"
                   : "aspect-square p-2 overflow-auto bg-[#fdf6e3]",
-                isSelected ? "bg-blue-100" : "hover:bg-blue-100"
+                isSelected ? "bg-blue-100 dark:bg-blue-100" : "hover:bg-blue-100 dark:hover:bg-blue-100"
               )}
               onClick={() => {
                 setSelectedDate(formatted);
@@ -310,7 +311,7 @@ const stickerOptions: ReadonlyArray<{ value: string; Icon: LucideIcon }> = [
               {/* 모바일 : 날짜 셀 중앙에 아이콘 1개만, 작게 표시 */}
               {isMobile && StickerIcon && (
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1.5 pointer-events-none">
-                  <StickerIcon size={26} className="opacity-80" />
+                  <StickerIcon size={26} className="opacity-80 dark:opacity-100" />
                 </div>
               )}
 

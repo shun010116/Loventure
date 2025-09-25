@@ -2,6 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============ Light-Lock: 전역 라이트 고정 ============ */
+:root {
+  /* 오타 수정: color-scheme */
+  color-scheme: light !important;   /* UA 폼/스크롤 포함 라이트 고정 */
+  --background: #fdf6e3 !important; /* 프로젝트 라이트 기본 배경색 */
+  --foreground: #171717 !important;
+}
+
+/* 기기가 다크여도 '라이트 변수'를 다시 주입해서 동일하게 보이게 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light !important;
+    --background: #fdf6e3 !important;
+    --foreground: #171717 !important;
+  }
+
+  /* 화면 자체도 라이트 고정 */
+  html, body, #__next, #root, main {
+    background: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+
+  /* 입력/컨트롤류 라이트 고정 */
+  input, textarea, select {
+    background: var(--background) !important;
+    color: var(--foreground) !important;
+    border-color: rgba(0,0,0,0.2) !important;
+  }
+
+  button:has(> svg:only-child) {
+    background-color: transparent !important;
+  }
+
+  button.icon-btn {
+    background-color: transparent !important;
+  }
+
+  /* 아이콘/미디어 흐릿함 방지 */
+  svg, img, video, canvas {
+    filter: none !important;
+    opacity: 1 !important;
+    mix-blend-mode: normal !important;
+  }
+
+  ::placeholder { opacity: 1 !important; }
+}
+
+/* ====== 기존 커스텀 스타일 ====== */
 .table-register {
   width: 280px;
   height: 550px;
@@ -16,7 +64,7 @@
   border-radius: 15px;
   outline: none;
   padding-left: 10px;
-  background-color: rgb(233,233,233);
+  background-color: rgb(233,233,233) !important;
 }
 
 .btn-register {
@@ -27,31 +75,20 @@
   border-radius: 15px;
   outline: none;
   padding-left: 10px;
-  background-color: rgb(164, 199, 255);
+  background-color: rgb(164, 199, 255) !important;
 }
 
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Tailwind @theme inline 변수 */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--background) !important;
+  --color-foreground: var(--foreground) !important;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* 전역 적용 */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--background) !important;
+  color: var(--foreground) !important;
   font-family: Arial, Helvetica, sans-serif;
 }
