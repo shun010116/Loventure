@@ -348,7 +348,10 @@ export default function MobileModal({
                         type="submit"
                         className="flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-lg active:scale-95"
                       >
-                        <Save size={25} />
+                        <Save
+                          size={25}
+                          className="text-black dark:text-black"
+                        />
                       </button>
                     </div>
                   )}
