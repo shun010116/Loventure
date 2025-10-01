@@ -1,26 +1,48 @@
 // utils/checkLevelUp.ts
+import { expToNextLevel, MAX_LEVEL } from "./rewardCalculator";
 
-function getRequiredExpForLevel(level: number): number {
-    return 50 * level * level;
-}
-
+const EVOLVE_LEVELS = [20];
 function getEvolutionStage(level: number): number {
-    if (level >= 30) return 3;
-    if (level >= 20) return 2;
-    if (level >= 10) return 1;
-    return 0;
+    let s = 0;
+    for (const L of EVOLVE_LEVELS) if (level >= L) s++;
+    return s;
 }
 
-export function applyLevelUp(character: any) {
-    let requiredExp = getRequiredExpForLevel(character.level);
+export type LevelUpResult = {
+    character: any;
+    evolved: boolean;
+    prevLevel: number;
+    newLevel: number;
+    prevStage: number;
+    newStage: number;
+}
 
-    while (character.exp >= requiredExp) {
-        character.level += 1;
-        character.exp -= requiredExp;
-        requiredExp = getRequiredExpForLevel(character.level);
+export function applyLevelUp(character: any): LevelUpResult {
+    const prevLevel = character.level ?? 1;
+    const prevStage = character.evolutionStage;
+
+    let requiredExp = expToNextLevel(character.level);
+    while (character.level < MAX_LEVEL && character.exp >= requiredExp) {
+            character.level += 1;
+            character.exp -= requiredExp;
+            requiredExp = expToNextLevel(character.level);
+        }
+    if (character.level >= MAX_LEVEL) {
+        character.level = MAX_LEVEL;
+        character.exp = 0;
     }
 
     character.evolutionStage = getEvolutionStage(character.level);
+    
+    const newLevel = character.level;
+    const newStage = character.evolutionStage;
 
-    return character;
+    return {
+        character,
+        evolved: newStage > prevStage,
+        prevLevel,
+        newLevel,
+        prevStage,
+        newStage,
+    };
 }

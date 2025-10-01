@@ -399,7 +399,7 @@ export default function MainLayout() {
               {/* 내 캐릭터 */}
               <div className="flex flex-col items-center w-full sm:w-1/2 lg:w-[22%] bg-white rounded shadow p-4 h-[400px]">
                 <div>
-                  <img src={`/character/${myCharacter?.evolutionStage}/${myCharacter?.avatar}`} className="w-24 h-24 rounded-full mb-2"/>
+                  <img src={`/character/sprites/${myCharacter?.evolutionStage}/${myCharacter?.avatar}`} className="w-24 h-24 rounded-full mb-2"/>
                 </div>
                 <div className="text-sm font-bold">{myCharacter?.name ?? "-"}</div>
                 <div className="text-xs">Lv. {myCharacter?.level ?? "-"}</div>
@@ -422,7 +422,7 @@ export default function MainLayout() {
               {/* 파트너 캐릭터 */}
               <div className="flex flex-col items-center w-full sm:w-1/2 lg:w-[22%] bg-white rounded shadow p-4 h-[400px]">
                 <div>
-                  <img src={`/character/${partnerCharacter?.evolutionStage}/${partnerCharacter?.avatar}`} className="w-24 h-24 rounded-full mb-2" />
+                  <img src={`/character/sprites/${partnerCharacter?.evolutionStage}/${partnerCharacter?.avatar}`} className="w-24 h-24 rounded-full mb-2" />
                 </div>
                 <div className="text-sm font-bold">{partnerCharacter?.name ?? "No Partner"}</div>
                 <div className="text-xs">Lv. {partnerCharacter?.level ?? "-"}</div>

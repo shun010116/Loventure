@@ -4,6 +4,7 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 import { getPartnerId } from "@/utils/getPartnerId";
 import { sendNotification } from "@/lib/notify";
+import { computeCoupleQuestReward } from "@/utils/rewardCalculator";
 
 // POST /api/coupleQuest : 커플 퀘스트 생성
 export async function POST(req: Request) {
@@ -24,13 +25,29 @@ export async function POST(req: Request) {
         description,
         goalType = "shared-count",
         targetValue = 1,
-        reward = { exp: 0, gold: 0 },
+        resetType = "Daily",
     } = await req.json();
 
     // Check condition
     if (!title || !targetValue) {
         return error("필수 항목이 누락되었습니다.", 400);
     }
+
+    const chars = await Character.find({ userId: { $in: [user._id, partnerId] } }).lean();
+    const avgLevel = Math.max(
+        1,
+        Math.round(
+            (chars.reduce((s, c) => s+ Number(c?.level ?? 1), 0)) / (chars.length || 1)
+        )
+    );
+
+    const reward = computeCoupleQuestReward({
+        levelForCalc: avgLevel,
+        goalType: goalType,
+        resetType: resetType,
+        targetValue: targetValue,
+        evolved: avgLevel >= 20,
+    });
 
     const newQuest = await CoupleQuest.create({
         coupleId: user.coupleId,
@@ -39,9 +56,13 @@ export async function POST(req: Request) {
         description,
         goalType,
         targetValue,
-        reward,
+        reward: {
+            exp: reward.exp,
+            gold: reward.gold
+        },
         progress: { [user._id]: 0 },
     });
+
 
     // send notification to partner
     // sendNotification({

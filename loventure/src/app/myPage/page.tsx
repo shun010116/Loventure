@@ -93,14 +93,14 @@ export default function MyPage() {
         </div>
       </div>
 
-      <div className='p-4 text-center rounded-lg'>
+      {/* <div className='p-4 text-center rounded-lg'>
         <p className='mb-4 text-center text-sm'>캐릭터 변경</p>
         <input type="file" onChange={(e) =>  setFile(e.target.files?.[0] || null)} />
         <button onClick={handleUpload} disabled={!file || load} className='mt-2 bg-blue-500 text-white px-4 py-2 rounded'>
           {load ? 'Uploading...' : 'Upload Image'}
         </button>
 
-      </div>
+      </div> */}
     </>
   );
 }

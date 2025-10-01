@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Character } from "@/components/Types";
+import { expToNextLevel } from "@/utils/rewardCalculator";
 
 /* ===================== Sprite Animator (스프라이트 시트 재생기) ===================== */
 /**
@@ -256,8 +257,8 @@ interface CharacterSectionProps {
 
 
 /* 경험치 Bar */
-function LineExpBar({ percent }: { percent: number }) {
-  const p = Math.max(0, Math.min(100, percent ?? 0));
+function LineExpBar({ next, current }: { next: number, current: number }) {
+  const p = current / next * 100
   return (
     <div className="flex items-center gap-3 w-full">
       <div className="relative h-3 w-full rounded-full border-2 border-stone-800">
@@ -338,7 +339,7 @@ export default function CharacterSection({
         {/* 캐릭터 스프라이트 */}
         <SpriteAnimator
           sheetSrc={
-            char?.evolutionStage && char?.avatar
+            char?.avatar
               ? `/character/sprites/${char.evolutionStage}/${char.avatar}`
               : options?.sheetSrc ?? "/character/sprites/0/cat.png"
           }
@@ -376,7 +377,7 @@ export default function CharacterSection({
         <div className="w-full mt-3 flex items-center gap-3">
           <span className="font-semibold whitespace-nowrap">LV.{char?.level ?? "-"}</span>
             <div className="relative h-3 flex-1">
-              <LineExpBar percent={Number(char?.exp ?? 0)} />
+              <LineExpBar next={expToNextLevel(char?.level ?? 1)} current={char?.exp ?? 0} />
             </div>
         </div>
 

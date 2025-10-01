@@ -3,7 +3,7 @@ import Character from "@/models/Character";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { success, error } from "@/utils/response";
 import { sendNotification } from "@/lib/notify";
-import { calculateReward } from "@/utils/rewardCalculator";
+import { computeUserQuestReward } from "@/utils/rewardCalculator";
 
 // POST /api/userQuest : 개인 퀘스트 생성
 export async function POST(req: Request) {
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         },
         needApproval,
     } = await req.json();
-    
+
     // Check couple exists
     if (String(createdBy) !== String(user._id) && !user.coupleId) {
         return error("상대에게 퀘스트를 주려면 커플이 연결되어 있어야 합니다.", 403);
@@ -54,6 +54,18 @@ export async function POST(req: Request) {
         await creatorCharacter.save();
     }
 
+    const char = await Character.findOne({ userId: userId });
+    const level = char.level;
+
+    const calcReward = computeUserQuestReward({
+        level,
+        difficulty: difficulty,
+        goalType: goalType,
+        resetType: resetType,
+        targetValue: goalType === "count" ? (targetValue ?? 1) : 1,
+        evolved: level >= 20,
+    })
+
     // Create UserQuest
     const newQuest = await UserQuest.create({
         userId,
@@ -64,7 +76,10 @@ export async function POST(req: Request) {
         goalType,
         resetType,
         targetValue,
-        reward,
+        reward: {
+            exp: calcReward.exp,
+            gold: isSelf ? calcReward.gold : reward.gold
+        },
         needApproval,
         status: isSelf ? "accepted" : "pending", // If self-created, set status to accepted
     });

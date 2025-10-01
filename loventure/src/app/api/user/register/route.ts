@@ -4,6 +4,8 @@ import Character from "@/models/Character";
 import bcrypt from "bcrypt";
 import { success, error } from "@/utils/response";
 import { generateUniqueCoupleCode } from "@/utils/generateUniqueCoupleCode";
+import { INITIAL_CHARACTERS } from "@/constants/characters";
+import { getRandomItem } from "@/utils/random";
 
 // POST /api/user/register : 회원가입
 export async function POST(req: Request) {
@@ -47,8 +49,11 @@ export async function POST(req: Request) {
         //console.log("저장된 유저:", newUser);
 
         // create Character
+        const randomCharacter = getRandomItem(INITIAL_CHARACTERS);
         const newCharacter = await Character.create({
             userId: newUser._id,
+            name: nickname,
+            avatar: randomCharacter.sprite,
         });
 
         return success("회원가입이 완료되었습니다.", {

@@ -90,24 +90,30 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
     setPartnerQuests(data.partnerQuests ?? []);
     setCoupleQuests(data.coupleQuests ?? []);
   };
-
+  
   useEffect(() => {
     if (!loading && isLoggedIn) {
       fetchAllQuests();
     }
   }, [loading, isLoggedIn])
-
+  
   /* ───────── 2. 캐릭터 fetch ─────── */
+  const fetchCharacters = async () => {
+    const res = await fetch("/api/character/me", { credentials: "include" });
+    if (!res.ok) return;
+    const { data } = await res.json();
+    setMyCharacter(data.myCharacter ?? null);
+    setPartnerCharacter(data.partnerCharacter ?? null);
+  }
   useEffect(() => {
     if (!user) return;
-    (async () => {
-      const res = await fetch("/api/character/me", { credentials: "include" });
-      if (!res.ok) return;
-      const { data } = await res.json();
-      setMyCharacter(data.myCharacter ?? null);
-      setPartnerCharacter(data.partnerCharacter ?? null);
-    })();
+    fetchCharacters();
   }, [user]);
+  useEffect(() => {
+    if (activeTab === "character") {
+      fetchCharacters();
+    }
+  }, [activeTab]);
 
   /* ───────── 3. 스케줄 fetch & 필터 ─────── */
   useEffect(() => {
@@ -334,6 +340,7 @@ export default function MobileClientLayout({ children }: MobileClientLayoutProps
       });
 
       if (res.ok) {
+        await fetchCharacters();
         await fetchAllQuests();
       } else {
         const data = await res.json();
