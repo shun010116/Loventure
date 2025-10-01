@@ -84,12 +84,12 @@ export async function POST(req: Request) {
         status: isSelf ? "accepted" : "pending", // If self-created, set status to accepted
     });
 
-    // sendNotification({
-    //     userId: user._id,
-    //     type: "quest",
-    //     content: `${user.nickname}님이 퀘스트를 생성했어요!`,
-    //     link: "/UserQuest",
-    // })
+    sendNotification({
+        userId: user._id,
+        type: "quest",
+        content: `${user.nickname}님이 퀘스트를 생성했어요!`,
+        link: "/",
+    })
 
     // Return UserQuest
     return success("개인 퀘스트가 생성되었습니다.", {

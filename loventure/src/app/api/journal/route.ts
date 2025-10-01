@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         userId: partnerId || "",
         type: "exchange_journal",
         content: `${user.nickname}님이 교환일기를 작성했어요`,
-        link: "/diary"
+        link: "/"
     })
 
     // Return ExchangeJournal info
