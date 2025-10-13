@@ -225,12 +225,12 @@ MIT License
 <div align="center">
   <table>
     <tr>
-      <td><img src="./page%20screenshot/cat_0.gif"   width="220" alt="cat_0"></td>
-      <td><img src="./page%20screenshot/sheep_0.gif" width="220" alt="sheep_0"></td>
+      <td><img src="./page%20screenshot/cat_0.gif"   width="240" alt="cat_0"></td>
+      <td><img src="./page%20screenshot/sheep_0.gif" width="240" alt="sheep_0"></td>
     </tr>
     <tr>
-      <td><img src="./page%20screenshot/cat_1.gif"   width="220" alt="cat_1"></td>
-      <td><img src="./page%20screenshot/sheep_1.gif" width="220" alt="sheep_1"></td>
+      <td><img src="./page%20screenshot/cat_1.gif"   width="240" alt="cat_1"></td>
+      <td><img src="./page%20screenshot/sheep_1.gif" width="240" alt="sheep_1"></td>
     </tr>
   </table>
 
