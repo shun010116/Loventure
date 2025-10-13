@@ -216,30 +216,26 @@ MIT License
 - 일정 level 달성시 캐릭터의 시각적 진화(변화) 요소 제공
 - 향후 커스터마이징/아이템 해금 조건으로 활용 가능성
 
-<figure style="text-align:center">
-    <img src="./page screenshot/메인 캐릭터 화면.jpg" width="300">
-    <figcaption style="text-align: center">메인 화면의 캐릭터창</figcaption>
-</figure>
+<div align="center">
+  <img src="./page%20screenshot/메인 캐릭터 화면.jpg" width="300" alt="메인 화면의 캐릭터창">
+  <div><em>메인 화면의 캐릭터창</em></div>
+</div>
 
 
-<figure style="text-align:center">
-    <div>
-        <img src="./page screenshot/cat_0.gif">
-        <img src="./page screenshot/sheep_0.gif">
-    </div>
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/cat_0.gif"   width="220" alt="cat_0"></td>
+      <td><img src="./page%20screenshot/sheep_0.gif" width="220" alt="sheep_0"></td>
+    </tr>
+    <tr>
+      <td><img src="./page%20screenshot/cat_1.gif"   width="220" alt="cat_1"></td>
+      <td><img src="./page%20screenshot/sheep_1.gif" width="220" alt="sheep_1"></td>
+    </tr>
+  </table>
 
-</figure>
-
-
-<figure style="text-align:center">
-    <div>
-        <img src="./page screenshot/cat_1.gif">
-        <img src="./page screenshot/sheep_1.gif">
-        <figcaption style="text-align: center">캐릭터별 동작</figcaption>
-    </div>
-    
-    
-</figure>
+  <div><em>캐릭터별 동작</em></div>
+</div>
 
 <br><br>
 
@@ -271,20 +267,28 @@ MIT License
 - 퀘스트를 완료하며 연인과 함께 성장하는 캐릭터
 - 자유로운 퀘스트 수주로 사용자에 맞게 커스텀 가능
 
-<figure style="text-align:center">
-    <img src="./page screenshot/커플 퀘스트.jpg" width="300">
-    <img src="./page screenshot/커플 퀘스트.jpg" width="300">
-    <figcaption style="text-align: center">사용자 및 커플 퀘스트 페이지</figcaption>
-</figure>
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/커플%20퀘스트.jpg" width="300" alt="사용자 퀘스트"></td>
+      <td><img src="./page%20screenshot/커플%20퀘스트.jpg" width="300" alt="커플 퀘스트"></td>
+    </tr>
+  </table>
+  <div><em>사용자 및 커플 퀘스트 페이지</em></div>
+</div>
 
-<br>
+<br><br>
 
 
-<figure style="text-align:center">
-    <img src="./page screenshot/연인 퀘스트 생성.jpg" width="300">
-    <img src="./page screenshot/커플 퀘스트 생성.jpg" width="300">
-    <figcaption style="text-align: center">연인 및 커플 퀘스트 생성</figcaption>
-</figure>
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/연인%20퀘스트%20생성.jpg" width="300" alt="연인 퀘스트 생성"></td>
+      <td><img src="./page%20screenshot/커플%20퀘스트%20생성.jpg" width="300" alt="커플 퀘스트 생성"></td>
+    </tr>
+  </table>
+  <div><em>연인 및 커플 퀘스트 생성</em></div>
+</div>
 
 
 
@@ -295,17 +299,22 @@ MIT License
 🎯 목적
 - 내용 넣어야 함
 
-<figure style="text-align:center">
-    <img src="./page screenshot/달력 메인화면.jpg" width="300">
-    <figcaption style="text-align: center">달력 페이지</figcaption>
-</figure>
+<div align="center">
+  <img src="./page%20screenshot/달력%20메인화면.jpg" width="300" alt="달력 페이지">
+  <div><em>달력 페이지</em></div>
+</div>
 
+<br>
 
-<figure style="text-align:center">
-    <img src="./page screenshot/달력 일정 생성1.jpg" width="300">
-    <img src="./page screenshot/달력 일정 생성2.jpg" width="300">
-    <figcaption style="text-align: center">일정 생성</figcaption>
-</figure>
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/달력%20일정%20생성1.jpg" width="300" alt="일정 생성 1"></td>
+      <td><img src="./page%20screenshot/달력%20일정%20생성2.jpg" width="300" alt="일정 생성 2"></td>
+    </tr>
+  </table>
+  <div><em>일정 생성</em></div>
+</div>
 
 
 ---
@@ -315,13 +324,23 @@ MIT License
 🎯 목적
 - 내용 넣어야 함
 
-<figure style="text-align:center"">
-    <img src="./page screenshot/교환일기 메인 화면.jpg" width="300">
-    <figcaption style="text-align: center">교환일기 페인 화면</figcaption>
-</figure>
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/교환일기%20메인%20화면.jpg" width="300" alt="교환일기 메인"></td>
+    </tr>
+  </table>
+  <div><em>교환일기 화면</em></div>
+</div>
 
-<figure style="text-align:center"">
-    <img src="./page screenshot/교환일기 작성.jpg" width="300">
-    <img src="./page screenshot/교환일기 읽기.jpg" width="300">
-    <figcaption style="text-align: center">교환일기 작성 및 읽기</figcaption>
-</figure>
+<br><br>
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/교환일기%20작성.jpg" width="300" alt="교환일기 작성"></td>
+      <td colspan="2" align="center"><img src="./page%20screenshot/교환일기%20읽기.jpg" width="300" alt="교환일기 읽기"></td>
+    </tr>
+  </table>
+  <div><em>교환일기 작성 및 읽기</em></div>
+</div>
