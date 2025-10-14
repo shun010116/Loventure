@@ -50,16 +50,16 @@ function clamp(n: number, lo: number, hi: number) { return Math.max(lo, Math.min
 export function expToNextLevel(level: number) {
     if (level <= 0) level = 1;
 
-    if (level <= 10) return 80 + 40 * 10 // 400
+    if (level <= 10) return 80 + 40 * (level - 1);
 
     if (level <= 30) {
-        const lastSeg1 = 80 + 40 * 10; // 400
+        const lastSeg1 = 80 + 40 * 10; // 480
         const targetLv11 = lastSeg1 + 40; // 520
         const c = targetLv11 / Math.pow(11, 1.5);
         return Math.round(c * Math.pow(level, 1.5));
     }
 
-    const lastSeg1 = 80 + 40 * 10; // 400
+    const lastSeg1 = 80 + 40 * 10; // 480
     const targetLv11 = lastSeg1 + 40; // 520
     const c = targetLv11 / Math.pow(11, 1.5);
     const lv30 = Math.round(c * Math.pow(30, 1.5));

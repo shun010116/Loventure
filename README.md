@@ -247,6 +247,12 @@ MIT License
 | 최대 레벨 | 50 |
 | 진화 레벨 | 20 |
 
+| 레벨 | 공식 |
+| ----- | ----- |
+| 1 - 10 | $120 + 40 \times (\textrm{level} -1)$ |
+| 11 - 30 | $(\textrm{Cumulative 11}) / 11^{1.5} \times \textrm{level}^{1.5}$ |
+| 31 - 50 | $(\textrm{Cumulative 30}) \times 1.05 / 31^{2.0} \times \textrm{level}^{2.0} $ |
+
 다음 경험치
 ![exp](./public/image/EXP%20to%20Next%20Level%20(Lv1–50)%20with%20Evolution%20at%20Lv20.png)
 
@@ -290,7 +296,60 @@ MIT License
   <div><em>연인 및 커플 퀘스트 생성</em></div>
 </div>
 
+<details>
+    <summary>보상 생성 규칙</summary>
 
+- userQuest
+  1. 기본 경험치  
+  레벨 L일 때의 주간 퀘스트 경험치는:  
+  $\textrm{BaseEXP}(L) = \frac{\textrm{expToNextLevel}(L)}{14}$
+  2. 보상 경험치 공식  
+  입력변수
+    - $D$: 퀘스트 난이도 (1-5)
+    - $G$: 목표 유형 (check: 1.0, count: 1.15)
+    - $R$: 반복 유형 (Daily: 0.9, Weekly, One-time: 1.0)
+    - $T$: 목표 수치(주로 count에 해당)
+    - $E$: 진화 여부(Lv ≥ 20이면 true)  
+  중간 계산
+    - 난이도 보정: $\textrm{diffMult}(D)$
+    - 목표 유형 가중치: $\textrm{goalWeight}(G)$
+    - 반복 유형 가중치: $\textrm{resetMult}(R)$
+    - 크기 보정(count만): $\textrm{sizeFactor}(T) = 1 + \log_{10}({T+9})$  
+
+  경험치 공식  
+  $$\textrm{rawEXP} = \textrm{BaseEXP}(L) \times \textrm{diffMult}(D) \times \textrm{goalWeight}(G) \times \textrm{resetMult}(R) \times \begin{cases}1, \quad \quad \quad \quad \quad \quad \textrm{if}\;G = \textrm{check}\\ \textrm{sizeFactor}(T),\;\; \textrm{if}\;G=\textrm{count} \end{cases}$$
+  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{RawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
+
+  3. 골드 보상 공식
+  $\textrm{Gold} = \textrm{round5}(EXP \times 0.6 \times (1.10 \; \textrm{if} \; E)) $
+  - round5(n): 5단위 반올림 (e.g., 17 → 15, 18 → 20)
+
+- coupleQuest
+  1. 입력 변수
+    - $L$: 평균 레벨
+    - $G$: 목표 유형 (shared-count: 1.25, both-complete: 1.35)
+    - $R$: 반복 유형 (Daily: 0.9, Weekly, One-time: 1.0)
+    - $T$: 목표 수치
+    - $E$: 진화 여부
+
+  2. 경험치 공식  
+  $$\textrm{rawEXP} = \textrm{BaseEXP}(L) \times 1.5 \times \textrm{goalWeight}(G) \times \textrm{resetMult}(R) \times \textrm{sizeFactor}(T)$$
+  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{RawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
+
+  3. 골드 공식  
+  $\textrm{Gold} = \textrm{round5}(\textrm{EXP} \times 0.6 \times (1.10 \; \textrm{if} \; E))$
+
+요약
+| 항목 | 설명 |
+| ----- | ----- |
+|BaseEXP | 레벨별 주간 기준 퀘스트 보상 경험치 |
+| diffMult | 난이도에 따른 경험치 보정값 |
+| goalWeight | 목표 유형에 따른 보정값 |
+| resetMult | 반복 주기 보정값 |
+| sizeFactor | 목표 수치 크기에 따른 보정값 (log10 기반) |
+| Evolved | 20 level 이상일 경우, 경험치 1.05배, 골드 1.10배 |
+
+</details>
 
 ---
 
