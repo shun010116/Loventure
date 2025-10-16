@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { success, error } from "@/utils/response";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
-const COOKIE_EXPIRES_IN = 60 * 60 * 6; // 6시간
+const TOKEN_TTL = 60 * 60 * 3; // 3시간
 
 if (!JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined");
@@ -42,8 +42,21 @@ export async function POST(req: Request) {
                 email: user.email,
             },
             JWT_SECRET,
-            { expiresIn: COOKIE_EXPIRES_IN }
+            { expiresIn: TOKEN_TTL }
         );
+
+        // secure option
+        const isProd = process.env.NODE_ENV === "production";
+        const cookieOptions = [
+            `token=${token}`,
+            "HttpOnly",
+            "Path=/",
+            `Max-Age=${TOKEN_TTL}`,
+            "SameSite=Lax",
+            isProd ? "Secure" : "", // True when production
+        ]
+            .filter(Boolean)
+            .join("; ");
 
         // Set token in cookie
         return new Response(JSON.stringify({
@@ -57,7 +70,7 @@ export async function POST(req: Request) {
         }), {
             status: 200,
             headers: {
-                "Set-Cookie": `token=${token}; HttpOnly; Path=/; Max-Age=${COOKIE_EXPIRES_IN}; SameSite=Strict;`,
+                "Set-Cookie": cookieOptions,
                 "Content-Type": "application/json",
             },
         });
