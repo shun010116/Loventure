@@ -1,7 +1,8 @@
 # 💞 Loventure: 커플 기반 일정 & 교환일기 웹 애플리케이션
 
-**Loventure**는 커플을 위한 RPG 스타일의 일정 관리 및 감성 일기 교환 플랫폼입니다. 
-기존의 커플 앱들은 사용자의 모든 요구를 맞춰주지 못합니다. 일정 공유 달력이나 교환일기같은 소소한 일상을 나눌 수 있는 기능이 부족합니다. **Loventure**에서는 커플이 각자 캐릭터를 육성하며, 함께 퀘스트를 수행하고, 교환일기로 감정을 나눌 수 있는 특별한 공간을 제공합니다.
+**Loventure**는 커플을 위한 RPG 스타일의 일정 관리 및 감성 일기 교환 플랫폼입니다.      
+기존의 커플 앱들은 사용자의 모든 요구를 맞춰주지 못합니다. 일정 공유 달력이나 교환일기같은 소소한 일상을 나눌 수 있는 기능이 부족합니다.    
+**Loventure**에서는 커플이 각자 캐릭터를 육성하며, 함께 퀘스트를 수행하고, 교환일기로 감정을 나눌 수 있는 특별한 공간을 제공합니다.    
 
 ## ✨ 주요 기능
 
@@ -35,6 +36,340 @@
 - 커플 사이트에 알맞는 따뜻한 파스텔 톤, 미니멀 UI 지향.
 
 ---
+
+
+
+## 🧙 캐릭터 레벨 시스템 (Level System)
+
+⚙️ 기능
+- 퀘스트 달성 --> 보상으로 경험치(exp) 획득 -> 캐릭터 level 증가
+- 일정 level 달성시 캐릭터의 시각적 진화(변화) 요소 제공합니다.
+- 향후 캐릭터 커스터마이징/아이템 해금 조건으로 활용 가능성이 있습니다.  
+    
+<br><br>      
+
+<div align="center">
+  <img src="./page%20screenshot/메인화면.jpg" width="300" alt="메인 화면의 캐릭터창">
+  <div><em>메인 화면의 캐릭터창</em></div>
+</div>
+
+<br>
+
+
+메인 화면에서는 카드 형태의 공간으로 본인과 연인의 캐릭터가 나뉘어져 있습니다.     
+캐릭터 카드에는 다음의 내용이 포함되어 있습니다. 
+ <li> 캐릭터의 모습 
+ <li> 커플의 애칭
+ <li> 레벨과 경험치바
+ <li> 오늘의 일정
+
+
+<br><br>
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/cat_0.gif"   width="240" alt="cat_0"></td>
+      <td><img src="./page%20screenshot/sheep_0.gif" width="240" alt="sheep_0"></td>
+    </tr>
+    <tr>
+      <td><img src="./page%20screenshot/cat_1.gif"   width="240" alt="cat_1"></td>
+      <td><img src="./page%20screenshot/sheep_1.gif" width="240" alt="sheep_1"></td>
+    </tr>
+  </table>
+
+  <div><em>캐릭터별 동작</em></div>
+</div>
+
+<br>
+
+캐릭터의 종류는 2가지 입니다.
+- 고양이
+- 양
+
+각 캐릭터는 고유한 동작이 있고, LV.20 달성시 다음 단계로 진화합니다.
+진화할 때는 캐릭터 외형과 고유 동작이 변화합니다
+
+
+
+
+
+<br><br>
+
+<details>
+    <summary>경험치 적용 규칙</summary>
+
+| 항목 | 값 |
+| ----- | ----- |
+| 최대 레벨 | 50 |
+| 진화 레벨 | 20 |
+
+| 레벨 | 공식 |
+| ----- | ----- |
+| 1 - 10 | $120 + 40 \times (\textrm{level} -1)$ |
+| 11 - 30 | $(\textrm{Cumulative 11}) / 11^{1.5} \times \textrm{level}^{1.5}$ |
+| 31 - 50 | $(\textrm{Cumulative 30}) \times 1.05 / 31^{2.0} \times \textrm{level}^{2.0} $ |
+
+다음 경험치
+![exp](./public/image/EXP%20to%20Next%20Level%20(Lv1–50)%20with%20Evolution%20at%20Lv20.png)
+
+누적 경험치
+![cumulativeExp](./public/image/Cumulative%20EXP%20(Lv1–50)%20with%20Evolution%20at%20Lv20.png)
+
+[경험치 테이블](./public/Loventure_Leveling_Simulation_with_Evolution_at_Lv20__Lv1_50_.csv)
+</details>
+
+
+---
+
+### 💎 퀘스트 시스템
+
+--- 
+
+⚙️ 기능
+- 사용자 퀘스트와 커플 공동 퀘스트가 존재합니다.
+- 사용자 스스로 퀘스트를 생성하거나 연인이 나에게 퀘스트를 줄 수 있습니다.
+- 퀘스트를 완료하면 연인과 함께 성장하는 캐릭터를 지켜볼 수 있습니다.
+- 제약없는 퀘스트 커스텀으로 사용자별로 자유롭게 퀘스트 생성할 수 있습니다.
+- 퀘스트의 성공 여부는 내가 판단할 수도 있지만, 연인이 판단이 필요한 경우가 있습니다.
+
+<br>
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/퀘스트 수락 후.jpg" width="300" alt="사용자 퀘스트"></td>
+      <td><img src="./page%20screenshot/커플%20퀘스트.jpg" width="300" alt="커플 퀘스트"></td>
+    </tr>
+  </table>
+  <div><em>사용자 및 커플 퀘스트 페이지</em></div>
+</div>
+
+<br>
+
+
+퀘스트 페이지는 유저 퀘스트 페이지와 커플 퀘스트 페이지가 있습니다.  
+유저 퀘스트 페이지는 사용자의 퀘스트와 연인의 퀘스트를 생성하고 확인하는 페이지입니다.   
+
+커플 퀘스트 페이지는 커플 공동의 퀘스트를 생성하고 확인하는 페이지입니다.
+
+<br>
+
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/연인%20퀘스트%20생성.jpg" width="300" alt="연인 퀘스트 생성"></td>
+      <td><img src="./page%20screenshot/커플%20퀘스트%20생성.jpg" width="300" alt="커플 퀘스트 생성"></td>
+    </tr>
+  </table>
+  <div><em>연인 및 커플 퀘스트 생성</em></div>
+</div>
+
+<br>
+
+십자가 모양의 버튼을 눌러서 나오는 위의 창에서 퀘스트를 생성할 수 있습니다.   
+퀘스트는 다음의 구조를 가집니다.
+- 제목 - 퀘스트 페이지에 뜨는 퀘스트의 명칭입니다.
+- 설명 - 퀘스트에 대한 자세한 설명입니다.
+- 목표 유형 - 일회성인지 여러 번 수행할 퀘스트인지 정합니다.
+- 목표값 - 여러 번 수행할 퀘스트의 경우 수행할 횟수를 지정합니다.
+- 난이도 - 퀘스트의 난이도를 설정합니다.
+- 리셋 주기 - 퀘스트 생성 주기입니다. 
+- 파트너에게 줄 보상 - 내가 연인에게 퀘스트를 준 경우에 연인이 퀘스트를 완료하면 주는 보상입니다.
+
+<br><br>
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/연인 퀘스트 수주.jpg" width="300" alt="퀘스트 수락 전 화면"></td>
+      <td><img src="./page%20screenshot/퀘스트 수주 받은 영희의 화면.jpg" width="300" alt="퀘스트 수락 전 화면"></td>
+    </tr>
+  </table>
+  <div><em>연인이 퀘스트를 주었을 때 1</em></div>
+
+  <br><br>
+
+만약에 자신의 퀘스트를 생성하는 것이 아니라 연인에게 퀘스트를 주는 경우에는    
+연인 퀘스트 리스트의 십자가 모양의 버튼을 눌러서 연인에게 줄 퀘스트를 생성할 수 있습니다.
+
+  <br>
+
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/수주 받은 퀘스트.jpg" width="300" alt="연인 퀘스트 생성"></td>
+      <td><img src="./page%20screenshot/퀘스트 수락 후.jpg" width="300" alt="커플 퀘스트 생성"></td>
+    </tr>
+  </table>
+  <div><em>연인이 퀘스트를 주었을 때 2</em></div>
+</div>
+
+
+<br>
+
+   
+퀘스트를 생성하면 빈 하트 모양의 퀘스트가 생성되고, 이는 아직 연인이 수락하지 않았다는 뜻입니다.
+연인이 퀘스트를 확인하고 수정한 뒤에 수락하면 하트가 채워지고 완전한 퀘스트가 됩니다.
+
+
+
+<br><br>
+
+
+<details>
+    <summary>보상 생성 규칙</summary>
+
+- userQuest
+  1. 기본 경험치  
+  레벨 L일 때의 주간 퀘스트 경험치는:  
+  $\textrm{BaseEXP}(L) = \frac{\textrm{expToNextLevel}(L)}{14}$
+  1. 보상 경험치 공식  
+  입력변수
+    - $D$: 퀘스트 난이도 (1-5)
+    - $G$: 목표 유형 (check: 1.0, count: 1.15)
+    - $R$: 반복 유형 (Daily: 0.9, Weekly, One-time: 1.0)
+    - $T$: 목표 수치(주로 count에 해당)
+    - $E$: 진화 여부(Lv ≥ 20이면 true)  
+  중간 계산
+    - 난이도 보정: $\textrm{diffMult}(D)$
+    - 목표 유형 가중치: $\textrm{goalWeight}(G)$
+    - 반복 유형 가중치: $\textrm{resetMult}(R)$
+    - 크기 보정(count만): $\textrm{sizeFactor}(T) = 1 + \log_{10}({T+9})$  
+
+  경험치 공식  
+  $$\textrm{rawEXP} = \textrm{BaseEXP}(L) \times \textrm{diffMult}(D) \times \textrm{goalWeight}(G) \times \textrm{resetMult}(R) \times \begin{cases}1, \quad \quad \quad \quad \quad \quad \textrm{if}\;G = \textrm{check}\\ \textrm{sizeFactor}(T),\;\; \textrm{if}\;G=\textrm{count} \end{cases}$$
+  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{RawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
+
+  3. 골드 보상 공식
+  $\textrm{Gold} = \textrm{round5}(EXP \times 0.6 \times (1.10 \; \textrm{if} \; E)) $
+  - round5(n): 5단위 반올림 (e.g., 17 → 15, 18 → 20)
+
+- coupleQuest
+  1. 입력 변수
+    - $L$: 평균 레벨
+    - $G$: 목표 유형 (shared-count: 1.25, both-complete: 1.35)
+    - $R$: 반복 유형 (Daily: 0.9, Weekly, One-time: 1.0)
+    - $T$: 목표 수치
+    - $E$: 진화 여부
+
+  2. 경험치 공식  
+  $$\textrm{rawEXP} = \textrm{BaseEXP}(L) \times 1.5 \times \textrm{goalWeight}(G) \times \textrm{resetMult}(R) \times \textrm{sizeFactor}(T)$$
+  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{RawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
+
+  3. 골드 공식  
+  $\textrm{Gold} = \textrm{round5}(\textrm{EXP} \times 0.6 \times (1.10 \; \textrm{if} \; E))$
+
+요약
+| 항목 | 설명 |
+| ----- | ----- |
+|BaseEXP | 레벨별 주간 기준 퀘스트 보상 경험치 |
+| diffMult | 난이도에 따른 경험치 보정값 |
+| goalWeight | 목표 유형에 따른 보정값 |
+| resetMult | 반복 주기 보정값 |
+| sizeFactor | 목표 수치 크기에 따른 보정값 (log10 기반) |
+| Evolved | 20 level 이상일 경우, 경험치 1.05배, 골드 1.10배 |
+
+</details>
+
+---
+
+## 🗓️ 일정 공유 달력 시스템
+
+⚙️ 기능
+- 미니멀 파스톤 텔의 따뜻한 감성을 주는 달력 디자인
+- 서로의 일정이 공유되는 달력으로 커플이 서로의 일정을 쉽게 공유할 수 있습니다..
+- 각 일정은 스티커로 표시하여 일정의 직관성을 높이고, 커플이 같이 달력을 꾸미는 재미를 줍니다.
+- 금일 일정은 메인 캐릭터 화면에서 리스트형식으로 보여줍니다.
+
+<br><br>
+
+<div align="center">
+  <img src="./page%20screenshot/달력%20메인화면.jpg" width="300" alt="달력 페이지">
+  <div><em>달력 페이지</em></div>
+</div>
+
+<br>
+
+달력 페이지에서는 커플이 서로의 일정을 공유할 수 있습니다.   
+공유한 일정은 스티커로 표시되어 실제로 달력에 스티커를 붙이듯이 달력을 꾸밀 수 있습니다.    
+
+
+<br>
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/달력%20일정%20생성1.jpg" width="300" alt="일정 생성 1"></td>
+      <td><img src="./page%20screenshot/달력%20일정%20생성2.jpg" width="300" alt="일정 생성 2"></td>
+    </tr>
+  </table>
+  <div><em>일정 생성</em></div>
+</div>
+
+<br>
+
+일정 생성 화면에서 스티커를 선택하고 어떤 일정인지 설명을 적을 수 있습니다.
+여기서 생성한 일정 중 금일의 일정은 메인 화면 중 캐릭터 카드에서 리스트 형식으로 보여줍니다.
+
+<br>
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/메인화면 일정.jpg" width="300" alt="일정 생성 1"></td>
+    </tr>
+  </table>
+  <div><em>메인화면에서 보이는 일정</em></div>
+</div>
+
+
+
+---
+
+## 💌 교환일기 시스템
+
+⚙️ 기능
+- 커플이 주고받을 수 있는 날짜별 교환일기 시스템입니다.
+- 상대방이 읽었는지 확인 가능합니다. 상대방이 읽으면 알람이 옵니다. 
+
+<br>
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/교환일기%20메인%20화면.jpg" width="300" alt="교환일기 메인"></td>
+    </tr>
+  </table>
+  <div><em>교환일기 화면</em></div>
+</div>
+
+<br>
+
+달력화면에서 날짜를 선택하면 다음의 사진처럼 교환일기를 작성하는 페이지로 넘어갑니다.
+
+<br><br>
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="./page%20screenshot/교환일기%20작성.jpg" width="300" alt="교환일기 작성"></td>
+      <td colspan="2" align="center"><img src="./page%20screenshot/교환일기%20읽기.jpg" width="300" alt="교환일기 읽기"></td>
+    </tr>
+  </table>
+  <div><em>교환일기 작성 및 읽기</em></div>
+</div>
+
+<br>
+
+일기에서는 제목, 날씨, 내용을 적을 수 있고 교환일기를 작성한 날짜는 달력화면에 파란색으로 칠해집니다.    
+또한 교환일기가 작성된 달력칸을 클릭하면 상대방이 읽었는지 확인이
+
+
+
+
+<br><br>
+
 
 ## 🛠️ 기술 스택
 
@@ -113,13 +448,6 @@ Loventure/
 |------|------|
 | 이동은 (@highblueberry)| 프론트엔드 설계 및 개발, 캐릭터 디자인 |
 | 최상훈 (@shun010116) | 백엔드 설계 및 개발 |
-
----
-
-## 📌 프로젝트 목적
-
-> 커플이 바쁜 일상 속에서도 서로의 하루를 나누고, 함께 성장하는 경험을 제공하고자 시작된 능동적인 커플 지향 웹앱입니다. 단순한 스케줄러가 아닌, **게임처럼 즐기며 능동적인 연애를 지속할 수 있게 도와주는 플랫폼**을 목표로 합니다.
-
 
 ---
 
@@ -206,207 +534,3 @@ MIT License
 | 권한 제한 | 수정/삭제는 작성자만 가능 |
 
 </details>
-
----
-
-## 🧙 캐릭터 레벨 시스템 (Level System)
-
-⚙️ 기능
-- 퀘스트 달성 --> 보상으로 경험치(exp) 획득 -> 캐릭터 level 증가
-- 일정 level 달성시 캐릭터의 시각적 진화(변화) 요소 제공
-- 향후 커스터마이징/아이템 해금 조건으로 활용 가능성
-
-<div align="center">
-  <img src="./page%20screenshot/메인 캐릭터 화면.jpg" width="300" alt="메인 화면의 캐릭터창">
-  <div><em>메인 화면의 캐릭터창</em></div>
-</div>
-
-
-<div align="center">
-  <table>
-    <tr>
-      <td><img src="./page%20screenshot/cat_0.gif"   width="240" alt="cat_0"></td>
-      <td><img src="./page%20screenshot/sheep_0.gif" width="240" alt="sheep_0"></td>
-    </tr>
-    <tr>
-      <td><img src="./page%20screenshot/cat_1.gif"   width="240" alt="cat_1"></td>
-      <td><img src="./page%20screenshot/sheep_1.gif" width="240" alt="sheep_1"></td>
-    </tr>
-  </table>
-
-  <div><em>캐릭터별 동작</em></div>
-</div>
-
-<br><br>
-
-<details>
-    <summary>경험치 적용 규칙</summary>
-
-| 항목 | 값 |
-| ----- | ----- |
-| 최대 레벨 | 50 |
-| 진화 레벨 | 20 |
-
-| 레벨 | 공식 |
-| ----- | ----- |
-| 1 - 10 | $120 + 40 \times (\textrm{level} -1)$ |
-| 11 - 30 | $(\textrm{Cumulative 11}) / 11^{1.5} \times \textrm{level}^{1.5}$ |
-| 31 - 50 | $(\textrm{Cumulative 30}) \times 1.05 / 31^{2.0} \times \textrm{level}^{2.0} $ |
-
-다음 경험치
-![exp](./public/image/EXP%20to%20Next%20Level%20(Lv1–50)%20with%20Evolution%20at%20Lv20.png)
-
-누적 경험치
-![cumulativeExp](./public/image/Cumulative%20EXP%20(Lv1–50)%20with%20Evolution%20at%20Lv20.png)
-
-[경험치 테이블](./public/Loventure_Leveling_Simulation_with_Evolution_at_Lv20__Lv1_50_.csv)
-</details>
-
-
----
-
-### 💎 퀘스트 시스템
-
---- 
-
-⚙️ 기능
-- 개인이 완료하는 사용자 퀘스트와 커플이 함께 완료하는 커플 퀘스트가 존재
-- 연인이 스스로 혹은 상대방에게 퀘스트를 수주하여 능동적인 연애 지향
-- 퀘스트를 완료하며 연인과 함께 성장하는 캐릭터
-- 제약없는 퀘스트 수주로 사용자별로 자유롭게 퀘스트 커스텀 가능
-- 연인이 수주한 퀘스트는 연인의 허락이 있어야 퀘스트 성공 가능
-
-<div align="center">
-  <table>
-    <tr>
-      <td><img src="./page%20screenshot/커플%20퀘스트.jpg" width="300" alt="사용자 퀘스트"></td>
-      <td><img src="./page%20screenshot/커플%20퀘스트.jpg" width="300" alt="커플 퀘스트"></td>
-    </tr>
-  </table>
-  <div><em>사용자 및 커플 퀘스트 페이지</em></div>
-</div>
-
-<br><br>
-
-
-<div align="center">
-  <table>
-    <tr>
-      <td><img src="./page%20screenshot/연인%20퀘스트%20생성.jpg" width="300" alt="연인 퀘스트 생성"></td>
-      <td><img src="./page%20screenshot/커플%20퀘스트%20생성.jpg" width="300" alt="커플 퀘스트 생성"></td>
-    </tr>
-  </table>
-  <div><em>연인 및 커플 퀘스트 생성</em></div>
-</div>
-
-<details>
-    <summary>보상 생성 규칙</summary>
-
-- userQuest
-  1. 기본 경험치  
-  레벨 L일 때의 주간 퀘스트 경험치는:  
-  $\textrm{BaseEXP}(L) = \frac{\textrm{expToNextLevel}(L)}{14}$
-  1. 보상 경험치 공식  
-  입력변수
-    - $D$: 퀘스트 난이도 (1-5)
-    - $G$: 목표 유형 (check: 1.0, count: 1.15)
-    - $R$: 반복 유형 (Daily: 0.9, Weekly, One-time: 1.0)
-    - $T$: 목표 수치(주로 count에 해당)
-    - $E$: 진화 여부(Lv ≥ 20이면 true)  
-  중간 계산
-    - 난이도 보정: $\textrm{diffMult}(D)$
-    - 목표 유형 가중치: $\textrm{goalWeight}(G)$
-    - 반복 유형 가중치: $\textrm{resetMult}(R)$
-    - 크기 보정(count만): $\textrm{sizeFactor}(T) = 1 + \log_{10}({T+9})$  
-
-  경험치 공식  
-  $$\textrm{rawEXP} = \textrm{BaseEXP}(L) \times \textrm{diffMult}(D) \times \textrm{goalWeight}(G) \times \textrm{resetMult}(R) \times \begin{cases}1, \quad \quad \quad \quad \quad \quad \textrm{if}\;G = \textrm{check}\\ \textrm{sizeFactor}(T),\;\; \textrm{if}\;G=\textrm{count} \end{cases}$$
-  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{RawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
-
-  3. 골드 보상 공식
-  $\textrm{Gold} = \textrm{round5}(EXP \times 0.6 \times (1.10 \; \textrm{if} \; E)) $
-  - round5(n): 5단위 반올림 (e.g., 17 → 15, 18 → 20)
-
-- coupleQuest
-  1. 입력 변수
-    - $L$: 평균 레벨
-    - $G$: 목표 유형 (shared-count: 1.25, both-complete: 1.35)
-    - $R$: 반복 유형 (Daily: 0.9, Weekly, One-time: 1.0)
-    - $T$: 목표 수치
-    - $E$: 진화 여부
-
-  2. 경험치 공식  
-  $$\textrm{rawEXP} = \textrm{BaseEXP}(L) \times 1.5 \times \textrm{goalWeight}(G) \times \textrm{resetMult}(R) \times \textrm{sizeFactor}(T)$$
-  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{RawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
-
-  3. 골드 공식  
-  $\textrm{Gold} = \textrm{round5}(\textrm{EXP} \times 0.6 \times (1.10 \; \textrm{if} \; E))$
-
-요약
-| 항목 | 설명 |
-| ----- | ----- |
-|BaseEXP | 레벨별 주간 기준 퀘스트 보상 경험치 |
-| diffMult | 난이도에 따른 경험치 보정값 |
-| goalWeight | 목표 유형에 따른 보정값 |
-| resetMult | 반복 주기 보정값 |
-| sizeFactor | 목표 수치 크기에 따른 보정값 (log10 기반) |
-| Evolved | 20 level 이상일 경우, 경험치 1.05배, 골드 1.10배 |
-
-</details>
-
----
-
-## 🗓️ 일정 공유 달력 시스템
-
-⚙️ 기능
-- 미니멀 파스톤 텔의 따뜻한 감성을 주는 달력 디자인
-- 서로의 일정이 공유되는 달력으로 커플이 서로의 일정을 쉽게 공유할 수 있다.
-- 각 일정은 스티커로 표시하여 일정의 직관성을 높이고, 커플이 같이 달력을 꾸미는 재미를 준다.
-- 금일 일정은 메인 캐릭터 화면에서 리스트형식으로 보여준다.
-
-<div align="center">
-  <img src="./page%20screenshot/달력%20메인화면.jpg" width="300" alt="달력 페이지">
-  <div><em>달력 페이지</em></div>
-</div>
-
-<br>
-
-<div align="center">
-  <table>
-    <tr>
-      <td><img src="./page%20screenshot/달력%20일정%20생성1.jpg" width="300" alt="일정 생성 1"></td>
-      <td><img src="./page%20screenshot/달력%20일정%20생성2.jpg" width="300" alt="일정 생성 2"></td>
-    </tr>
-  </table>
-  <div><em>일정 생성</em></div>
-</div>
-
-
----
-
-## 💌 교환일기 시스템
-
-⚙️ 기능
-- 커플이 주고받을 수 있는 날짜별 교환일기 시스템
-- 상대방이 읽었는지 확인 가능하다. 읽으면 알람이 온다. 
-
-<div align="center">
-  <table>
-    <tr>
-      <td><img src="./page%20screenshot/교환일기%20메인%20화면.jpg" width="300" alt="교환일기 메인"></td>
-    </tr>
-  </table>
-  <div><em>교환일기 화면</em></div>
-</div>
-
-<br><br>
-
-<div align="center">
-  <table>
-    <tr>
-      <td><img src="./page%20screenshot/교환일기%20작성.jpg" width="300" alt="교환일기 작성"></td>
-      <td colspan="2" align="center"><img src="./page%20screenshot/교환일기%20읽기.jpg" width="300" alt="교환일기 읽기"></td>
-    </tr>
-  </table>
-  <div><em>교환일기 작성 및 읽기</em></div>
-</div>
