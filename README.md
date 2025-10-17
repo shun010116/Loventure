@@ -381,20 +381,6 @@
 | 배포 | AWS EC2 (Ubuntu), PM2, |
 | 기타 | Figma (디자인), ESLint / Prettier (코드 스타일) |
 
-
-
-## ⚙️ 서버 환경 구성
-| 항목 | 내용 |
-| ----- | ----- |
-| OS | Ubuntu 22.04 LTS (AWS EC2) |
-| 런타임 | Node.js v20.x |
-| 프레임워크 | Next.js 15 (App Router) |
-| 데이터베이스 | MongoDB Atlas (Cloud) |
-| 프로세스 관리  | PM2 |
-| 배포 방식 | Git + PM2 Reload |
-| 인증 방식 | httpOnly Cookie + JWT |
-
-
 ---
 
 ## ⚙️ 서버 환경 구성
