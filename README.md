@@ -452,7 +452,7 @@ Loventure/
 └── README.md
 ```
 
-## API 흐름도
+## 🧩 API 흐름도
 ![API](./public/image/API.png)
 
 주요 API
