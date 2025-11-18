@@ -237,8 +237,8 @@
     - 크기 보정(count만): $\textrm{sizeFactor}(T) = 1 + \log_{10}({T+9})$  
 
   경험치 공식  
-  $$\textrm{rawEXP} = \textrm{BaseEXP}(L) \times \textrm{diffMult}(D) \times \textrm{goalWeight}(G) \times \textrm{resetMult}(R) \times \begin{cases}1, \quad \quad \quad \quad \quad \quad \textrm{if}\;G = \textrm{check}\\ \textrm{sizeFactor}(T),\;\; \textrm{if}\;G=\textrm{count} \end{cases}$$
-  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{RawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
+  $$\textrm{rawEXP} = \textrm{BaseEXP}(\textrm{L}) \times \textrm{diffMult}(\textrm{D}) \times \textrm{goalWeight}(\textrm{G}) \times \textrm{resetMult}(\textrm{R}) \times \Big( 1 \quad \textrm{if}\; \textrm{G} = \textrm{check} \quad \textrm{else}\; \textrm{sizeFactor}(\textrm{T}) \Big) $$
+  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{rawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
 
   3. 골드 보상 공식
   $\textrm{Gold} = \textrm{round5}(EXP \times 0.6 \times (1.10 \; \textrm{if} \; E)) $
@@ -254,7 +254,7 @@
 
   2. 경험치 공식  
   $$\textrm{rawEXP} = \textrm{BaseEXP}(L) \times 1.5 \times \textrm{goalWeight}(G) \times \textrm{resetMult}(R) \times \textrm{sizeFactor}(T)$$
-  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{RawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
+  $$EXP = \textrm{clamp}(\textrm{round}(\textrm{rawEXP} \times (1.05 \; \textrm{if}\; E)),\; \textrm{max}(20, 0.4 \cdot \textrm{BaseEXP}), 6.0 \cdot \textrm{BaseExp}) $$
 
   3. 골드 공식  
   $\textrm{Gold} = \textrm{round5}(\textrm{EXP} \times 0.6 \times (1.10 \; \textrm{if} \; E))$
@@ -473,30 +473,30 @@ Loventure/
 ![userQuest](./public/image/userQuest.png)
 
 🧠 상세 흐름 설명
-1. pending 상태
+1. `pending` 상태
     - 퀘스트 생성 직후 상태
-    - needrApproval: boolean에 따라 분기
-    - 승인 불필요 (needApproval = false)
-        - --> status = accepted
-    - 승인 필요 (needApproval = true)
-        - 파트너가 수락 --> status = accepted
-        - 파트너가 거절 --> status = rejected
-2. accepted 상태
+    - `needrApproval`: boolean에 따라 분기
+    - 승인 불필요 (`needApproval = false`)
+        - --> `status = accepted`
+    - 승인 필요 (`needApproval = true`)
+        - 파트너가 수락 --> `status = accepted`
+        - 파트너가 거절 --> `status = rejected`
+2. `accepted` 상태
     - 퀘스트가 정식으로 활성화
     - 수행자는 완료 버튼을 누를 수 있음
-    - 승인 불필요 (needApproval = false)
-        - 완료 버튼 누르면 status = approved, 보상지급
-    - 승인 필요 (needApproval = true)
-        - 완료 버튼 누르면 status = complted  
-3. completed 상태
+    - 승인 불필요 (`needApproval = false`)
+        - 완료 버튼 누르면 `status = approved`, 보상지급
+    - 승인 필요 (`needApproval = true`)
+        - 완료 버튼 누르면 `status = complted`  
+3. `completed` 상태
     - 퀘스트 수행 완료 후 생성자의 최종 승인을 기다림
-    - 생성자가 승인 --> status = approved
+    - 생성자가 승인 --> `status = approved`
     - 보상 지급 및 캐릭터 경험치 반영
-    - 생성자가 거절 --> status = rejected
-4. approved 상태
+    - 생성자가 거절 --> `status = rejected`
+4. `approved` 상태
     - 퀘스트 종료 및 보상 지급 완료
-    - 캐릭터 성장 반영 (applyLevelUP() 호출 가능)
-5. rejected 상태
+    - 캐릭터 성장 반영 (`applyLevelUP()` 호출 가능)
+5. `rejected` 상태
     - 파트너 혹은 생성자가 퀘스트를 거절한 경우
 
 </details>
@@ -510,9 +510,9 @@ Loventure/
 🧠 흐름 정리 요약
 | 단계 | 사용자 | 행동 | 상태 |
 | ----- | ----- | ----- | ----- |
-| 1 | 작성자 | /api/journal로 일기 작성 | DB에 저장 + 상대에게 알림 |
-| 2 | 상대 | 캘린더에서 일기 조회 | /api/journal?date=... |
-| 3 | 상대 | 처음 읽을 경우 /api/journal/:id/read | isReadBy에 추가 |
+| 1 | 작성자 | `/api/journal`로 일기 작성 | DB에 저장 + 상대에게 알림 |
+| 2 | 상대 | 캘린더에서 일기 조회 | `/api/journal?date=...` |
+| 3 | 상대 | 처음 읽을 경우 `/api/journal/:id/read` | `isReadBy`에 추가 |
 | 4 | 작성자 | 알림 확인 | 상대가 일기를 읽었는지 확인 가능 |
 
 
