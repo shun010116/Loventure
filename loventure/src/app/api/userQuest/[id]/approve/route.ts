@@ -7,10 +7,10 @@ import { applyLevelUp } from "@/utils/checkLevelUp";
 const normId = (v: any) => String(v?._id ?? v);
 
 // PATCH /api/userQuest/:id/approve : 퀘스트 완료 승인 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { user, error: authError } = await getAuthenticatedUser(req, true);
-        const { id } = params;
+        const { id } = await params;
     
         if (authError) {
             return error(authError.message, authError.status);
